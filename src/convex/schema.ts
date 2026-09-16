@@ -34,10 +34,39 @@ const schema = defineSchema(
 
     // add other tables here
 
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    // Marketplace: user-submitted editing & design resources.
+    resources: defineTable({
+      title: v.string(),
+      description: v.string(),
+      url: v.string(),
+      category: v.string(),
+      authorId: v.id("users"),
+      price: v.number(), // 0 = free
+      featured: v.optional(v.boolean()),
+      status: v.union(v.literal("published"), v.literal("hidden")),
+      createdAt: v.number(),
+    })
+      .index("by_status", ["status"])
+      .index("by_category", ["category"]),
+
+    // Comments users leave on a resource detail page.
+    comments: defineTable({
+      resourceId: v.id("resources"),
+      authorId: v.id("users"),
+      body: v.string(),
+      createdAt: v.number(),
+    }).index("by_resource", ["resourceId"]),
+
+    // Purchases. amount is stored in cents; 0 means the resource is free.
+    purchases: defineTable({
+      resourceId: v.id("resources"),
+      userId: v.id("users"),
+      amount: v.number(),
+      status: v.union(v.literal("pending"), v.literal("completed")),
+      createdAt: v.number(),
+    })
+      .index("by_user", ["userId"])
+      .index("by_resource", ["resourceId"]),
   },
   {
     schemaValidation: false,
