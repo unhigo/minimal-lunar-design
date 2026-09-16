@@ -12,7 +12,11 @@ import "./index.css";
 const Landing = lazy(() => import("./pages/Landing.tsx"));
 const AuthPage = lazy(() => import("./pages/Auth.tsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
-const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const Catalog = lazy(() => import("./pages/Catalog.tsx"));
+const ResourceDetail = lazy(() => import("./pages/ResourceDetail.tsx"));
+const Upload = lazy(() => import("./pages/Upload.tsx"));
+const Studio = lazy(() => import("./pages/Studio.tsx"));
+const Admin = lazy(() => import("./pages/Admin.tsx"));
 
 // Simple loading fallback for route transitions
 function RouteLoading() {
@@ -131,7 +135,32 @@ createRoot(document.getElementById("root")!).render(
                   </RequireAuth>
                 }
               />
-              <Route path="*" element={<NotFound />} />
+              <Route
+                path="/studio"
+                element={
+                  <RequireAuth>
+                    <Studio />
+                  </RequireAuth>
+                }
+              />
+              <Route path="/catalog" element={<Catalog />} />
+              <Route path="/resource/:id" element={<ResourceDetail />} />
+              <Route
+                path="/upload"
+                element={
+                  <RequireAuth>
+                    <Upload />
+ </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <RequireAuth>
+                    <Admin />
+                  </RequireAuth>
+                }
+              />
             </Routes>
           </Suspense>
         </BrowserRouter>

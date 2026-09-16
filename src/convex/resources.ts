@@ -382,6 +382,49 @@ export const listRecentComments = query({
   },
 });
 
+export const setVisibility = mutation({
+  args: { id: v.id("resources"), hidden: v.boolean() },
+  handler: async (ctx, { id, hidden }) => {
+    const callerId = await getAuthUserId(ctx);
+    if (callerId === null) throw new Error("Not signed in.");
+    const caller = await ctx.db.get(callerId);
+    if (caller?.role !== ROLES.ADMIN) throw new Error("Admins only.");
+    await ctx.db.patch(id, { status: hidden ? "hidden" : "published" });
+  },
+});
+
+export const toggleFeatured = mutation({
+  args: { id: v.id("resources"), featured: v.boolean() },
+  handler: async (ctx, { id, featured }) => {
+    const callerId = await getAuthUserId(ctx);
+    if (callerId === null) throw new Error("Not signed in.");
+    const caller = await ctx.db.get(callerId);
+    if (caller?.role !== ROLES.ADMIN) throw new Error("Admins only.");
+    await ctx.db.patch(id, { featured });
+  },
+});
+
+export const removeAsAdmin = mutation({
+  args: { id: v.id("resources") },
+  handler: async (ctx, { id }) => {
+    const callerId = await getAuthUserId(ctx);
+    if (callerId === null) throw new Error("Not signed in.");
+    const caller = await ctx.db.get(callerId);
+    if (caller?.role !== ROLES.ADMIN) throw new Error("Admins only.");
+    const comments = await ctx.db
+      .query("comments")
+      .withIndex("by_resource", (q) => q.eq("resourceId", id))
+      .collect();
+    for (const c of comments) await ctx.db.delete(c._id);
+    const purchases = await ctx.db
+      .query("purchases")
+      .withIndex("by_resource", (q) => q.eq("resourceId", id))
+      .collect();
+    for (const p of purchases) await ctx.db.delete(p._id);
+    await ctx.db.delete(id);
+  },
+});
+
 export const bootstrapAdmin = mutation({
   args: { secret: v.string() },
   handler: async (ctx, { secret }) => {
