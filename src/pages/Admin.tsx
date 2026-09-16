@@ -13,6 +13,7 @@ import {
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { formatPrice, timeAgo } from "@/lib/catalog";
 
 export default function Admin() {
@@ -35,8 +36,28 @@ export default function Admin() {
   const removeResource = useMutation(api.resources.removeAsAdmin);
   const removeComment = useMutation(api.resources.deleteComment);
   const setUserRole = useMutation(api.resources.setUserRole);
+  const bootstrapAdmin = useMutation(api.resources.bootstrapAdmin);
 
   const [busy, setBusy] = useState(false);
+  const [secret, setSecret] = useState("");
+  const [bootstrapError, setBootstrapError] = useState<string | null>(null);
+  const [bootstrapDone, setBootstrapDone] = useState(false);
+
+  const handleBootstrap = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setBootstrapError(null);
+    try {
+      await bootstrapAdmin({ secret: secret.trim() });
+      setBootstrapDone(true);
+    } catch (err) {
+      setBootstrapError(
+        err instanceof Error ? err.message : "No se pudo activar el rol.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
 
   if (user === undefined) {
     return (
@@ -53,6 +74,47 @@ export default function Admin() {
         <p className="text-sm text-muted-foreground">
           Esta zona es solo para administradores.
         </p>
+        {bootstrapDone ? (
+          <p className="text-[13px] text-muted-foreground">
+            Rol activado. Recargando…
+          </p>
+        ) : (
+          <form
+            onSubmit={handleBootstrap}
+            className="flex w-full max-w-sm flex-col gap-3 rounded-sm border border-border/70 p-6"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Primer administrador
+            </p>
+            <p className="text-[12px] leading-relaxed text-muted-foreground">
+              Si eres el propietario del estudio, introduce la clave de
+              arranque para activar tu cuenta como administradora.
+            </p>
+            <Input
+              value={secret}
+              onChange={(e) => setSecret(e.target.value)}
+              placeholder="Clave de arranque"
+              type="password"
+              className="h-9 rounded-sm border-border bg-transparent font-mono"
+              required
+            />
+            {bootstrapError && (
+              <p className="text-[12px] text-destructive">{bootstrapError}</p>
+            )}
+            <Button
+              type="submit"
+              size="sm"
+              disabled={busy || !secret.trim()}
+              className="rounded-sm"
+            >
+              {busy ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                "Activar administrador"
+              )}
+            </Button>
+          </form>
+        )}
         <Link
           to="/dashboard"
           className="text-[13px] text-muted-foreground underline underline-offset-4 hover:text-foreground"

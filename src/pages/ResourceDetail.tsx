@@ -283,13 +283,15 @@ export default function ResourceDetail() {
                     {c.body}
                   </p>
                 </div>
-                <button
-                  onClick={() => void deleteComment({ id: c._id })}
-                  title="Eliminar comentario"
-                  className="shrink-0 p-1.5 text-muted-foreground transition-colors hover:text-destructive"
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
+                {c.isMine && (
+                  <button
+                    onClick={() => void deleteComment({ id: c._id })}
+                    title="Eliminar comentario"
+                    className="shrink-0 p-1.5 text-muted-foreground transition-colors hover:text-destructive"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                )}
               </li>
             ))}
             {comments !== undefined && comments.length === 0 && (

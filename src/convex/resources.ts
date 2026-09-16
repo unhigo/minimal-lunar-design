@@ -68,6 +68,29 @@ export const getPublished = query({
   },
 });
 
+export const listMine = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return [];
+    const resources = await ctx.db
+      .query("resources")
+      .withIndex("by_author", (q) => q.eq("authorId", userId))
+      .collect();
+    resources.sort((a, b) => b.createdAt - a.createdAt);
+    return await Promise.all(
+      resources.map(async (r) => {
+        const sales = await ctx.db
+          .query("purchases")
+          .withIndex("by_resource", (q) => q.eq("resourceId", r._id))
+          .filter((q) => q.eq(q.field("status"), "completed"))
+          .collect();
+        return { ...r, sales: sales.length };
+      }),
+    );
+  },
+});
+
 export const listCategories = query({
   args: {},
   handler: async (ctx) => {
@@ -165,6 +188,7 @@ export const removeMine = mutation({
 export const listComments = query({
   args: { resourceId: v.id("resources") },
   handler: async (ctx, { resourceId }) => {
+    const viewerId = await getAuthUserId(ctx);
     const comments = await ctx.db
       .query("comments")
       .withIndex("by_resource", (q) => q.eq("resourceId", resourceId))
@@ -176,6 +200,7 @@ export const listComments = query({
         return {
           ...c,
           authorName: author?.name ?? author?.email ?? "Unknown",
+          isMine: viewerId !== null && c.authorId === viewerId,
         };
       }),
     );

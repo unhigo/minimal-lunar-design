@@ -47,7 +47,8 @@ const schema = defineSchema(
       createdAt: v.number(),
     })
       .index("by_status", ["status"])
-      .index("by_category", ["category"]),
+      .index("by_category", ["category"])
+      .index("by_author", ["authorId"]),
 
     // Comments users leave on a resource detail page.
     comments: defineTable({

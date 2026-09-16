@@ -22,6 +22,9 @@ export function ResourceCard({ resource }: { resource: ResourceCardData }) {
       <div className="flex items-center justify-between">
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           {resource.category}
+          {resource.featured && (
+            <span className="ml-2 text-foreground">★ destacado</span>
+          )}
         </span>
         <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
       </div>

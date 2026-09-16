@@ -65,7 +65,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       setError(
         error instanceof Error
           ? error.message
-          : "Failed to send verification code. Please try again.",
+          : "No se pudo enviar el código. Inténtalo de nuevo.",
       );
       setIsLoading(false);
     }
@@ -83,7 +83,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     } catch (error) {
       console.error("OTP verification error:", error);
 
-      setError("The verification code you entered is incorrect.");
+      setError("El código introducido no es correcto.");
       setIsLoading(false);
 
       setOtp("");
@@ -99,7 +99,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     } catch (error) {
       console.error("Guest login error:", error);
       setError(
-        `Failed to sign in as guest: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `No se pudo entrar como invitado: ${error instanceof Error ? error.message : "error desconocido"}`,
       );
       setIsLoading(false);
     }
@@ -115,14 +115,14 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
               <span className="size-2 rounded-full bg-foreground/70" />
             </span>
             <span className="text-sm font-medium tracking-[0.22em] uppercase">
-              Luna Studio
+              Minimal Lunar Design
             </span>
           </Link>
           <Link
             to="/"
             className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
           >
-            Back home
+            Volver al inicio
           </Link>
         </div>
       </header>
@@ -139,10 +139,11 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                   </span>
                 </div>
                 <CardTitle className="text-lg font-light tracking-tight">
-                  Enter the studio
+                  Entra al estudio
                 </CardTitle>
                 <CardDescription className="text-[13px]">
-                  A year of moonlight is waiting. Sign in or create an account.
+                  Un año de luz de luna te espera. Inicia sesión o crea tu
+                  cuenta.
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleEmailSubmit}>
@@ -166,7 +167,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       </div>
                       <div className="relative flex justify-center">
                         <span className="bg-card px-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                          or
+                          o
                         </span>
                       </div>
                     </div>
@@ -179,7 +180,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       disabled={isLoading}
                     >
                       <UserX className="mr-2 size-4" />
-                      Continue as guest
+                      Entrar como invitado
                     </Button>
                   </div>
                 </CardContent>
@@ -205,10 +206,10 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
             <>
               <CardHeader className="mt-4 text-center">
                 <CardTitle className="text-lg font-light tracking-tight">
-                  Check your email
+                  Revisa tu correo
                 </CardTitle>
                 <CardDescription className="text-[13px]">
-                  We sent a six-digit code to {step.email}
+                  Te hemos enviado un código de seis dígitos a {step.email}
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleOtpSubmit}>
@@ -250,13 +251,13 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                     </p>
                   )}
                   <p className="mt-4 text-center text-[12px] text-muted-foreground">
-                    Didn't receive a code?{" "}
+                    ¿No te ha llegado el código?{" "}
                     <Button
                       variant="link"
                       className="h-auto p-0 text-[12px]"
                       onClick={() => setStep("signIn")}
                     >
-                      Try again
+                      Inténtalo de nuevo
                     </Button>
                   </p>
                 </CardContent>
@@ -269,7 +270,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 size-4 animate-spin" />
-                        Verifying…
+                        Verificando…
                       </>
                     ) : (
                       <>
@@ -285,7 +286,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                     disabled={isLoading}
                     className="w-full text-muted-foreground"
                   >
-                    Use a different email
+                    Usar otro correo
                   </Button>
                 </CardFooter>
               </form>
