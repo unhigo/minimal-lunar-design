@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { LogOut, SlidersHorizontal } from "lucide-react";
+import { LogOut, Moon, SlidersHorizontal } from "lucide-react";
 import { ControlPanel } from "@/components/ControlPanel";
 import { StudioStage } from "@/components/StudioStage";
 import { Button } from "@/components/ui/button";
