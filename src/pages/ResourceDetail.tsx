@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useAction, useMutation, useQuery } from "convex/react";
+import type { Id } from "@/convex/_generated/dataModel";
 import {
   ArrowLeft,
   Download,
@@ -18,20 +19,21 @@ import { formatPrice, timeAgo } from "@/lib/catalog";
 
 export default function ResourceDetail() {
   const { id } = useParams<{ id: string }>();
+  const resourceId = id as Id<"resources"> | undefined;
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
   const resource = useQuery(
     api.resources.getPublished,
-    id ? { id } : "skip",
+    resourceId ? { id: resourceId } : "skip",
   );
   const comments = useQuery(
     api.resources.listComments,
-    id ? { resourceId: id as never } : "skip",
+    resourceId ? { resourceId } : "skip",
   );
   const purchased = useQuery(
     api.resources.hasPurchased,
-    id ? { resourceId: id as never } : "skip",
+    resourceId ? { resourceId } : "skip",
   );
 
   const beginCheckout = useMutation(api.resources.beginCheckout);
@@ -70,11 +72,11 @@ export default function ResourceDetail() {
   }
 
   const handleCheckout = async () => {
-    if (!id) return;
+    if (!resourceId) return;
     setCheckoutBusy(true);
     setError(null);
     try {
-      const result = await beginCheckout({ resourceId: id as never });
+      const result = await beginCheckout({ resourceId });
       if (result.status === "already-owned") {
         setCheckoutMsg("Ya tienes este recurso en tu espacio.");
       } else if (result.status === "completed") {
@@ -92,11 +94,11 @@ export default function ResourceDetail() {
 
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id || !commentBody.trim()) return;
+    if (!resourceId || !commentBody.trim()) return;
     setCommentBusy(true);
     setError(null);
     try {
-      await addComment({ resourceId: id as never, body: commentBody.trim() });
+      await addComment({ resourceId, body: commentBody.trim() });
       setCommentBody("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo comentar.");

@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { LogOut, Moon, SlidersHorizontal } from "lucide-react";
+import { Link } from "react-router";
+import { LogOut, SlidersHorizontal } from "lucide-react";
 import { ControlPanel } from "@/components/ControlPanel";
 import { StudioStage } from "@/components/StudioStage";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { LunarProvider, useLunar } from "@/hooks/use-lunar-context";
-import { useAuth } from "@/hooks/use-auth";
 import { DEFAULT_LUNAR_STATE } from "@/lib/lunar";
 
 function PhaseChip() {
@@ -23,7 +23,6 @@ function PhaseChip() {
 
 function StudioWorkspace() {
   const { state } = useLunar();
-  const { user, signOut } = useAuth();
   const [panelOpen, setPanelOpen] = useState(false);
 
   // "Unsaved" badge: true while the user has strayed from the default palette/layout.
@@ -31,11 +30,6 @@ function StudioWorkspace() {
     state.bgColor === DEFAULT_LUNAR_STATE.bgColor &&
     state.layout === DEFAULT_LUNAR_STATE.layout;
   const customized = !isDefault;
-
-  const handleSignOut = async () => {
-    await signOut();
-    window.location.href = "/";
-  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
@@ -67,21 +61,15 @@ function StudioWorkspace() {
           <div className="flex items-center gap-2">
             {customized ? (
               <span className="hidden rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline">
-                unsaved
+                sin guardar
               </span>
             ) : null}
-            <span className="hidden text-[11px] text-muted-foreground sm:inline">
-              {user?.email ?? user?.name ?? "Studio"}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-muted-foreground"
-              onClick={() => void handleSignOut()}
+            <Link
+              to="/dashboard"
+              className="hidden text-[11px] text-muted-foreground transition-colors hover:text-foreground sm:inline"
             >
-              <LogOut className="size-3.5" />
-              Sign out
-            </Button>
+              Mi espacio
+            </Link>
           </div>
         </header>
 
@@ -91,7 +79,7 @@ function StudioWorkspace() {
   );
 }
 
-export default function Dashboard() {
+export default function Studio() {
   return (
     <LunarProvider>
       <StudioWorkspace />
