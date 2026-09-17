@@ -38,12 +38,25 @@ const schema = defineSchema(
     resources: defineTable({
       title: v.string(),
       description: v.string(),
-      url: v.string(),
+      url: v.optional(v.string()), // external link, when the resource is not a file
       category: v.string(),
       authorId: v.id("users"),
       price: v.number(), // 0 = free
       featured: v.optional(v.boolean()),
       status: v.union(v.literal("published"), v.literal("hidden")),
+      // Uploaded image (Convex file storage): the resource file itself and/or
+      // the cover preview shown on cards and detail pages.
+      fileStorageId: v.optional(v.id("_storage")),
+      coverStorageId: v.optional(v.id("_storage")),
+      fileMeta: v.optional(
+        v.object({
+          name: v.string(),
+          type: v.string(),
+          size: v.number(),
+          width: v.optional(v.number()),
+          height: v.optional(v.number()),
+        }),
+      ),
       createdAt: v.number(),
     })
       .index("by_status", ["status"])

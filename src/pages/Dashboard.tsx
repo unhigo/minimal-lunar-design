@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowUpRight,
+  Copy,
   Download,
   Eye,
   EyeOff,
+  ImagePlus,
   Loader2,
   Palette,
   Pencil,
@@ -27,7 +29,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import ImageEditor, { type EditedImage } from "@/components/ImageEditor";
 import { CATEGORIES, formatPrice, timeAgo } from "@/lib/catalog";
+import { uploadImage } from "@/lib/upload";
 
 const QUICK_ACTIONS = [
   {
@@ -58,13 +62,19 @@ function EditResourceDialog({
     _id: string;
     title: string;
     description: string;
-    url: string;
+    url?: string | undefined;
     category: string;
     price: number;
+    coverUrl: string | null;
+    coverStorageId?: string;
   } | null;
   onClose: () => void;
 }) {
   const updateResource = useMutation(api.resources.updateMine);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const attach = useMutation(api.files.attach);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [title, setTitle] = useState(resource?.title ?? "");
   const [description, setDescription] = useState(resource?.description ?? "");
   const [url, setUrl] = useState(resource?.url ?? "");
@@ -72,10 +82,64 @@ function EditResourceDialog({
   const [priceEuros, setPriceEuros] = useState(
     ((resource?.price ?? 0) / 100).toString(),
   );
+  const [cover, setCover] = useState<{
+    storageId: string;
+    previewUrl: string;
+  } | null>(null);
+  const [editorFile, setEditorFile] = useState<File | null>(null);
+  const [coverBusy, setCoverBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!resource) return null;
+
+  const displayCover = cover?.previewUrl ?? resource.coverUrl ?? null;
+
+  const handlePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setEditorFile(file);
+  };
+
+  const handleEditorSave = async (result: EditedImage | null) => {
+    setEditorFile(null);
+    if (!result) return;
+    setCoverBusy(true);
+    setError(null);
+    try {
+      const ext = result.type === "image/png" ? "png" : "jpg";
+      const file = new File([result.blob], `portada.${ext}`, {
+        type: result.type,
+      });
+      const uploaded = await uploadImage(generateUploadUrl, attach, file);
+      setCover({
+        storageId: uploaded.storageId as unknown as string,
+        previewUrl: URL.createObjectURL(result.blob),
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo subir la portada.",
+      );
+    } finally {
+      setCoverBusy(false);
+    }
+  };
+
+  const handleClearCover = () => {
+    if (cover) URL.revokeObjectURL(cover.previewUrl);
+    setCover(null);
+    // Sending an empty string clears the cover server-side.
+    void updateResource({
+      id: resource._id as never,
+      title: title.trim(),
+      description: description.trim(),
+      url: url.trim() || undefined,
+      category,
+      price: Math.round(parseFloat(priceEuros || "0") * 100),
+      coverStorageId: "" as never,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,9 +154,10 @@ function EditResourceDialog({
         id: resource._id as never,
         title: title.trim(),
         description: description.trim(),
-        url: url.trim(),
+        url: url.trim() || undefined,
         category,
         price: cents,
+        ...(cover ? { coverStorageId: cover.storageId as never } : {}),
       });
       onClose();
     } catch (err) {
@@ -113,6 +178,69 @@ function EditResourceDialog({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Cover */}
+          <div className="flex flex-col gap-1.5">
+            <label className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Portada
+            </label>
+            {displayCover ? (
+              <div className="flex items-center gap-3">
+                <img
+                  src={displayCover}
+                  alt="Portada"
+                  className="h-16 w-24 rounded-sm border border-border/60 object-cover"
+                />
+                <div className="flex gap-1.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-sm"
+                    disabled={coverBusy}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {coverBusy ? (
+                      <Loader2 className="mr-1.5 size-3 animate-spin" />
+                    ) : (
+                      <Pencil className="mr-1.5 size-3" />
+                    )}
+                    Cambiar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 rounded-sm text-destructive hover:text-destructive"
+                    disabled={coverBusy}
+                    onClick={handleClearCover}
+                  >
+                    <Trash2 className="mr-1.5 size-3" /> Quitar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center justify-center gap-2 rounded-sm border border-dashed border-border/70 px-4 py-6 text-[13px] text-muted-foreground transition-colors hover:border-foreground/40"
+              >
+                {coverBusy ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <ImagePlus className="size-4" />
+                )}
+                Añadir portada (se abrirá el editor)
+              </button>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+              className="hidden"
+              onChange={handlePick}
+            />
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <label className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Título
@@ -141,13 +269,13 @@ function EditResourceDialog({
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              Enlace
+              Enlace externo (opcional)
             </label>
             <Input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               type="url"
-              required
+              placeholder="https://…"
               className="h-9 rounded-sm border-border bg-transparent"
             />
           </div>
@@ -193,12 +321,20 @@ function EditResourceDialog({
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={busy} className="rounded-sm">
+            <Button type="submit" disabled={busy || coverBusy} className="rounded-sm">
               {busy ? <Loader2 className="size-4 animate-spin" /> : "Guardar"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {editorFile && (
+        <ImageEditor
+          file={editorFile}
+          onClose={() => setEditorFile(null)}
+          onSave={(result) => void handleEditorSave(result)}
+        />
+      )}
     </Dialog>
   );
 }
@@ -208,6 +344,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const purchases = useQuery(api.resources.myPurchases);
   const myResources = useQuery(api.resources.listMine);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const removeResource = useMutation(api.resources.removeMine);
   const [editing, setEditing] = useState<
@@ -215,9 +352,11 @@ export default function Dashboard() {
         _id: string;
         title: string;
         description: string;
-        url: string;
+        url?: string | undefined;
         category: string;
         price: number;
+        coverUrl: string | null;
+        coverStorageId?: string;
       }
     | null
   >(null);
@@ -237,6 +376,17 @@ export default function Dashboard() {
       setDeleting(null);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleCopy = async (r: { _id: string }) => {
+    const link = `${window.location.origin}/resource/${r._id}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedId(r._id);
+      window.setTimeout(() => setCopiedId(null), 1600);
+    } catch {
+      // Clipboard unavailable — silently ignore.
     }
   };
 
@@ -366,23 +516,60 @@ export default function Dashboard() {
                   key={r._id}
                   className="flex flex-col gap-3 py-4 lg:flex-row lg:items-center lg:justify-between"
                 >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                      {r.title}{" "}
-                      {r.status === "hidden" && (
-                        <span className="ml-1 font-mono text-[10px] uppercase text-muted-foreground">
-                          · oculto
-                        </span>
-                      )}
-                    </p>
-                    <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
-                      {r.category} · {formatPrice(r.price)} ·{" "}
-                      {r.sales === 1
-                        ? "1 venta"
-                        : `${r.sales} ventas`} · {timeAgo(r.createdAt)}
-                    </p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    {r.coverUrl ? (
+                      <img
+                        src={r.coverUrl}
+                        alt=""
+                        className="h-10 w-14 shrink-0 rounded-sm border border-border/60 object-cover"
+                      />
+                    ) : null}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">
+                        {r.title}{" "}
+                        {r.status === "hidden" && (
+                          <span className="ml-1 font-mono text-[10px] uppercase text-muted-foreground">
+                            · oculto
+                          </span>
+                        )}
+                      </p>
+                      <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+                        {r.category} · {formatPrice(r.price)} ·{" "}
+                        {r.sales === 1
+                          ? "1 venta"
+                          : `${r.sales} ventas`} · {timeAgo(r.createdAt)}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      title="Copiar enlace público"
+                      onClick={() => void handleCopy(r)}
+                    >
+                      {copiedId === r._id ? (
+                        <Copy className="size-3.5 text-foreground" />
+                      ) : (
+                        <Copy className="size-3.5" />
+                      )}
+                    </Button>
+                    {(r.fileUrl || r.url) && (
+                      <a
+                        href={r.fileUrl ?? r.url ?? "#"}
+                        download={
+                          r.fileUrl
+                            ? r.fileMeta?.name ?? "recurso"
+                            : undefined
+                        }
+                        target={r.fileUrl ? undefined : "_blank"}
+                        rel={r.fileUrl ? undefined : "noopener noreferrer"}
+                        title="Descargar"
+                        className="inline-flex h-8 items-center rounded-sm px-2 text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        <Download className="size-3.5" />
+                      </a>
+                    )}
                     <Link
                       to={`/resource/${r._id}`}
                       className="inline-flex h-8 items-center rounded-sm border border-border px-3 font-mono text-[11px] text-muted-foreground transition-colors hover:text-foreground"
@@ -463,15 +650,18 @@ export default function Dashboard() {
                       {formatPrice(p.amount)} · {timeAgo(p.createdAt)}
                     </p>
                   </div>
-                  {p.resourceUrl ? (
+                  {p.fileUrl || p.resourceUrl ? (
                     <a
-                      href={p.resourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={p.fileUrl ?? p.resourceUrl ?? "#"}
+                      download={
+                        p.fileUrl ? undefined : undefined
+                      }
+                      target={p.fileUrl ? undefined : "_blank"}
+                      rel={p.fileUrl ? undefined : "noopener noreferrer"}
                       className="inline-flex h-8 shrink-0 items-center gap-1.5 self-start rounded-sm border border-border px-3 text-[12px] text-muted-foreground transition-colors hover:text-foreground sm:self-auto"
                     >
                       <Download className="size-3" />
-                      Abrir recurso
+                      Descargar
                     </a>
                   ) : null}
                 </li>

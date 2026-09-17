@@ -48,6 +48,9 @@ export const listPublished = query({
         return {
           ...r,
           authorName: author?.name ?? author?.email ?? "Unknown",
+          coverUrl: r.coverStorageId
+            ? await ctx.storage.getUrl(r.coverStorageId)
+            : null,
         };
       }),
     );
@@ -64,6 +67,12 @@ export const getPublished = query({
     return {
       ...resource,
       authorName: author?.name ?? author?.email ?? "Unknown",
+      fileUrl: resource.fileStorageId
+        ? await ctx.storage.getUrl(resource.fileStorageId)
+        : null,
+      coverUrl: resource.coverStorageId
+        ? await ctx.storage.getUrl(resource.coverStorageId)
+        : null,
     };
   },
 });
@@ -85,7 +94,16 @@ export const listMine = query({
           .withIndex("by_resource", (q) => q.eq("resourceId", r._id))
           .filter((q) => q.eq(q.field("status"), "completed"))
           .collect();
-        return { ...r, sales: sales.length };
+        return {
+          ...r,
+          sales: sales.length,
+          coverUrl: r.coverStorageId
+            ? await ctx.storage.getUrl(r.coverStorageId)
+            : null,
+          fileUrl: r.fileStorageId
+            ? await ctx.storage.getUrl(r.fileStorageId)
+            : null,
+        };
       }),
     );
   },
@@ -110,19 +128,34 @@ export const create = mutation({
   args: {
     title: v.string(),
     description: v.string(),
-    url: v.string(),
+    url: v.optional(v.string()),
     category: v.string(),
     price: v.number(),
+    fileStorageId: v.optional(v.id("_storage")),
+    coverStorageId: v.optional(v.id("_storage")),
+    fileMeta: v.optional(
+      v.object({
+        name: v.string(),
+        type: v.string(),
+        size: v.number(),
+        width: v.optional(v.number()),
+        height: v.optional(v.number()),
+      }),
+    ),
   },
-  handler: async (ctx, { title, description, url, category, price }) => {
+  handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Must be signed in to upload.");
+    const { title, description, url, category, price, fileStorageId, coverStorageId, fileMeta } = args;
     return await ctx.db.insert("resources", {
       title,
       description,
-      url,
+      url: url || undefined,
       category,
       price: Math.max(0, Math.round(price)),
+      fileStorageId,
+      coverStorageId,
+      fileMeta,
       authorId: userId,
       status: "published",
       createdAt: Date.now(),
@@ -135,25 +168,33 @@ export const updateMine = mutation({
     id: v.id("resources"),
     title: v.string(),
     description: v.string(),
-    url: v.string(),
+    url: v.optional(v.string()),
     category: v.string(),
     price: v.number(),
+    coverStorageId: v.optional(v.id("_storage")),
   },
-  handler: async (
-    ctx,
-    { id, title, description, url, category, price },
-  ) => {
+  handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Not signed in.");
+    const { id, title, description, url, category, price, coverStorageId } = args;
     const resource = await ctx.db.get(id);
     if (!resource) throw new Error("Resource not found.");
     if (resource.authorId !== userId) throw new Error("Not your resource.");
+    // Replace the cover: delete the old blob if it is being swapped or removed.
+    if (
+      coverStorageId !== undefined &&
+      resource.coverStorageId &&
+      resource.coverStorageId !== coverStorageId
+    ) {
+      await ctx.storage.delete(resource.coverStorageId);
+    }
     await ctx.db.patch(id, {
       title,
       description,
-      url,
+      url: url || undefined,
       category,
       price: Math.max(0, Math.round(price)),
+      ...(coverStorageId !== undefined ? { coverStorageId } : {}),
     });
   },
 });
@@ -166,7 +207,10 @@ export const removeMine = mutation({
     const resource = await ctx.db.get(id);
     if (!resource) throw new Error("Resource not found.");
     if (resource.authorId !== userId) throw new Error("Not your resource.");
-    // Cascade-delete comments and purchases that point at this resource.
+    // Cascade-delete comments, purchases and stored images for this resource.
+    for (const storageId of [resource.fileStorageId, resource.coverStorageId]) {
+      if (storageId) await ctx.storage.delete(storageId);
+    }
     const comments = await ctx.db
       .query("comments")
       .withIndex("by_resource", (q) => q.eq("resourceId", id))
@@ -306,6 +350,9 @@ export const myPurchases = query({
           ...p,
           resourceTitle: resource?.title ?? "(deleted resource)",
           resourceUrl: resource?.url ?? null,
+          fileUrl: resource?.fileStorageId
+            ? await ctx.storage.getUrl(resource.fileStorageId)
+            : null,
         };
       }),
     );

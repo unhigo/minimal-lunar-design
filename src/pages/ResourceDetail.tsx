@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import type { Id } from "@/convex/_generated/dataModel";
 import {
   ArrowLeft,
@@ -15,6 +15,7 @@ import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { IntegrationPanel } from "@/components/IntegrationPanel";
 import { formatPrice, timeAgo } from "@/lib/catalog";
 
 export default function ResourceDetail() {
@@ -130,6 +131,13 @@ export default function ResourceDetail() {
       </header>
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-12">
+        {resource.coverUrl && (
+          <img
+            src={resource.coverUrl}
+            alt={resource.title}
+            className="mb-8 aspect-[21/9] w-full rounded-sm border border-border/60 object-cover"
+          />
+        )}
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           {resource.category}
         </p>
@@ -183,19 +191,28 @@ export default function ResourceDetail() {
             {error && <p className="mt-1 text-[12px] text-destructive">{error}</p>}
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
-            {owned && resource.url ? (
+            {owned && resource.fileUrl ? (
+              <a
+                href={resource.fileUrl}
+                download={resource.fileMeta?.name ?? "recurso"}
+                className="inline-flex h-10 items-center gap-2 rounded-sm bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+              >
+                <Download className="size-4" />
+                Descargar imagen
+              </a>
+            ) : owned && resource.url ? (
               <a
                 href={resource.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-10 items-center gap-2 rounded-sm bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
               >
-                <Download className="size-4" />
+                <ExternalLink className="size-4" />
                 Abrir recurso
               </a>
             ) : owned ? (
               <span className="inline-flex h-10 items-center text-[12px] text-muted-foreground">
-                Sin enlace adjunto
+                Sin archivo adjunto
               </span>
             ) : (
               <Button
@@ -223,6 +240,19 @@ export default function ResourceDetail() {
             )}
           </div>
         </div>
+
+        {/* Integration / export — only for owners */}
+        {owned && (
+          <section className="mt-8">
+            <IntegrationPanel
+              resourceId={resource._id}
+              title={resource.title}
+              fileUrl={resource.fileUrl}
+              externalUrl={resource.url ?? null}
+              coverUrl={resource.coverUrl}
+            />
+          </section>
+        )}
 
         {/* Comments */}
         <section className="mt-14">
