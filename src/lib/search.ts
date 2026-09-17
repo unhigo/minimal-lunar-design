@@ -11,6 +11,17 @@ import {
   INSPIRATION,
   type InspirationItem,
 } from "@/data/inspiration";
+import {
+  searchArticles,
+  searchProjects,
+  searchCreators,
+  ARTICLES,
+  PROJECTS,
+  CREATORS,
+  type Article,
+  type Project,
+  type Creator,
+} from "@/data/community";
 import type { Tool } from "@/data/tools";
 
 export interface ConvexResourceLike {
@@ -26,12 +37,18 @@ export interface ConvexResourceLike {
 export type SearchHit =
   | { kind: "tool"; tool: Tool }
   | { kind: "resource"; resource: ConvexResourceLike }
-  | { kind: "inspiration"; item: InspirationItem };
+  | { kind: "inspiration"; item: InspirationItem }
+  | { kind: "project"; project: Project }
+  | { kind: "article"; article: Article }
+  | { kind: "creator"; creator: Creator };
 
 export interface SearchSummary {
   tools: number;
   resources: number;
   inspiration: number;
+  projects: number;
+  articles: number;
+  creators: number;
 }
 
 export function searchAll(
@@ -40,6 +57,9 @@ export function searchAll(
 ): { hits: SearchHit[]; summary: SearchSummary } {
   const tools = searchTools(query).slice(0, 6);
   const items = searchInspiration(query).slice(0, 6);
+  const projects = searchProjects(query).slice(0, 4);
+  const articles = searchArticles(query).slice(0, 4);
+  const creators = searchCreators(query).slice(0, 4);
   const needle = query.trim().toLowerCase();
   const matchedResources = needle
     ? resources.filter(
@@ -56,6 +76,9 @@ export function searchAll(
       kind: "resource" as const,
       resource: r,
     })),
+    ...projects.map((p) => ({ kind: "project" as const, project: p })),
+    ...articles.map((a) => ({ kind: "article" as const, article: a })),
+    ...creators.map((c) => ({ kind: "creator" as const, creator: c })),
     ...items.map((i) => ({ kind: "inspiration" as const, item: i })),
   ];
 
@@ -65,6 +88,9 @@ export function searchAll(
       tools: searchTools(query).length,
       resources: matchedResources.length,
       inspiration: searchInspiration(query).length,
+      projects: searchProjects(query).length,
+      articles: searchArticles(query).length,
+      creators: searchCreators(query).length,
     },
   };
 }
@@ -75,5 +101,8 @@ export function ecosystemCounts(resourcesCount = 0) {
     tools: TOOLS.length,
     inspiration: INSPIRATION.length,
     resources: resourcesCount,
+    projects: PROJECTS.length,
+    articles: ARTICLES.length,
+    creators: CREATORS.length,
   };
 }

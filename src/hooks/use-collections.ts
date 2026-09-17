@@ -6,7 +6,7 @@
  * `createCollection`, etc. and never touch storage directly.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const KEY = "mld.collections.v1";
 
@@ -18,7 +18,13 @@ export interface Collection {
   createdAt: number;
 }
 
-export type SaveKind = "tool" | "resource" | "inspiration" | "project" | "article";
+export type SaveKind =
+  | "tool"
+  | "resource"
+  | "inspiration"
+  | "project"
+  | "article"
+  | "creator";
 
 interface CollectionsState {
   saved: Record<string, { collectionId: string | null; savedAt: number }>;
@@ -166,8 +172,27 @@ export function useCollections() {
 
   const savedCount = Object.keys(state.saved).length;
 
+  /** Flattened saved entries, newest first, for collection pages. */
+  const savedEntries = useMemo(
+    () =>
+      Object.entries(state.saved)
+        .map(([key, value]) => {
+          const [kind, ...rest] = key.split(":");
+          return {
+            key,
+            kind: kind as SaveKind,
+            id: rest.join(":"),
+            collectionId: value.collectionId,
+            savedAt: value.savedAt,
+          };
+        })
+        .sort((a, b) => b.savedAt - a.savedAt),
+    [state.saved],
+  );
+
   return {
     savedCount,
+    savedEntries,
     collections: state.collections,
     save,
     unsave,

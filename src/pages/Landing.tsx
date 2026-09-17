@@ -64,7 +64,7 @@ const AREAS = [
   {
     to: "/discover",
     title: "Discover",
-    body: "Un buscador para todo: herramientas, recursos e inspiración.",
+    body: "Un buscador para todo: herramientas, recursos, proyectos e inspiración.",
     meta: "buscador global",
   },
   {
@@ -83,6 +83,18 @@ const AREAS = [
     to: "/inspiration",
     title: "Inspiración",
     body: "Referencias visuales por disciplina, listas para guardar.",
+    meta: "demo inicial",
+  },
+  {
+    to: "/projects",
+    title: "Proyectos",
+    body: "Trabajos con proceso, herramientas usadas y su creador.",
+    meta: "demo inicial",
+  },
+  {
+    to: "/creators",
+    title: "Creadores",
+    body: "Perfiles con proyectos, artículos y herramientas de cada cual.",
     meta: "demo inicial",
   },
 ] as const;
@@ -234,11 +246,11 @@ export default function Landing() {
                   Ecosistema
                 </p>
                 <h2 className="mt-3 text-2xl font-light tracking-tight sm:text-3xl">
-                  Cuatro puertas de entrada
+                  Las puertas del ecosistema
                 </h2>
               </div>
             </div>
-            <div className="mt-10 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-10 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-2 lg:grid-cols-3">
               {AREAS.map((a) => (
                 <Link
                   key={a.to}
@@ -361,6 +373,26 @@ export default function Landing() {
                   {c}
                 </Link>
               ))}
+            </div>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                to="/collections"
+                className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Tus colecciones →
+              </Link>
+              <Link
+                to="/submit"
+                className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Enviar una propuesta →
+              </Link>
+              <Link
+                to="/articles"
+                className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Leer los artículos →
+              </Link>
             </div>
           </div>
         </section>

@@ -29,6 +29,9 @@ const KIND_LABEL: Record<SearchHit["kind"], string> = {
   tool: "herramienta",
   resource: "recurso",
   inspiration: "inspiración",
+  project: "proyecto",
+  article: "artículo",
+  creator: "creador",
 };
 
 function HitCard({ hit }: { hit: SearchHit }) {
@@ -73,6 +76,60 @@ function HitCard({ hit }: { hit: SearchHit }) {
             {formatPrice(hit.resource.price ?? 0)}
           </p>
         </div>
+      </Link>
+    );
+  }
+  if (hit.kind === "project") {
+    return (
+      <Link
+        to={`/projects/${hit.project.slug}`}
+        className="group flex flex-col overflow-hidden border border-border/60 bg-background transition-colors hover:bg-muted/40"
+      >
+        <div
+          className="h-32 w-full border-b border-border/60"
+          style={{ background: hit.project.gradient }}
+        />
+        <div className="flex flex-1 flex-col p-5">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            proyecto · {hit.project.category} · demo
+          </span>
+          <h3 className="mt-3 text-[15px] font-medium">{hit.project.title}</h3>
+          <p className="mt-1.5 line-clamp-2 text-[13px] text-muted-foreground">
+            {hit.project.description}
+          </p>
+        </div>
+      </Link>
+    );
+  }
+  if (hit.kind === "article") {
+    return (
+      <Link
+        to={`/articles/${hit.article.slug}`}
+        className="group flex flex-col border border-border/60 bg-background p-5 transition-colors hover:bg-muted/40"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          artículo · {hit.article.category} · demo
+        </span>
+        <h3 className="mt-3 text-[15px] font-medium">{hit.article.title}</h3>
+        <p className="mt-1.5 line-clamp-2 text-[13px] text-muted-foreground">
+          {hit.article.excerpt}
+        </p>
+      </Link>
+    );
+  }
+  if (hit.kind === "creator") {
+    return (
+      <Link
+        to={`/creators/${hit.creator.slug}`}
+        className="group flex flex-col border border-border/60 bg-background p-5 transition-colors hover:bg-muted/40"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          creador · {hit.creator.type} · demo
+        </span>
+        <h3 className="mt-3 text-[15px] font-medium">{hit.creator.name}</h3>
+        <p className="mt-1.5 line-clamp-2 text-[13px] text-muted-foreground">
+          {hit.creator.bio}
+        </p>
       </Link>
     );
   }
@@ -192,8 +249,10 @@ export default function Discover() {
         {q && (
           <>
             <p className="mt-8 font-mono text-[11px] text-muted-foreground">
-              {summary.tools} herramientas · {summary.resources} recursos ·{" "}
-              {summary.inspiration} inspiración para “{q}”
+          {summary.tools} herramientas · {summary.resources} recursos ·{" "}
+          {summary.projects} proyectos · {summary.articles} artículos ·{" "}
+          {summary.creators} creadores · {summary.inspiration} inspiración para
+          “{q}”
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {hits.map((hit, i) => (
@@ -211,7 +270,7 @@ export default function Discover() {
         )}
 
         {!q && (
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Link
               to="/tools"
               className="border border-border/60 p-6 transition-colors hover:bg-muted/40"
@@ -222,12 +281,39 @@ export default function Discover() {
               </p>
             </Link>
             <Link
+              to="/projects"
+              className="border border-border/60 p-6 transition-colors hover:bg-muted/40"
+            >
+              <h2 className="text-[15px] font-medium">Proyectos</h2>
+              <p className="mt-1.5 text-[13px] text-muted-foreground">
+                Trabajos con proceso, herramientas y creador.
+              </p>
+            </Link>
+            <Link
               to="/catalog"
               className="border border-border/60 p-6 transition-colors hover:bg-muted/40"
             >
               <h2 className="text-[15px] font-medium">Recursos</h2>
               <p className="mt-1.5 text-[13px] text-muted-foreground">
                 Mockups, fuentes y texturas de la comunidad.
+              </p>
+            </Link>
+            <Link
+              to="/articles"
+              className="border border-border/60 p-6 transition-colors hover:bg-muted/40"
+            >
+              <h2 className="text-[15px] font-medium">Artículos</h2>
+              <p className="mt-1.5 text-[13px] text-muted-foreground">
+                Guías enlazadas con las herramientas que citan.
+              </p>
+            </Link>
+            <Link
+              to="/creators"
+              className="border border-border/60 p-6 transition-colors hover:bg-muted/40"
+            >
+              <h2 className="text-[15px] font-medium">Creadores</h2>
+              <p className="mt-1.5 text-[13px] text-muted-foreground">
+                Quiénes están detrás del trabajo.
               </p>
             </Link>
             <Link

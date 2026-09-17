@@ -9,6 +9,11 @@ import {
   Search,
 } from "lucide-react";
 import { getToolBySlug, relatedTools } from "@/data/tools";
+import {
+  articlesAboutTool,
+  creatorsUsingTool,
+  projectsUsingTool,
+} from "@/data/community";
 import { searchAll } from "@/lib/search";
 import { ToolCard } from "@/components/ToolCard";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -45,6 +50,9 @@ export default function ToolDetail() {
         (h) => h.kind === "inspiration",
       ).length
     : 0;
+  const toolProjects = tool ? projectsUsingTool(tool.slug) : [];
+  const toolArticles = tool ? articlesAboutTool(tool.slug) : [];
+  const toolCreators = tool ? creatorsUsingTool(tool.slug) : [];
 
   usePageMeta({
     title: tool
@@ -197,7 +205,61 @@ export default function ToolDetail() {
           <h2 className="text-lg font-light tracking-tight">
             En la plataforma
           </h2>
-          <div className="mt-5 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-3">
+          <div className="mt-5 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-2 lg:grid-cols-3">
+            {toolProjects.length > 0 && (
+              <Link
+                to={`/projects?category=${encodeURIComponent(toolProjects[0].category)}`}
+                className="group bg-background p-5 transition-colors hover:bg-muted/40"
+              >
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  proyectos
+                </p>
+                <h3 className="mt-3 text-sm font-medium">
+                  {toolProjects.length} {toolProjects.length === 1 ? "proyecto" : "proyectos"} la usan
+                </h3>
+                <p className="mt-1 text-[12px] text-muted-foreground">
+                  {toolProjects
+                    .slice(0, 2)
+                    .map((p) => p.title)
+                    .join(" · ")}
+                </p>
+              </Link>
+            )}
+            {toolArticles.length > 0 && (
+              <Link
+                to={`/articles/${toolArticles[0].slug}`}
+                className="group bg-background p-5 transition-colors hover:bg-muted/40"
+              >
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  artículos
+                </p>
+                <h3 className="mt-3 text-sm font-medium">
+                  {toolArticles.length} {toolArticles.length === 1 ? "lectura" : "lecturas"}
+                </h3>
+                <p className="mt-1 line-clamp-1 text-[12px] text-muted-foreground">
+                  {toolArticles[0].title}
+                </p>
+              </Link>
+            )}
+            {toolCreators.length > 0 && (
+              <Link
+                to={`/creators/${toolCreators[0].slug}`}
+                className="group bg-background p-5 transition-colors hover:bg-muted/40"
+              >
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  creadores
+                </p>
+                <h3 className="mt-3 text-sm font-medium">
+                  {toolCreators.length} en su flujo de trabajo
+                </h3>
+                <p className="mt-1 text-[12px] text-muted-foreground">
+                  {toolCreators
+                    .slice(0, 2)
+                    .map((c) => c.name)
+                    .join(" · ")}
+                </p>
+              </Link>
+            )}
             <Link
               to={`/catalog?search=${encodeURIComponent(tool.name)}`}
               className="group bg-background p-5 transition-colors hover:bg-muted/40"

@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import { TOOL_CATEGORIES, searchTools, trendingTools } from "@/data/tools";
 import { ToolCard } from "@/components/ToolCard";
 import { SiteHeader } from "@/components/SiteHeader";
+import { FilterChips } from "@/components/FilterChips";
 import { usePageMeta } from "@/hooks/use-page-meta";
 
 export default function Tools() {
@@ -50,31 +51,13 @@ export default function Tools() {
               className="h-11 w-full rounded-sm border border-border bg-transparent pl-9 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40"
             />
           </div>
-          <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:flex-wrap md:px-0">
-            <button
-              onClick={() => setCategory("all")}
-              className={`shrink-0 rounded-sm border px-3 py-1.5 font-mono text-[11px] transition-colors ${
-                category === "all"
-                  ? "border-foreground/50 text-foreground"
-                  : "border-border text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              todas
-            </button>
-            {TOOL_CATEGORIES.map((c) => (
-              <button
-                key={c}
-                onClick={() => setCategory(c)}
-                className={`shrink-0 rounded-sm border px-3 py-1.5 font-mono text-[11px] transition-colors ${
-                  category === c
-                    ? "border-foreground/50 text-foreground"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
+          <FilterChips
+            options={TOOL_CATEGORIES}
+            value={category}
+            onChange={setCategory}
+            allLabel="todas"
+            ariaLabel="Filtrar herramientas por categoría"
+          />
         </div>
 
         {/* Trending strip */}
