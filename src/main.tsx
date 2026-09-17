@@ -18,6 +18,10 @@ const Upload = lazy(() => import("./pages/Upload.tsx"));
 const Studio = lazy(() => import("./pages/Studio.tsx"));
 const Admin = lazy(() => import("./pages/Admin.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const Tools = lazy(() => import("./pages/Tools.tsx"));
+const ToolDetail = lazy(() => import("./pages/ToolDetail.tsx"));
+const Discover = lazy(() => import("./pages/Discover.tsx"));
+const Inspiration = lazy(() => import("./pages/Inspiration.tsx"));
 
 // Simple loading fallback for route transitions
 function RouteLoading() {
@@ -145,6 +149,10 @@ createRoot(document.getElementById("root")!).render(
                 }
               />
               <Route path="/catalog" element={<Catalog />} />
+              <Route path="/tools" element={<Tools />} />
+              <Route path="/tools/:slug" element={<ToolDetail />} />
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/inspiration" element={<Inspiration />} />
               <Route path="/resource/:id" element={<ResourceDetail />} />
               <Route
                 path="/upload"

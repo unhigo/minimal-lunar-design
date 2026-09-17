@@ -1,9 +1,12 @@
-import { useMemo } from "react";
-import { Link } from "react-router";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Search } from "lucide-react";
 import { moonPath, moonPhase } from "@/lib/lunar";
 import { CATEGORIES } from "@/lib/catalog";
+import { SiteHeader } from "@/components/SiteHeader";
+import { trendingTools, featuredTools } from "@/data/tools";
+import { INSPIRATION } from "@/data/inspiration";
 
 function useTodayMoon(radius = 44) {
   return useMemo(() => {
@@ -57,44 +60,45 @@ const STEPS = [
   { n: "04", title: "Crea", body: "Descarga el recurso o compón en el estudio lunar." },
 ] as const;
 
+const AREAS = [
+  {
+    to: "/discover",
+    title: "Discover",
+    body: "Un buscador para todo: herramientas, recursos e inspiración.",
+    meta: "buscador global",
+  },
+  {
+    to: "/tools",
+    title: "Herramientas",
+    body: "Directorio curado con web oficial, licencia y alternativas.",
+    meta: "30 herramientas",
+  },
+  {
+    to: "/catalog",
+    title: "Recursos",
+    body: "Mockups, fuentes, texturas y plantillas de la comunidad.",
+    meta: "8 categorías",
+  },
+  {
+    to: "/inspiration",
+    title: "Inspiración",
+    body: "Referencias visuales por disciplina, listas para guardar.",
+    meta: "demo inicial",
+  },
+] as const;
+
 export default function Landing() {
   const { phase, illumination, d } = useTodayMoon(44);
+  const navigate = useNavigate();
+  const [heroQuery, setHeroQuery] = useState("");
+  const trending = useMemo(() => trendingTools(5), []);
+  const featured = useMemo(() => featuredTools(3), []);
+  const inspirationSample = useMemo(() => INSPIRATION.slice(0, 3), []);
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-5">
-          <Link to="/" className="flex items-center gap-2.5">
-            <span className="flex size-6 items-center justify-center rounded-full border border-foreground/40">
-              <span className="size-2 rounded-full bg-foreground/70" />
-            </span>
-            <span className="text-sm font-medium uppercase tracking-[0.22em]">
-              Minimal Lunar Design
-            </span>
-          </Link>
-          <nav className="flex items-center gap-1 sm:gap-2">
-            <Link
-              to="/catalog"
-              className="hidden px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
-            >
-              Catálogo
-            </Link>
-            <a
-              href="#how"
-              className="hidden px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
-            >
-              Cómo funciona
-            </a>
-            <Link
-              to="/auth"
-              className="inline-flex h-9 items-center rounded-sm border border-foreground/70 px-4 text-[13px] font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
-            >
-              Empezar
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="flex-1">
         {/* Hero */}
@@ -114,12 +118,29 @@ export default function Landing() {
                 <span className="text-muted-foreground"> publica los tuyos.</span>
               </h1>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                Minimal Lunar Design es un catálogo de recursos de edición y
-                diseño: mockups, fuentes, texturas y plantillas. Encuentra lo
-                que necesitas, comparte lo que creas y compón tu calendario
-                lunar en el estudio.
+                Herramientas, recursos e inspiración de edición y diseño en un
+                solo ecosistema: descubre, guarda y crea. Empieza buscando.
               </p>
-              <div className="mt-10 flex flex-wrap items-center gap-4">
+
+              {/* Hero search — global discovery entry */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  navigate(heroQuery.trim() ? `/discover?q=${encodeURIComponent(heroQuery.trim())}` : "/discover");
+                }}
+                className="relative mt-8 max-w-md"
+              >
+                <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={heroQuery}
+                  onChange={(e) => setHeroQuery(e.target.value)}
+                  placeholder="Search tools, projects, resources…"
+                  aria-label="Buscador global"
+                  className="h-12 w-full rounded-sm border border-border bg-transparent pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40"
+                />
+              </form>
+
+              <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link
                   to="/catalog"
                   className="inline-flex h-11 items-center gap-2 rounded-sm bg-foreground px-6 text-sm font-medium text-background transition-opacity hover:opacity-90"
@@ -204,18 +225,143 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Category strip */}
+        {/* Discovery areas */}
         <section className="border-y border-border/60">
-          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-center gap-2 px-5 py-8">
-            {CATEGORIES.map((c) => (
+          <div className="mx-auto w-full max-w-6xl px-5 py-14">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+                  Ecosistema
+                </p>
+                <h2 className="mt-3 text-2xl font-light tracking-tight sm:text-3xl">
+                  Cuatro puertas de entrada
+                </h2>
+              </div>
+            </div>
+            <div className="mt-10 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-2 lg:grid-cols-4">
+              {AREAS.map((a) => (
+                <Link
+                  key={a.to}
+                  to={a.to}
+                  className="group bg-background p-6 transition-colors hover:bg-muted/40"
+                >
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    {a.meta}
+                  </p>
+                  <h3 className="mt-4 flex items-center gap-1.5 text-[15px] font-medium">
+                    {a.title}
+                    <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                  </h3>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
+                    {a.body}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Trending tools */}
+        <section className="mx-auto w-full max-w-6xl px-5 py-14">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+                Tendencia
+              </p>
+              <h2 className="mt-3 text-2xl font-light tracking-tight sm:text-3xl">
+                Herramientas en órbita
+              </h2>
+            </div>
+            <Link
+              to="/tools"
+              className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Ver directorio
+            </Link>
+          </div>
+          <div className="mt-8 flex flex-wrap gap-2">
+            {trending.map((t) => (
               <Link
-                key={c}
-                to="/catalog"
-                className="rounded-sm border border-border px-3 py-1.5 font-mono text-[11px] text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+                key={t.id}
+                to={`/tools/${t.slug}`}
+                className="group inline-flex items-center gap-2 rounded-sm border border-border px-4 py-2.5 transition-colors hover:border-foreground/40"
               >
-                {c}
+                <span className="text-[13px]">{t.name}</span>
+                <span className="font-mono text-[10px] text-muted-foreground">
+                  {t.category}
+                </span>
               </Link>
             ))}
+          </div>
+
+          {/* Featured + inspiration preview */}
+          <div className="mt-12 grid gap-10 lg:grid-cols-2">
+            <div>
+              <h3 className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                Destacadas
+              </h3>
+              <ul className="mt-4 divide-y divide-border/60 border-y border-border/60">
+                {featured.map((t) => (
+                  <li key={t.id}>
+                    <Link
+                      to={`/tools/${t.slug}`}
+                      className="flex items-center justify-between py-3.5 transition-colors hover:text-muted-foreground"
+                    >
+                      <span className="text-[14px]">{t.name}</span>
+                      <span className="font-mono text-[11px] text-muted-foreground">
+                        {t.shortDescription.slice(0, 34)}…
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <div className="flex items-center justify-between">
+                <h3 className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Inspiración reciente
+                </h3>
+                <Link
+                  to="/inspiration"
+                  className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Ver todo
+                </Link>
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                {inspirationSample.map((i) => (
+                  <div
+                    key={i.id}
+                    className="overflow-hidden rounded-sm border border-border/60"
+                  >
+                    <div
+                      className="aspect-[4/3] w-full"
+                      style={{ background: i.gradient }}
+                    />
+                    <p className="truncate px-2.5 py-2 text-[11px] text-muted-foreground">
+                      {i.title}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Resource categories strip */}
+        <section className="border-t border-border/60">
+          <div className="mx-auto w-full max-w-6xl px-5 py-10">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {CATEGORIES.map((c) => (
+                <Link
+                  key={c}
+                  to="/catalog"
+                  className="rounded-sm border border-border px-3 py-1.5 font-mono text-[11px] text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+                >
+                  {c}
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 
