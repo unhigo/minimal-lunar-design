@@ -11,8 +11,8 @@ import { getAuthUserId } from "@convex-dev/auth/server";
  * can size thumbnails without decoding the image.
  */
 
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MB
-const ALLOWED_IMAGE_TYPES = [
+export const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MB
+export const ALLOWED_IMAGE_TYPES = [
   "image/png",
   "image/jpeg",
   "image/webp",
