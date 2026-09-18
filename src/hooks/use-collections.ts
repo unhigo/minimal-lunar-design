@@ -1,56 +1,43 @@
 /**
- * Collections (save-for-later) MVP: localStorage-backed.
+ * Collections (save-for-later) hook: localStorage-backed.
  *
- * Designed so the storage backend can later swap to Convex without changing
- * the component contract: components call `save`, `unsave`, `isSaved`,
- * `createCollection`, etc. and never touch storage directly.
+ * State transitions live in the pure `collections-core.ts` module; this hook
+ * only wires React state, persistence and cross-hook notifications around
+ * them. The public API is unchanged, so no component needs edits.
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-
-const KEY = "mld.collections.v1";
-
-export interface Collection {
-  id: string;
-  name: string;
-  /** `${kind}:${id}` entries, e.g. "tool:figma" or "inspiration:i-03". */
-  items: string[];
-  createdAt: number;
-}
-
-export type SaveKind =
-  | "tool"
-  | "resource"
-  | "inspiration"
-  | "project"
-  | "article"
-  | "creator";
-
-interface CollectionsState {
-  saved: Record<string, { collectionId: string | null; savedAt: number }>;
-  collections: Collection[];
-}
-
-const EMPTY: CollectionsState = { saved: {}, collections: [] };
+import {
+  COLLECTIONS_KEY,
+  EMPTY_COLLECTIONS,
+  entryKey,
+  applySave,
+  applyUnsave,
+  applyCreateCollection,
+  applyDeleteCollection,
+  applyMoveTo,
+  type CollectionsState,
+  type SaveKind,
+} from "./collections-core";
 
 function load(): CollectionsState {
-  if (typeof window === "undefined") return EMPTY;
+  if (typeof window === "undefined") return EMPTY_COLLECTIONS;
   try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return EMPTY;
+    const raw = window.localStorage.getItem(COLLECTIONS_KEY);
+    if (!raw) return EMPTY_COLLECTIONS;
     const parsed = JSON.parse(raw) as CollectionsState;
     return {
       saved: parsed.saved ?? {},
       collections: parsed.collections ?? [],
     };
   } catch {
-    return EMPTY;
+    return EMPTY_COLLECTIONS;
   }
 }
 
 function persist(state: CollectionsState) {
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(state));
+    window.localStorage.setItem(COLLECTIONS_KEY, JSON.stringify(state));
   } catch {
     // Storage full or unavailable — degrade silently.
   }
@@ -58,13 +45,10 @@ function persist(state: CollectionsState) {
 
 const listeners = new Set<() => void>();
 
-function notify() {
-  for (const l of listeners) l();
-}
-
 export function useCollections() {
   const [state, setState] = useState<CollectionsState>(load);
 
+  // Cross-hook sync: one instance writes, the others reload from storage.
   useEffect(() => {
     const listener = () => setState(load());
     listeners.add(listener);
@@ -73,40 +57,26 @@ export function useCollections() {
     };
   }, []);
 
-  const entryKey = (kind: SaveKind, id: string) => `${kind}:${id}`;
-
-  const save = useCallback((kind: SaveKind, id: string, collectionId?: string) => {
-    setState((prev) => {
-      const k = entryKey(kind, id);
-      const next: CollectionsState = {
-        ...prev,
-        saved: {
-          ...prev.saved,
-          [k]: { collectionId: collectionId ?? null, savedAt: Date.now() },
-        },
-      };
+  const save = useCallback(
+    (kind: SaveKind, id: string, collectionId?: string) => {
+      const next = applySave(load(), kind, id, collectionId);
       persist(next);
-      notify();
-      return next;
-    });
-  }, []);
+      setState(next);
+      for (const l of listeners) l();
+    },
+    [],
+  );
 
   const unsave = useCallback((kind: SaveKind, id: string) => {
-    setState((prev) => {
-      const k = entryKey(kind, id);
-      const saved = { ...prev.saved };
-      delete saved[k];
-      const next: CollectionsState = { ...prev, saved };
-      persist(next);
-      notify();
-      return next;
-    });
+    const next = applyUnsave(load(), kind, id);
+    persist(next);
+    setState(next);
+    for (const l of listeners) l();
   }, []);
 
   const toggle = useCallback(
     (kind: SaveKind, id: string) => {
-      const k = entryKey(kind, id);
-      if (state.saved[k]) unsave(kind, id);
+      if (state.saved[entryKey(kind, id)]) unsave(kind, id);
       else save(kind, id);
     },
     [state, save, unsave],
@@ -118,54 +88,25 @@ export function useCollections() {
   );
 
   const createCollection = useCallback((name: string) => {
-    setState((prev) => {
-      const collection: Collection = {
-        id: `c-${Date.now().toString(36)}`,
-        name: name.trim() || "Nueva colección",
-        items: [],
-        createdAt: Date.now(),
-      };
-      const next: CollectionsState = {
-        ...prev,
-        collections: [...prev.collections, collection],
-      };
-      persist(next);
-      notify();
-      return next;
-    });
+    const next = applyCreateCollection(load(), name);
+    persist(next);
+    setState(next);
+    for (const l of listeners) l();
   }, []);
 
   const deleteCollection = useCallback((collectionId: string) => {
-    setState((prev) => {
-      const saved = Object.fromEntries(
-        Object.entries(prev.saved).filter(
-          ([, v]) => v.collectionId !== collectionId,
-        ),
-      );
-      const next: CollectionsState = {
-        saved,
-        collections: prev.collections.filter((c) => c.id !== collectionId),
-      };
-      persist(next);
-      notify();
-      return next;
-    });
+    const next = applyDeleteCollection(load(), collectionId);
+    persist(next);
+    setState(next);
+    for (const l of listeners) l();
   }, []);
 
   const moveTo = useCallback(
     (kind: SaveKind, id: string, collectionId: string | null) => {
-      setState((prev) => {
-        const k = entryKey(kind, id);
-        const current = prev.saved[k];
-        if (!current) return prev;
-        const next: CollectionsState = {
-          ...prev,
-          saved: { ...prev.saved, [k]: { ...current, collectionId } },
-        };
-        persist(next);
-        notify();
-        return next;
-      });
+      const next = applyMoveTo(load(), kind, id, collectionId);
+      persist(next);
+      setState(next);
+      for (const l of listeners) l();
     },
     [],
   );

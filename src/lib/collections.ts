@@ -4,7 +4,7 @@
  * live in Convex, so they are resolved by the page via the published list.
  */
 
-import type { SaveKind } from "@/hooks/use-collections";
+import type { SaveKind } from "@/hooks/collections-core";
 import { getToolById } from "@/data/tools";
 import { INSPIRATION } from "@/data/inspiration";
 import {

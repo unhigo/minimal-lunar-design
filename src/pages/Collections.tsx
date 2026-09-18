@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import { useCollections, type Collection } from "@/hooks/use-collections";
+import { useCollections } from "@/hooks/use-collections";
+import type { Collection } from "@/hooks/collections-core";
 import {
   KIND_LABEL,
   resolveEntry,
