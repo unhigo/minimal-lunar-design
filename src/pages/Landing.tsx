@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Search } from "lucide-react";
 import { moonPath, moonPhase } from "@/lib/lunar";
+import { BRAND } from "@/lib/brand";
 import { CATEGORIES } from "@/lib/catalog";
 import { SiteHeader } from "@/components/SiteHeader";
 import { trendingTools, featuredTools } from "@/data/tools";
@@ -122,16 +123,17 @@ export default function Landing() {
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
               <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-                Recursos de edición y diseño
+                {BRAND.tagline}
               </p>
               <h1 className="text-4xl leading-[1.08] font-light tracking-tight sm:text-5xl lg:text-6xl">
-                Busca recursos,
+                Explora, compón,
                 <br />
-                <span className="text-muted-foreground"> publica los tuyos.</span>
+                <span className="text-muted-foreground"> publica tus experimentos.</span>
               </h1>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                Herramientas, recursos e inspiración de edición y diseño en un
-                solo ecosistema: descubre, guarda y crea. Empieza buscando.
+                Herramientas, recursos, experimentos y exploración visual en un
+                solo laboratorio: descubre, guarda y compon la ficha con la
+                comunidad. Empieza buscando.
               </p>
 
               {/* Hero search — global discovery entry */}
@@ -485,7 +487,7 @@ export default function Landing() {
       <footer className="border-t border-border/60">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-5 py-8 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[12px] text-muted-foreground">
-            Minimal Lunar Design — búsqueda de recursos de edición y diseño.
+ — laboratorio de exploración digital.
           </p>
           <p className="font-mono text-[11px] text-muted-foreground">
             Fase {phase.toFixed(3)} · {illumination}% iluminada esta noche

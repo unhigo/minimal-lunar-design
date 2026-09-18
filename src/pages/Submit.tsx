@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Clock, Send, Upload } from "lucide-react";
@@ -59,7 +60,7 @@ const TYPES: { id: SubmissionType; hint: string }[] = [
 
 export default function Submit() {
   usePageMeta({
-    title: "Enviar — Minimal Lunar Design",
+    title: `Enviar — ${BRAND.mark}`,
     description:
       "Propón una herramienta, un proyecto o un artículo para el directorio. Revisión antes de publicar.",
     path: "/submit",
@@ -239,7 +240,7 @@ export default function Submit() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-4xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>

@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { Link, useParams } from "react-router";
 import { ArrowLeft, Bookmark, ExternalLink } from "lucide-react";
 import {
@@ -19,7 +20,7 @@ export default function ProjectDetail() {
 
   usePageMeta({
     title: project
-      ? `${project.title} — Proyectos · Minimal Lunar Design`
+      ? `${project.title} — Proyectos · ${BRAND.mark}`
       : "Proyecto no encontrado",
     description: project?.description ?? "",
     path: `/projects/${slug ?? ""}`,
@@ -198,7 +199,7 @@ export default function ProjectDetail() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-4xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+            ${BRAND.mark} · ${BRAND.tagline}
           </p>
         </div>
       </footer>

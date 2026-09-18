@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { Link, useParams } from "react-router";
 import {
   ArrowLeft,
@@ -56,7 +57,7 @@ export default function ToolDetail() {
 
   usePageMeta({
     title: tool
-      ? `${tool.name} — Herramientas · Minimal Lunar Design`
+      ? `${tool.name} — Herramientas · ${BRAND.mark}`
       : "Herramienta no encontrada",
     description: tool?.shortDescription ?? "",
     path: `/tools/${slug ?? ""}`,
@@ -315,7 +316,7 @@ export default function ToolDetail() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-4xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+            ${BRAND.mark} · ${BRAND.tagline}
           </p>
         </div>
       </footer>

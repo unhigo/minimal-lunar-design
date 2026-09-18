@@ -2,6 +2,7 @@ import { Link, NavLink } from "react-router";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { BRAND } from "@/lib/brand";
 
 const NAV = [
   { to: "/discover", label: "Discover" },
@@ -14,8 +15,8 @@ const NAV = [
 ];
 
 /**
- * Shared navigation for the discovery areas. Reuses the landing page's visual
- * language: lunar mark, mono labels, thin borders. Internal app areas
+ * Shared navigation for the discovery areas. Reuses the lab's visual
+ * language: orbital mark, mono labels, thin borders. Internal app areas
  * (Dashboard, Studio) keep their own headers.
  */
 export function SiteHeader() {
@@ -29,8 +30,13 @@ export function SiteHeader() {
           <span className="flex size-6 items-center justify-center rounded-full border border-foreground/40">
             <span className="size-2 rounded-full bg-foreground/70" />
           </span>
-          <span className="text-sm font-medium uppercase tracking-[0.22em]">
-            Minimal Lunar Design
+          <span className="flex flex-col leading-none">
+            <span className="text-sm font-medium uppercase tracking-[0.22em]">
+              MOONØ.LAB
+            </span>
+            <span className="mt-0.5 hidden font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground lg:block">
+              Digital Exploration Lab
+            </span>
           </span>
         </Link>
 

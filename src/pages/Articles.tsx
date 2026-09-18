@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { Search } from "lucide-react";
@@ -9,7 +10,7 @@ import { formatArticleDate } from "@/data/community";
 
 export default function Articles() {
   usePageMeta({
-    title: "Artículos — Minimal Lunar Design",
+    title: `Artículos — ${BRAND.mark}`,
     description:
       "Guías y reflexiones demo sobre licencias, color, tipografía e imagen, enlazadas con las herramientas del directorio.",
     path: "/articles",
@@ -97,7 +98,7 @@ export default function Articles() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-4xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>

@@ -81,6 +81,39 @@ const schema = defineSchema(
     })
       .index("by_user", ["userId"])
       .index("by_resource", ["resourceId"]),
+
+    // Editable content blocks that compose a resource page. Any signed-in
+    // user may add/edit blocks on any resource (open-lab moderation model).
+    resourceBlocks: defineTable({
+      resourceId: v.id("resources"),
+      authorId: v.id("users"),
+      type: v.union(
+        v.literal("image"),
+        v.literal("video"),
+        v.literal("text"),
+        v.literal("gallery"),
+        v.literal("slider"),
+      ),
+      order: v.number(),
+      storageId: v.optional(v.id("_storage")),
+      url: v.optional(v.string()),
+      text: v.optional(v.string()),
+      meta: v.optional(
+        v.object({
+          name: v.optional(v.string()),
+          type: v.optional(v.string()),
+          size: v.optional(v.number()),
+          width: v.optional(v.number()),
+          height: v.optional(v.number()),
+          caption: v.optional(v.string()),
+          ratio: v.optional(v.string()),
+          autoplay: v.optional(v.boolean()),
+          loop: v.optional(v.boolean()),
+          muted: v.optional(v.boolean()),
+        }),
+      ),
+      createdAt: v.number(),
+    }).index("by_resource", ["resourceId", "order"]),
   },
   {
     schemaValidation: false,

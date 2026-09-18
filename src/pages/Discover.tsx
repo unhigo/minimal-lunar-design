@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Search, X } from "lucide-react";
@@ -154,7 +155,7 @@ function HitCard({ hit }: { hit: SearchHit }) {
 
 export default function Discover() {
   usePageMeta({
-    title: "Discover — Minimal Lunar Design",
+    title: `Discover — ${BRAND.mark}`,
     description:
       "Busca en todo el ecosistema: herramientas de diseño, recursos de la comunidad e inspiración. Un solo buscador.",
     path: "/discover",
@@ -332,7 +333,7 @@ export default function Discover() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>

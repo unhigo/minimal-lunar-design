@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { Search } from "lucide-react";
@@ -74,7 +75,7 @@ export function CreatorCard({ slug }: { slug: string }) {
 
 export default function Creators() {
   usePageMeta({
-    title: "Creadores — Minimal Lunar Design",
+    title: `Creadores — ${BRAND.mark}`,
     description:
       "Perfiles de demostración con proyectos y artículos enlazados: descubre quién está detrás de cada pieza.",
     path: "/creators",
@@ -142,7 +143,7 @@ export default function Creators() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>

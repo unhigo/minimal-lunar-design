@@ -509,3 +509,29 @@ export const bootstrapAdmin = mutation({
     return ROLES.ADMIN;
   },
 });
+
+/**
+ * Full view of one of the caller's own resources for the block editor.
+ * Returns null for missing resources; ownership must be checked by the caller
+ * (comparing authorId against the current user id from useAuth).
+ */
+export const getMineForEdit = query({
+  args: { id: v.id("resources") },
+  handler: async (ctx, { id }) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return null;
+    const resource = await ctx.db.get(id);
+    if (!resource) return null;
+    const author = await ctx.db.get(resource.authorId);
+    return {
+      ...resource,
+      authorName: author?.name ?? author?.email ?? "Unknown",
+      fileUrl: resource.fileStorageId
+        ? await ctx.storage.getUrl(resource.fileStorageId)
+        : null,
+      coverUrl: resource.coverStorageId
+        ? await ctx.storage.getUrl(resource.coverStorageId)
+        : null,
+    };
+  },
+});

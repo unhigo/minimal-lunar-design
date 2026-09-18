@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { Link, useParams } from "react-router";
 import { ArrowLeft, Bookmark } from "lucide-react";
 import {
@@ -19,7 +20,7 @@ export default function CreatorProfile() {
 
   usePageMeta({
     title: creator
-      ? `${creator.name} — Creadores · Minimal Lunar Design`
+      ? `${creator.name} — Creadores · ${BRAND.mark}`
       : "Creador no encontrado",
     description: creator?.bio ?? "",
     path: `/creators/${slug ?? ""}`,
@@ -182,7 +183,7 @@ export default function CreatorProfile() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-4xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+            ${BRAND.mark} · ${BRAND.tagline}
           </p>
         </div>
       </footer>

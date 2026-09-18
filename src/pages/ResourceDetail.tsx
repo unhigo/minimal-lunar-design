@@ -16,6 +16,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { IntegrationPanel } from "@/components/IntegrationPanel";
+import { ResourceBlocks } from "@/components/ResourceBlocks";
+import { BRAND } from "@/lib/brand";
 import { formatPrice, timeAgo } from "@/lib/catalog";
 
 export default function ResourceDetail() {
@@ -27,6 +29,10 @@ export default function ResourceDetail() {
   const resource = useQuery(
     api.resources.getPublished,
     resourceId ? { id: resourceId } : "skip",
+  );
+  const blocks = useQuery(
+    api.blocks.list,
+    resourceId ? { resourceId } : "skip",
   );
   const comments = useQuery(
     api.resources.listComments,
@@ -148,6 +154,13 @@ export default function ResourceDetail() {
           {resource.description}
         </p>
 
+        {/* Community-composed content blocks */}
+        {blocks !== undefined && blocks.length > 0 && (
+          <div className="mt-10">
+            <ResourceBlocks blocks={blocks} />
+          </div>
+        )}
+
         <div className="mt-8 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-3">
           <div className="bg-background p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -254,6 +267,26 @@ export default function ResourceDetail() {
           </section>
         )}
 
+        {/* Open-lab invitation */}
+        {isAuthenticated && (
+          <section className="mt-12 flex flex-col gap-3 border border-dashed border-border/70 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium">Laboratorio abierto</p>
+              <p className="mt-1 max-w-md text-[13px] leading-relaxed text-muted-foreground">
+                {BRAND.mark} es un laboratorio colaborativo: cualquier persona
+                registrada puede ampliar esta ficha con imágenes, video, notas,
+                galerías o sliders.
+              </p>
+            </div>
+            <Link
+              to={`/resource/${id}/edit`}
+              className="inline-flex h-10 shrink-0 items-center rounded-sm bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            >
+              Editar bloques
+            </Link>
+          </section>
+        )}
+
         {/* Comments */}
         <section className="mt-14">
           <h2 className="flex items-center gap-2 text-lg font-light tracking-tight">
@@ -336,7 +369,7 @@ export default function ResourceDetail() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-4xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>

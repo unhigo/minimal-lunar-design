@@ -115,7 +115,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
               <span className="size-2 rounded-full bg-foreground/70" />
             </span>
             <span className="text-sm font-medium tracking-[0.22em] uppercase">
-              Minimal Lunar Design
+
             </span>
           </Link>
           <Link

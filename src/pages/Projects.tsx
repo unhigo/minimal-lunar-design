@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { Search } from "lucide-react";
@@ -71,7 +72,7 @@ export function ProjectCard({ slug }: { slug: string }) {
 
 export default function Projects() {
   usePageMeta({
-    title: "Proyectos — Minimal Lunar Design",
+    title: `Proyectos — ${BRAND.mark}`,
     description:
       "Proyectos de demostración que enlazan herramientas, creadores y artículos: ve de la referencia al proceso.",
     path: "/projects",
@@ -142,7 +143,7 @@ export default function Projects() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>

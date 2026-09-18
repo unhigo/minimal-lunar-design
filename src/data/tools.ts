@@ -280,7 +280,7 @@ export const TOOLS: Tool[] = [
     name: "Lucide",
     shortDescription: "Biblioteca de iconos SVG open source (la de esta app).",
     description:
-      "Lucide es una biblioteca de iconos SVG de código abierto, fork de Feather Icons, con cientos de trazos consistentes, paleta editable y paquetes oficiales para React, Vue, Svelte y más. Es la que utiliza Minimal Lunar Design.",
+      "Lucide es una biblioteca de iconos SVG de código abierto, fork de Feather Icons, con cientos de trazos consistentes, paleta editable y paquetes oficiales para React, Vue, Svelte y más. Es la que utiliza MOONØ.LAB.",
     website: "https://lucide.dev",
     category: "Iconos",
     tags: ["svg", "open source", "react"],

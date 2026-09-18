@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { TOOL_CATEGORIES, searchTools, trendingTools } from "@/data/tools";
@@ -8,7 +9,7 @@ import { usePageMeta } from "@/hooks/use-page-meta";
 
 export default function Tools() {
   usePageMeta({
-    title: "Herramientas — Minimal Lunar Design",
+    title: `Herramientas — ${BRAND.mark}`,
     description:
       "Directorio curado de herramientas de diseño, imagen, color, tipografía y 3D para creadores. Con web oficial, precio verificado y alternativas.",
     path: "/tools",
@@ -106,7 +107,7 @@ export default function Tools() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>

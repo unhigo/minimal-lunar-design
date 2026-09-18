@@ -402,7 +402,7 @@ export default function Dashboard() {
               <span className="size-2 rounded-full bg-foreground/70" />
             </span>
             <span className="text-sm font-medium uppercase tracking-[0.22em]">
-              Minimal Lunar Design
+
             </span>
           </Link>
           <nav className="flex items-center gap-1">
@@ -576,6 +576,12 @@ export default function Dashboard() {
                     >
                       Ver
                     </Link>
+                    <Link
+                      to={`/resource/${r._id}/edit`}
+                      className="inline-flex h-8 items-center rounded-sm border border-border px-3 font-mono text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Bloques
+                    </Link>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -714,7 +720,7 @@ export default function Dashboard() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>

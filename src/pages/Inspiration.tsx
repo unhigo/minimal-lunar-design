@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { Bookmark, LayoutGrid, Rows3, Rows4 } from "lucide-react";
@@ -86,7 +87,7 @@ function InspirationCard({
 
 export default function Inspiration() {
   usePageMeta({
-    title: "Inspiración — Minimal Lunar Design",
+    title: `Inspiración — ${BRAND.mark}`,
     description:
       "Referencias de web, UI, branding, tipografía, motion y más. Filtra por disciplina y guarda lo que te inspire en colecciones.",
     path: "/inspiration",
@@ -208,7 +209,7 @@ export default function Inspiration() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>

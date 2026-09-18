@@ -354,7 +354,7 @@ export default function Upload() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-3xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>

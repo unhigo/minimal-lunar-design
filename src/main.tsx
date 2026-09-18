@@ -30,6 +30,7 @@ const Articles = lazy(() => import("./pages/Articles.tsx"));
 const ArticleDetail = lazy(() => import("./pages/ArticleDetail.tsx"));
 const Collections = lazy(() => import("./pages/Collections.tsx"));
 const Submit = lazy(() => import("./pages/Submit.tsx"));
+const ResourceEditor = lazy(() => import("./pages/ResourceEditor.tsx"));
 
 // Simple loading fallback for route transitions
 function RouteLoading() {
@@ -170,6 +171,14 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/collections" element={<Collections />} />
               <Route path="/submit" element={<Submit />} />
               <Route path="/resource/:id" element={<ResourceDetail />} />
+              <Route
+                path="/resource/:id/edit"
+                element={
+                  <RequireAuth>
+                    <ResourceEditor />
+                  </RequireAuth>
+                }
+              />
               <Route
                 path="/upload"
                 element={

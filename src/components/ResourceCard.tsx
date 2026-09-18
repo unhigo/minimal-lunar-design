@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { ArrowUpRight } from "lucide-react";
 import { formatPrice, timeAgo } from "@/lib/catalog";
+import { BRAND } from "@/lib/brand";
 
 export interface ResourceCardData {
   _id: string;
@@ -30,7 +31,7 @@ export function ResourceCard({ resource }: { resource: ResourceCardData }) {
         ) : (
           <div className="flex h-full w-full items-center justify-center">
             <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60">
-              minimal lunar
+              {BRAND.name.toLowerCase()}
             </span>
           </div>
         )}

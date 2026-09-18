@@ -1,3 +1,4 @@
+import { BRAND } from "@/lib/brand";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import {
@@ -39,7 +40,7 @@ interface SavedItem {
  */
 export default function Collections() {
   usePageMeta({
-    title: "Colecciones — Minimal Lunar Design",
+    title: `Colecciones — ${BRAND.mark}`,
     description:
       "Tus guardados: herramientas, proyectos, recursos, artículos e inspiración organizados en colecciones.",
     path: "/collections",
@@ -309,7 +310,7 @@ export default function Collections() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            Minimal Lunar Design · Recursos de edición y diseño
+
           </p>
         </div>
       </footer>
