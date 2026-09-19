@@ -96,7 +96,7 @@ const AREAS = [
     to: "/tools",
     title: "Herramientas",
     body: "Directorio curado con web oficial, licencia y alternativas.",
-    meta: "30 herramientas",
+    meta: "31 herramientas",
   },
   {
     to: "/catalog",

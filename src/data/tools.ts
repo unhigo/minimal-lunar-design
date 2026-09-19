@@ -853,6 +853,39 @@ export const TOOLS: Tool[] = [
     trending: false,
     createdAt: Date.now(),
   },
+  {
+    id: "t-31",
+    slug: "nyxhora-embed",
+    name: "Nyxhora Embed",
+    shortDescription:
+      "Generador interno de código embed responsivo con vista previa.",
+    description:
+      "Nyxhora Embed es la herramienta interna del laboratorio para convertir URLs en bloques incrustables listos para producción: genera HTML estándar, componentes React/Next.js, amp-iframe y un Web Component autónomo, con modo responsivo 16:9, carga diferida, controles de scroll y borde, y vista previa en vivo.",
+    website: "/tools/nyxhora-embed/app",
+    category: "Código",
+    tags: ["embed", "iframe", "responsivo", "amp", "web component"],
+    pricing: "free",
+    pricingDetails:
+      "Herramienta interna del laboratorio: gratis y sin límites, se ejecuta en la propia app.",
+    platforms: ["web"],
+    features: [
+      "Vista previa interactiva en tiempo real",
+      "Salida en HTML, React/Next.js, AMP y Web Component",
+      "Modo responsivo 16:9 clamped al ancho elegido",
+    ],
+    pros: [
+      "Código listo para copiar y pegar en cualquier stack",
+      "Vista previa al instante sin recargar",
+    ],
+    cons: [
+      "Algunos orígenes bloquean su incrustación por políticas del navegador",
+    ],
+    alternatives: ["ray-so", "json-crack", "carrd"],
+    verified: true,
+    featured: false,
+    trending: true,
+    createdAt: Date.now() - 1 * day,
+  },
 ];
 
 // ---------------------------------------------------------------------------

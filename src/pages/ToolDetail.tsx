@@ -5,6 +5,7 @@ import {
   BadgeCheck,
   Bookmark,
   Check,
+  Code2,
   ExternalLink,
   Minus,
   Search,
@@ -188,6 +189,31 @@ export default function ToolDetail() {
             </ul>
           </div>
         </div>
+
+        {/* Lab-built: interactive tool app for internal entries */}
+        {tool.slug === "nyxhora-embed" && (
+          <Link
+            to="/tools/nyxhora-embed/app"
+            className="mt-10 flex flex-col gap-4 rounded-sm border border-foreground/25 bg-muted/30 p-6 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                construida en el laboratorio
+              </p>
+              <h2 className="mt-2 text-[15px] font-medium">
+                Abre el generador con vista previa en vivo
+              </h2>
+              <p className="mt-1 text-[13px] text-muted-foreground">
+                Configura, previsualiza y copia el código embed sin salir de la
+                app.
+              </p>
+            </div>
+            <span className="inline-flex h-11 shrink-0 items-center gap-2 rounded-sm bg-foreground px-5 text-sm font-medium text-background">
+              <Code2 className="size-4" />
+              Abrir herramienta
+            </span>
+          </Link>
+        )}
 
         {/* Related tools */}
         <section className="mt-14">
