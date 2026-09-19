@@ -54,7 +54,7 @@ export default function ArticleDetail() {
         <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           {article.category} · demo
         </p>
-        <h1 className="mt-3 text-3xl font-light leading-tight tracking-tight sm:text-4xl">
+        <h1 className="mt-3 h1-editorial leading-tight tracking-tight">
           {article.title}
         </h1>
         <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">

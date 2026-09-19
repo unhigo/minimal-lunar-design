@@ -147,7 +147,7 @@ export default function ResourceDetail() {
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           {resource.category}
         </p>
-        <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
+        <h1 className="mt-3 h1-editorial tracking-tight">
           {resource.title}
         </h1>
         <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">

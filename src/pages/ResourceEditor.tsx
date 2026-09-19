@@ -81,7 +81,7 @@ export default function ResourceEditor() {
         </p>
         <Link
           to={`/auth?returnTo=${encodeURIComponent(`/resource/${resourceId}/edit`)}`}
-          className="inline-flex h-10 items-center rounded-sm border border-foreground/70 px-5 text-[13px] font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
+          className="inline-flex h-11 items-center rounded-sm border border-foreground/70 px-6 text-sm font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
         >
           Inicia sesión
         </Link>
@@ -113,7 +113,7 @@ export default function ResourceEditor() {
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           {isAuthor ? "Editar" : "Colaborar"}
         </p>
-        <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
+        <h1 className="mt-3 h1-editorial tracking-tight">
           {resource.title}
         </h1>
         <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-muted-foreground">

@@ -65,7 +65,7 @@ export default function ProjectDetail() {
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
               {project.category} · {project.year} · demo
             </p>
-            <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
+            <h1 className="mt-3 h1-editorial tracking-tight">
               {project.title}
             </h1>
             <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">

@@ -31,7 +31,7 @@ export default function Articles() {
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           Lecturas
         </p>
-        <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
+        <h1 className="mt-3 h1-editorial tracking-tight">
           Artículos
         </h1>
         <p className="mt-2 max-w-lg text-[15px] text-muted-foreground">

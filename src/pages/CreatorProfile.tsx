@@ -61,7 +61,7 @@ export default function CreatorProfile() {
               <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
                 {creator.type} · {creator.location} · demo
               </p>
-              <h1 className="mt-2 text-3xl font-light tracking-tight">
+              <h1 className="mt-2 h1-editorial tracking-tight">
                 {creator.name}
               </h1>
               <p className="mt-1 font-mono text-[12px] text-muted-foreground">

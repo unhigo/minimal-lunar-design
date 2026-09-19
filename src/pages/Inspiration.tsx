@@ -118,7 +118,7 @@ export default function Inspiration() {
         </p>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
+            <h1 className="mt-3 h1-editorial tracking-tight">
               Inspiración
             </h1>
             <p className="mt-2 max-w-lg text-[15px] text-muted-foreground">

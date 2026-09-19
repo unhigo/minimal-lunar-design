@@ -439,11 +439,11 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           Tu espacio
         </p>
-        <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
+        <h1 className="mt-3 h1-editorial tracking-tight">
           Hola{user?.name ? `, ${user.name}` : ""}.
         </h1>
         <p className="mt-2 max-w-md text-[15px] text-muted-foreground">
