@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowUpRight,
+  Clock,
   Copy,
   Download,
   Eye,
@@ -344,6 +345,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const purchases = useQuery(api.resources.myPurchases);
   const myResources = useQuery(api.resources.listMine);
+  const mySubmissions = useQuery(api.submissions.listMine);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const removeResource = useMutation(api.resources.removeMine);
@@ -603,6 +605,44 @@ export default function Dashboard() {
             </ul>
           )}
         </section>
+
+        {/* My submissions (directory proposals) */}
+        {mySubmissions !== undefined && mySubmissions.length > 0 && (
+          <section className="mt-14">
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="text-lg font-light tracking-tight">Mis envíos</h2>
+                <p className="mt-1 text-[13px] text-muted-foreground">
+                  {mySubmissions.length === 1
+                    ? "1 propuesta en el directorio."
+                    : `${mySubmissions.length} propuestas en el directorio.`}
+                </p>
+              </div>
+              <Link
+                to="/submit"
+                className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Enviar otra
+              </Link>
+            </div>
+            <ul className="mt-6 divide-y divide-border/60 border-y border-border/60">
+              {mySubmissions.map((s) => (
+                <li key={s._id} className="flex items-center gap-4 py-3.5">
+                  <Clock className="size-3.5 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[14px]">{s.title}</p>
+                    <p className="font-mono text-[10px] text-muted-foreground">
+                      {s.category} · {timeAgo(s.createdAt)}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-sm border border-border px-2 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
+                    {s.status}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Purchases */}
         <section className="mt-14">

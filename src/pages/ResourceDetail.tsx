@@ -19,6 +19,77 @@ import { IntegrationPanel } from "@/components/IntegrationPanel";
 import { ResourceBlocks } from "@/components/ResourceBlocks";
 import { BRAND } from "@/lib/brand";
 import { formatPrice, timeAgo } from "@/lib/catalog";
+import {
+  badgesFor,
+  LICENSES,
+  PRICING_MODELS,
+  type SubmitPayload,
+} from "@/lib/submit-schema";
+
+/** Resolves a Convex storage id to a public URL (null while loading). */
+function StorageImage({
+  storageId,
+  alt,
+}: {
+  storageId: Id<"_storage">;
+  alt: string;
+}) {
+  const url = useQuery(api.files.getUrl, { storageId });
+  if (!url) {
+    return <div className="aspect-[4/3] w-full animate-pulse bg-muted/40" />;
+  }
+  return (
+    <img
+      src={url}
+      alt={alt}
+      loading="lazy"
+      className="aspect-[4/3] w-full rounded-sm border border-border/60 object-cover"
+    />
+  );
+}
+
+/** Embeds a demo video (YouTube/Loom/Vimeo) or falls back to a plain link. */
+function VideoEmbed({ url }: { url: string }) {
+  let embed: string | null = null;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com") && u.searchParams.get("v")) {
+      embed = `https://www.youtube-nocookie.com/embed/${u.searchParams.get("v")}`;
+    } else if (u.hostname === "youtu.be") {
+      embed = `https://www.youtube-nocookie.com/embed${u.pathname}`;
+    } else if (u.hostname.includes("loom.com")) {
+      embed = url.replace("/share/", "/embed/");
+    } else if (u.hostname.includes("vimeo.com")) {
+      embed = `https://player.vimeo.com/video${u.pathname}`;
+    }
+  } catch {
+    embed = null;
+  }
+  if (embed) {
+    return (
+      <div className="aspect-video w-full overflow-hidden rounded-sm border border-border/60">
+        <iframe
+          src={embed}
+          title="Vídeo demostrativo"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+          allowFullScreen
+          className="h-full w-full"
+        />
+      </div>
+    );
+  }
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-mono text-[12px] text-muted-foreground underline underline-offset-2 hover:text-foreground"
+    >
+      {url}
+    </a>
+  );
+}
 
 export default function ResourceDetail() {
   const { id } = useParams<{ id: string }>();
@@ -115,6 +186,21 @@ export default function ResourceDetail() {
   };
 
   const owned = purchased === true;
+  const pf = resource.productFields;
+  const autoBadges = pf
+    ? badgesFor({
+        category: resource.category,
+        pricing: (pf.pricing ?? "free") as SubmitPayload["pricing"],
+        license: (pf.license ?? "personal") as SubmitPayload["license"],
+        discountCode: pf.discountCode,
+        discountPercent: pf.discountPercent,
+        videoUrl: pf.videoUrl,
+        senderRole: (pf.senderRole ?? "curator") as SubmitPayload["senderRole"],
+        platforms: pf.platforms as SubmitPayload["platforms"],
+      })
+    : [];
+  const pricingLabel = PRICING_MODELS.find((p) => p.id === pf?.pricing)?.label;
+  const licenseLabel = LICENSES.find((l) => l.id === pf?.license)?.label;
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -150,6 +236,23 @@ export default function ResourceDetail() {
         <h1 className="mt-3 h1-editorial tracking-tight">
           {resource.title}
         </h1>
+        {pf?.tagline && (
+          <p className="mt-2 max-w-2xl text-[16px] font-light text-foreground/90">
+            {pf.tagline}
+          </p>
+        )}
+        {autoBadges.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {autoBadges.map((b) => (
+              <span
+                key={b.id}
+                className="inline-flex items-center gap-1 rounded-sm border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
+              >
+                <span aria-hidden>{b.glyph}</span> {b.label}
+              </span>
+            ))}
+          </div>
+        )}
         <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
           {resource.description}
         </p>
@@ -159,6 +262,128 @@ export default function ResourceDetail() {
           <div className="mt-10">
             <ResourceBlocks blocks={blocks} />
           </div>
+        )}
+
+        {/* Product detail — data captured by the /submit wizard */}
+        {pf && (
+          <section className="mt-10 space-y-8" aria-label="Detalle del producto">
+            {pf.gallery.length > 0 && (
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Galería
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {pf.gallery.map((g) => (
+                    <StorageImage
+                      key={g.storageId}
+                      storageId={g.storageId}
+                      alt={g.caption ?? resource.title}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {pf.videoUrl && (
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Vídeo demostrativo
+                </p>
+                <div className="mt-3">
+                  <VideoEmbed url={pf.videoUrl} />
+                </div>
+              </div>
+            )}
+
+            {pf.features.length > 0 && (
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Características
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {pf.features.map((f, i) => (
+                    <li key={i} className="flex items-start gap-3 text-[14px]">
+                      <span className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="grid gap-px border border-border/60 bg-border/60 sm:grid-cols-2">
+              {(pricingLabel || pf.pricingDetails) && (
+                <div className="bg-background p-4">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Modelo de precios
+                  </p>
+                  <p className="mt-1.5 text-sm">{pricingLabel ?? "—"}</p>
+                  {pf.pricingDetails && (
+                    <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                      {pf.pricingDetails}
+                    </p>
+                  )}
+                </div>
+              )}
+              {licenseLabel && (
+                <div className="bg-background p-4">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Licencia
+                  </p>
+                  <p className="mt-1.5 text-sm">{licenseLabel}</p>
+                </div>
+              )}
+              {(pf.platforms.length > 0 || pf.ecosystems.length > 0) && (
+                <div className="bg-background p-4">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Plataformas
+                  </p>
+                  <p className="mt-1.5 text-sm">
+                    {[...pf.platforms, ...pf.ecosystems].join(" · ")}
+                  </p>
+                </div>
+              )}
+              {pf.discountCode && pf.discountPercent && (
+                <div className="bg-background p-4">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Community deal
+                  </p>
+                  <p className="mt-1.5 text-sm">
+                    <span className="font-mono">{pf.discountCode}</span> · −{pf.discountPercent}%
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {(pf.tags.length > 0 || pf.authorHandle) && (
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border/60 pt-4">
+                {pf.authorHandle && (
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    {pf.senderRole === "creator" ? "creado por" : "enviado por"}{" "}
+                    <span className="text-foreground">{pf.authorHandle}</span>
+                  </span>
+                )}
+                {pf.authorLinks.map((l) => (
+                  <a
+                    key={l}
+                    href={l}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="break-all font-mono text-[11px] text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                  >
+                    {l}
+                  </a>
+                ))}
+                {pf.tags.length > 0 && (
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    {pf.tags.map((t) => `#${t}`).join(" ")}
+                  </span>
+                )}
+              </div>
+            )}
+          </section>
         )}
 
         <div className="mt-8 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-3">
