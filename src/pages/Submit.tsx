@@ -1,3 +1,12 @@
+/**
+ * Submit — single-page intake form for the directory.
+ *
+ * Seven sections (01 Identidad → 07 Revisión) are stacked on ONE page with
+ * no wizard jumps: the user scrolls through them, guided by a sticky index.
+ * All sections are validated together on submit; each field shows inline
+ * Spanish error messages. Draft persistence keeps work across reloads.
+ */
+
 import { BRAND } from "@/lib/brand";
 import {
   badgesFor,
@@ -13,23 +22,15 @@ import {
   submitSchema,
   type SubmitPayload,
 } from "@/lib/submit-schema";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { useMutation } from "convex/react";
-import { useAction } from "convex/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useAction, useMutation } from "convex/react";
 import { Link } from "react-router";
 import {
-  ArrowLeft,
-  ArrowRight,
   Check,
   Globe,
   ImagePlus,
   Loader2,
+  Send,
   Sparkles,
   Tag as TagIcon,
   Trash2,
@@ -41,24 +42,6 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { uploadImage } from "@/lib/upload";
 import { cn } from "@/lib/utils";
-
-/**
- * Submit — the directory intake wizard.
- *
- * Six steps: identity → classification → media → pricing → description →
- * author & moderation. Everything is validated with Zod per step; the payload
- * is sent to Convex where it always lands as `status: "pending"`. A draft is
- * persisted in localStorage so a reload never loses work.
- */
-
-const STEPS = [
-  { n: 1, label: "Identidad" },
-  { n: 2, label: "Clasificación" },
-  { n: 3, label: "Multimedia" },
-  { n: 4, label: "Precios" },
-  { n: 5, label: "Descripción" },
-  { n: 6, label: "Autoría" },
-] as const;
 
 type FormState = {
   title: string;
@@ -118,25 +101,37 @@ const EMPTY: FormState = {
   scheduledDate: "",
 };
 
-/** Fields validated per step — only the ones the step owns. */
-function stepFields(step: number): (keyof FormState)[] {
-  switch (step) {
-    case 1:
-      return ["title", "url", "tagline"];
-    case 2:
-      return ["category"];
-    case 3:
-      return ["gallery", "videoUrl"];
-    case 4:
-      return ["pricing", "license", "discountCode", "discountPercent"];
-    case 5:
-      return ["description", "features"];
-    case 6:
-      return ["senderRole", "authorHandle", "authorLinks", "contactEmail"];
-    default:
-      return [];
-  }
+/** Merge a persisted draft: tolerate schema drift from older drafts. */
+function hydrateDraft(): FormState {
+  const d = loadDraft<Partial<FormState>>();
+  if (!d) return EMPTY;
+  return {
+    ...EMPTY,
+    ...d,
+    platforms: Array.isArray(d.platforms) ? d.platforms : [],
+    ecosystems: Array.isArray(d.ecosystems) ? d.ecosystems : [],
+    tags: Array.isArray(d.tags) ? d.tags : [],
+    gallery: Array.isArray(d.gallery) ? d.gallery : [],
+    features:
+      Array.isArray(d.features) && d.features.length >= 3
+        ? d.features
+        : ["", "", ""],
+    authorLinks: Array.isArray(d.authorLinks) && d.authorLinks.length
+      ? d.authorLinks
+      : [""],
+  };
 }
+
+/** Sections shown in the sticky index; ids anchor-scroll on click. */
+const SECTIONS = [
+  { id: "identidad", n: "01", label: "Identidad" },
+  { id: "clasificacion", n: "02", label: "Clasificación" },
+  { id: "multimedia", n: "03", label: "Multimedia" },
+  { id: "pricing", n: "04", label: "Precios" },
+  { id: "descripcion", n: "05", label: "Descripción" },
+  { id: "autoria", n: "06", label: "Autoría" },
+  { id: "revision", n: "07", label: "Revisión" },
+] as const;
 
 export default function Submit() {
   usePageMeta({
@@ -151,8 +146,7 @@ export default function Submit() {
   const attach = useMutation(api.files.attach);
   const metaPreview = useAction(api.submissions.metaPreview);
 
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState<FormState>(() => loadDraft<FormState>() ?? EMPTY);
+  const [form, setForm] = useState<FormState>(hydrateDraft);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -182,12 +176,16 @@ export default function Submit() {
     [],
   );
 
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   // ------------------------------------------------------------------
   // Auto-fill via OpenGraph (server action — no CORS issues)
   // ------------------------------------------------------------------
   const autoFill = async () => {
     if (!form.url.trim()) {
-      toast.error("Escribe primero la URL del recurso.");
+      toast.error("Escribe primero la URL del recurso (sección 01).");
       return;
     }
     setAutoFilling(true);
@@ -204,7 +202,7 @@ export default function Submit() {
         description: f.description || res.description || "",
       }));
       toast.success("Metadatos aplicados", {
-        description: "Revisa título, eslogan y descripción antes de continuar.",
+        description: "Revisa título, eslogan y descripción antes de enviar.",
       });
     } finally {
       setAutoFilling(false);
@@ -284,71 +282,94 @@ export default function Submit() {
   };
 
   // ------------------------------------------------------------------
-  // Step validation — Zod slices
+  // Validation — whole form, mapped to per-field Spanish messages
   // ------------------------------------------------------------------
-  const validateStep = (target: number): boolean => {
-    const fields = stepFields(target);
-    if (fields.length === 0) return true;
-    const partial = submitSchema.partial(
-      Object.fromEntries(fields.map((f) => [f, true])) as never,
-    );
-    const shaped: Record<string, unknown> = {};
-    for (const f of fields) shaped[f as string] = form[f];
-    const res = partial.safeParse(shaped);
-    if (res.success) {
-      setErrors({});
-      return true;
-    }
-    const next: Record<string, string> = {};
-    for (const issue of res.error.issues) {
-      const key = String(issue.path[0] ?? "");
-      if (!next[key]) next[key] = issue.message;
-    }
-    setErrors(next);
-    return false;
+  const FIELD_SECTION: Record<string, string> = {
+    title: "identidad",
+    url: "identidad",
+    tagline: "identidad",
+    category: "clasificacion",
+    platforms: "clasificacion",
+    ecosystems: "clasificacion",
+    tags: "clasificacion",
+    gallery: "multimedia",
+    videoUrl: "multimedia",
+    pricing: "pricing",
+    license: "pricing",
+    discountCode: "pricing",
+    discountPercent: "pricing",
+    description: "descripcion",
+    features: "descripcion",
+    senderRole: "autoria",
+    authorHandle: "autoria",
+    authorLinks: "autoria",
+    contactEmail: "autoria",
   };
 
-  // Submit everything to Convex.
+  const FIELD_LABEL: Record<string, string> = {
+    title: "Nombre del recurso",
+    url: "URL de destino",
+    tagline: "Tagline",
+    category: "Categoría principal",
+    description: "Descripción detallada",
+    features: "Características clave",
+    contactEmail: "Email de contacto",
+    authorHandle: "Nombre o handle del autor",
+  };
+
+  const buildPayload = () => ({
+    title: form.title,
+    url: form.url,
+    tagline: form.tagline,
+    category: form.category,
+    platforms: form.platforms,
+    ecosystems: form.ecosystems,
+    tags: form.tags,
+    gallery: form.gallery.map((g) => ({
+      storageId: g.storageId as never,
+      caption: g.caption,
+    })),
+    ...(form.logoStorageId ? { logoStorageId: form.logoStorageId as never } : {}),
+    ...(form.thumbStorageId ? { thumbStorageId: form.thumbStorageId as never } : {}),
+    ...(form.videoUrl.trim() ? { videoUrl: form.videoUrl.trim() } : {}),
+    pricing: form.pricing,
+    ...(form.pricingDetails.trim() ? { pricingDetails: form.pricingDetails.trim() } : {}),
+    license: form.license,
+    ...(form.discountEnabled && form.discountCode.trim()
+      ? {
+          discountCode: form.discountCode.trim(),
+          discountPercent:
+            form.discountPercent && !Number.isNaN(Number(form.discountPercent))
+              ? Number(form.discountPercent)
+              : undefined,
+        }
+      : {}),
+    description: form.description,
+    features: form.features.map((f) => f.trim()).filter(Boolean),
+    senderRole: form.senderRole,
+    authorHandle: form.authorHandle,
+    authorLinks: form.authorLinks.map((l) => l.trim()).filter(Boolean),
+    contactEmail: form.contactEmail,
+    ...(form.scheduledDate ? { scheduledDate: new Date(form.scheduledDate).getTime() } : {}),
+  });
+
   const finalize = async () => {
-    if (!validateStep(6)) return;
-    const candidate = {
-      title: form.title,
-      url: form.url,
-      tagline: form.tagline,
-      category: form.category,
-      platforms: form.platforms,
-      ecosystems: form.ecosystems,
-      tags: form.tags,
-      gallery: form.gallery.map((g) => ({
-        storageId: g.storageId as never,
-        caption: g.caption,
-      })),
-      ...(form.logoStorageId ? { logoStorageId: form.logoStorageId as never } : {}),
-      ...(form.thumbStorageId ? { thumbStorageId: form.thumbStorageId as never } : {}),
-      ...(form.videoUrl.trim() ? { videoUrl: form.videoUrl.trim() } : {}),
-      pricing: form.pricing,
-      ...(form.pricingDetails.trim() ? { pricingDetails: form.pricingDetails.trim() } : {}),
-      license: form.license,
-      ...(form.discountEnabled && form.discountCode.trim()
-        ? {
-            discountCode: form.discountCode.trim(),
-            discountPercent: Number(form.discountPercent) || undefined,
-          }
-        : {}),
-      description: form.description,
-      features: form.features.map((f) => f.trim()).filter(Boolean),
-      senderRole: form.senderRole,
-      authorHandle: form.authorHandle,
-      authorLinks: form.authorLinks.map((l) => l.trim()).filter(Boolean),
-      contactEmail: form.contactEmail,
-      ...(form.scheduledDate
-        ? { scheduledDate: new Date(form.scheduledDate).getTime() }
-        : {}),
-    };
-    const parsed = submitSchema.safeParse(candidate);
+    const parsed = submitSchema.safeParse(buildPayload());
     if (!parsed.success) {
-      const first = parsed.error.issues[0];
-      toast.error(`${first.path.join(".")}: ${first.message}`);
+      const next: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const key = String(issue.path[0] ?? "");
+        if (!next[key]) {
+          next[key] = FIELD_LABEL[key]
+            ? `${FIELD_LABEL[key]}: ${issue.message}`
+            : issue.message;
+        }
+      }
+      setErrors(next);
+      const firstKey = String(parsed.error.issues[0].path[0] ?? "");
+      const section = FIELD_SECTION[firstKey];
+      if (section) scrollToSection(section);
+      toast.error("Revisa los campos marcados antes de enviar.");
       return;
     }
     setBusy(true);
@@ -381,15 +402,7 @@ export default function Submit() {
     }
   };
 
-  const goNext = () => {
-    if (!validateStep(step)) return;
-    setStep((s) => Math.min(6, s + 1));
-  };
-  const goBack = () => setStep((s) => Math.max(1, s - 1));
-
-  // ------------------------------------------------------------------
   // Live preview badges
-  // ------------------------------------------------------------------
   const previewBadges = useMemo(
     () =>
       badgesFor({
@@ -400,13 +413,30 @@ export default function Submit() {
         platforms: form.platforms as SubmitPayload["platforms"],
         discountCode: form.discountEnabled ? form.discountCode : undefined,
         discountPercent:
-          form.discountEnabled && form.discountPercent
+          form.discountEnabled && form.discountPercent && !Number.isNaN(Number(form.discountPercent))
             ? Number(form.discountPercent)
             : undefined,
         videoUrl: form.videoUrl || undefined,
       }),
     [form],
   );
+
+  // Completion counters per section (drives the index checkmarks).
+  const sectionDone: Record<string, boolean> = useMemo(() => {
+    const check = {
+      identidad: Boolean(form.title.trim() && form.url.trim() && form.tagline.trim()),
+      clasificacion: Boolean(form.category),
+      multimedia: true, // optional section
+      pricing: Boolean(form.pricing && form.license),
+      descripcion: Boolean(
+        form.description.trim().length >= 30 &&
+          form.features.filter((f) => f.trim()).length >= 3,
+      ),
+      autoria: Boolean(form.authorHandle.trim() && form.contactEmail.trim()),
+      revision: false,
+    };
+    return check;
+  }, [form]);
 
   // ------------------------------------------------------------------
   // Success screen
@@ -435,7 +465,7 @@ export default function Submit() {
               onClick={() => {
                 setDone(null);
                 setForm(EMPTY);
-                setStep(1);
+                setErrors({});
               }}
             >
               Enviar otra propuesta
@@ -450,14 +480,14 @@ export default function Submit() {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader />
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-12">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           Contribuir
         </p>
         <h1 className="mt-3 h1-editorial tracking-tight">Enviar una propuesta</h1>
         <p className="mt-2 max-w-lg text-[15px] text-muted-foreground">
-          Todo envío pasa por revisión antes de entrar al directorio. Puedes
-          volver cuando quieras:{" "}
+          Todo envío pasa por revisión antes de entrar al directorio. El
+          formulario se guarda solo:{" "}
           <button
             type="button"
             className="underline underline-offset-2 hover:text-foreground"
@@ -498,43 +528,44 @@ export default function Submit() {
           </button>
         </div>
 
-        {/* Step indicator */}
-        <ol className="mt-8 flex items-center gap-1 overflow-x-auto pb-1 font-mono text-[10px] uppercase tracking-[0.14em]">
-          {STEPS.map((s) => (
-            <li key={s.n} className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => s.n < step && setStep(s.n)}
-                disabled={s.n > step}
-                aria-current={step === s.n ? "step" : undefined}
-                className={cn(
-                  "rounded-sm px-2 py-1 transition-colors",
-                  step === s.n
-                    ? "bg-foreground text-background"
-                    : s.n < step
-                      ? "text-foreground hover:bg-muted"
-                      : "text-muted-foreground/60",
-                )}
-              >
-                {s.n < step ? "✓ " : ""}
-                {s.label}
-              </button>
-              {s.n < 6 && <span className="text-muted-foreground/40">/</span>}
-            </li>
-          ))}
-        </ol>
+        <div className="mt-10 grid gap-10 lg:grid-cols-[200px_minmax(0,1fr)]">
+          {/* Sticky section index (desktop) */}
+          <aside className="hidden lg:block">
+            <nav
+              aria-label="Secciones del formulario"
+              className="sticky top-20 space-y-0.5"
+            >
+              {SECTIONS.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => scrollToSection(s.id)}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left font-mono text-[11px] transition-colors",
+                    errors && Object.keys(errors).length > 0
+                      ? "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <span>{s.n}</span>
+                  <span className="flex-1">{s.label}</span>
+                  {sectionDone[s.id] && <Check className="size-3 text-foreground" />}
+                </button>
+              ))}
+            </nav>
+          </aside>
 
-        {/* Panels */}
-        <div className="mt-6 border border-border/70 p-5 sm:p-8">
-          {step === 1 && (
-            <section className="space-y-6" aria-label="Paso 1: identidad">
-              <header>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  01 / Identidad
-                </p>
-                <h2 className="mt-2 text-xl font-light">Información básica</h2>
-              </header>
-
+          {/* Sections */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void finalize();
+            }}
+            noValidate
+            className="space-y-10"
+          >
+            {/* 01 — Identidad */}
+            <Section id="identidad" n="01" title="Información básica">
               <Field label="Nombre del recurso" required error={errors.title}>
                 <input
                   value={form.title}
@@ -604,18 +635,10 @@ export default function Submit() {
                   className={inputCls(!!errors.tagline)}
                 />
               </Field>
-            </section>
-          )}
+            </Section>
 
-          {step === 2 && (
-            <section className="space-y-6" aria-label="Paso 2: clasificación">
-              <header>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  02 / Clasificación
-                </p>
-                <h2 className="mt-2 text-xl font-light">Categoría y ecosistema</h2>
-              </header>
-
+            {/* 02 — Clasificación */}
+            <Section id="clasificacion" n="02" title="Categoría y ecosistema">
               <Field label="Categoría principal" required error={errors.category}>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {SUBMIT_CATEGORIES.map((c) => (
@@ -735,18 +758,10 @@ export default function Submit() {
                   </div>
                 )}
               </Field>
-            </section>
-          )}
+            </Section>
 
-          {step === 3 && (
-            <section className="space-y-6" aria-label="Paso 3: multimedia">
-              <header>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  03 / Multimedia
-                </p>
-                <h2 className="mt-2 text-xl font-light">Demostración visual</h2>
-              </header>
-
+            {/* 03 — Multimedia */}
+            <Section id="multimedia" n="03" title="Demostración visual">
               <Field label="Galería de capturas" hint={`${form.gallery.length}/4`}>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {form.gallery.map((g) => (
@@ -824,26 +839,18 @@ export default function Submit() {
                 />
               </Field>
 
-              <Field label="Vídeo demostrativo" hint="URL de Loom, YouTube o Vimeo">
+              <Field label="Vídeo demostrativo" hint="URL de Loom, YouTube o Vimeo" error={errors.videoUrl}>
                 <input
                   value={form.videoUrl}
                   onChange={(e) => set("videoUrl", e.target.value)}
                   placeholder="https://youtube.com/watch?v=…"
-                  className={inputCls(false)}
+                  className={inputCls(!!errors.videoUrl)}
                 />
               </Field>
-            </section>
-          )}
+            </Section>
 
-          {step === 4 && (
-            <section className="space-y-6" aria-label="Paso 4: precios">
-              <header>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  04 / Pricing
-                </p>
-                <h2 className="mt-2 text-xl font-light">Modelo y licencia</h2>
-              </header>
-
+            {/* 04 — Precios */}
+            <Section id="pricing" n="04" title="Modelo y licencia">
               <Field label="Modelo de precios" required>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {PRICING_MODELS.map((p) => (
@@ -917,7 +924,7 @@ export default function Submit() {
                 </label>
                 {form.discountEnabled && (
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <Field label="Código de cupón">
+                    <Field label="Código de cupón" error={errors.discountCode}>
                       <input
                         value={form.discountCode}
                         onChange={(e) =>
@@ -925,10 +932,10 @@ export default function Submit() {
                         }
                         placeholder="LAB10"
                         maxLength={40}
-                        className={inputCls(false, "font-mono uppercase")}
+                        className={inputCls(!!errors.discountCode, "font-mono uppercase")}
                       />
                     </Field>
-                    <Field label="Descuento (%)">
+                    <Field label="Descuento (%)" error={errors.discountPercent}>
                       <input
                         value={form.discountPercent}
                         onChange={(e) =>
@@ -939,24 +946,16 @@ export default function Submit() {
                         }
                         placeholder="10"
                         inputMode="numeric"
-                        className={inputCls(false, "font-mono")}
+                        className={inputCls(!!errors.discountPercent, "font-mono")}
                       />
                     </Field>
                   </div>
                 )}
               </div>
-            </section>
-          )}
+            </Section>
 
-          {step === 5 && (
-            <section className="space-y-6" aria-label="Paso 5: descripción">
-              <header>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  05 / Descripción
-                </p>
-                <h2 className="mt-2 text-xl font-light">Detalle y características</h2>
-              </header>
-
+            {/* 05 — Descripción */}
+            <Section id="descripcion" n="05" title="Detalle y características">
               <Field
                 label="Descripción detallada"
                 required
@@ -1030,18 +1029,10 @@ export default function Submit() {
                   </button>
                 )}
               </Field>
-            </section>
-          )}
+            </Section>
 
-          {step === 6 && (
-            <section className="space-y-6" aria-label="Paso 6: autoría">
-              <header>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  06 / Autoría
-                </p>
-                <h2 className="mt-2 text-xl font-light">Creador y contacto</h2>
-              </header>
-
+            {/* 06 — Autoría */}
+            <Section id="autoria" n="06" title="Creador y contacto">
               <Field label="Rol del remitente" required>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {SENDER_ROLES.map((r) => (
@@ -1078,7 +1069,7 @@ export default function Submit() {
                 />
               </Field>
 
-              <Field label="Enlaces de autor" hint="Web, portfolio o redes">
+              <Field label="Enlaces de autor" hint="Web, portfolio o redes" error={errors.authorLinks}>
                 {form.authorLinks.map((l, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <input
@@ -1091,7 +1082,7 @@ export default function Submit() {
                           ),
                         )
                       }
-                      placeholder="https://…"
+                      placeholder="https://… (opcional)"
                       className={inputCls(false)}
                     />
                     {form.authorLinks.length > 1 && (
@@ -1148,79 +1139,153 @@ export default function Submit() {
                   className={inputCls(false, "font-mono")}
                 />
               </Field>
-            </section>
-          )}
-        </div>
+            </Section>
 
-        {/* Live badge preview */}
-        {previewBadges.length > 0 && (
-          <div className="mt-4 flex flex-wrap items-center gap-1.5">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              Insignias previstas:
-            </span>
-            {previewBadges.map((b) => (
-              <span
-                key={b.id}
-                className="inline-flex items-center gap-1 rounded-sm border border-border px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
-              >
-                <span aria-hidden>{b.glyph}</span> {b.label}
-              </span>
-            ))}
-          </div>
-        )}
+            {/* 07 — Revisión */}
+            <Section id="revision" n="07" title="Revisión y envío">
+              <div className="grid gap-px border border-border/60 bg-border/60 sm:grid-cols-2">
+                <SummaryRow label="Nombre" value={form.title || "—"} />
+                <SummaryRow label="URL" value={form.url || "—"} mono />
+                <SummaryRow
+                  label="Categoría"
+                  value={
+                    SUBMIT_CATEGORIES.find((c) => c.id === form.category)?.label ?? "—"
+                  }
+                />
+                <SummaryRow
+                  label="Precios"
+                  value={
+                    `${PRICING_MODELS.find((p) => p.id === form.pricing)?.label ?? "—"}` +
+                    (form.pricingDetails ? ` · ${form.pricingDetails}` : "")
+                  }
+                />
+                <SummaryRow
+                  label="Licencia"
+                  value={LICENSES.find((l) => l.id === form.license)?.label ?? "—"}
+                />
+                <SummaryRow
+                  label="Autor"
+                  value={`${form.authorHandle || "—"} · ${
+                    SENDER_ROLES.find((r) => r.id === form.senderRole)?.id === "creator"
+                      ? "creador"
+                      : "curador"
+                  }`}
+                />
+              </div>
 
-        {/* Navigation */}
-        <div className="mt-6 flex items-center justify-between border-t border-border/60 pt-5">
-          <button
-            type="button"
-            onClick={goBack}
-            disabled={step === 1}
-            className="btn-outline disabled:pointer-events-none disabled:opacity-40"
-          >
-            <ArrowLeft className="size-4" /> Anterior
-          </button>
-          <span className="font-mono text-[11px] text-muted-foreground">
-            {String(step).padStart(2, "0")} / 06
-          </span>
-          {step < 6 ? (
-            <button type="button" onClick={goNext} className="btn-solid">
-              Siguiente <ArrowRight className="size-4" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => void finalize()}
-              disabled={busy}
-              className="btn-solid disabled:opacity-50"
-            >
-              {busy ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Check className="size-4" />
+              {previewBadges.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Insignias:
+                  </span>
+                  {previewBadges.map((b) => (
+                    <span
+                      key={b.id}
+                      className="inline-flex items-center gap-1 rounded-sm border border-border px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
+                    >
+                      <span aria-hidden>{b.glyph}</span> {b.label}
+                    </span>
+                  ))}
+                </div>
               )}
-              Enviar propuesta
-            </button>
-          )}
-        </div>
 
-        <p className="mt-4 text-[12px] text-muted-foreground">
-          ¿Es un recurso descargable que quieres vender ya? Usa{" "}
-          <Link
-            to="/upload"
-            className="underline underline-offset-2 hover:text-foreground"
-          >
-            la subida directa
-          </Link>
-          .
-        </p>
+              {Object.keys(errors).length > 0 && (
+                <div className="rounded-sm border border-destructive/50 p-4">
+                  <p className="text-[13px] font-medium text-destructive">
+                    Faltan datos por corregir
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {Object.entries(errors).map(([key, msg]) => (
+                      <li key={key} className="text-[12px] text-muted-foreground">
+                        <button
+                          type="button"
+                          className="underline underline-offset-2 hover:text-foreground"
+                          onClick={() => scrollToSection(FIELD_SECTION[key] ?? "identidad")}
+                        >
+                          {FIELD_LABEL[key] ?? key}
+                        </button>
+                        {": "}
+                        {msg.replace(`${FIELD_LABEL[key]}: `, "")}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={busy}
+                className="btn-solid w-full justify-center disabled:opacity-50 sm:w-auto"
+              >
+                {busy ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Send className="size-4" />
+                )}
+                Enviar propuesta
+              </button>
+              <p className="text-[12px] text-muted-foreground">
+                ¿Es un recurso descargable que quieres vender ya? Usa{" "}
+                <Link
+                  to="/upload"
+                  className="underline underline-offset-2 hover:text-foreground"
+                >
+                  la subida directa
+                </Link>
+                .
+              </p>
+            </Section>
+          </form>
+        </div>
       </main>
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Small local primitives
+// Local primitives
 // ---------------------------------------------------------------------------
+
+function Section({
+  id,
+  n,
+  title,
+  children,
+}: {
+  id: string;
+  n: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section id={id} className="scroll-mt-20 space-y-6" aria-label={`Sección ${n}: ${title}`}>
+      <header className="flex items-baseline gap-3 border-b border-border/60 pb-3">
+        <span className="font-mono text-[11px] text-muted-foreground">{n}</span>
+        <h2 className="text-lg font-light tracking-tight">{title}</h2>
+      </header>
+      {children}
+    </section>
+  );
+}
+
+function SummaryRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="bg-background p-4">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-1.5 truncate text-sm",
+          mono && "font-mono text-[12px] break-all",
+        )}
+        title={value}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
 
 function inputCls(invalid: boolean, extra = "") {
   return cn(
