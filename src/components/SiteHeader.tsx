@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { BRAND } from "@/lib/brand";
@@ -67,6 +67,13 @@ export function SiteHeader() {
 
         <div className="flex shrink-0 items-center gap-1">
           <Link
+            to="/submit"
+            className="hidden h-9 items-center gap-1.5 rounded-sm bg-foreground px-4 text-[13px] font-medium text-background transition-opacity hover:opacity-90 md:inline-flex"
+          >
+            <Plus className="size-3.5" />
+            Submit
+          </Link>
+          <Link
             to="/discover"
             aria-label="Buscar"
             className="inline-flex size-9 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -130,6 +137,14 @@ export function SiteHeader() {
                 </NavLink>
               </li>
             ))}
+            <li className="pt-2">
+              <Link
+                to="/submit"
+                className="btn-solid h-10 w-full justify-center text-[13px]"
+              >
+                <Plus className="size-3.5" /> Submit
+              </Link>
+            </li>
           </ul>
           <div className="mt-4 flex flex-col gap-2 border-t border-border/60 pt-4 sm:hidden">
             {isAuthenticated ? (

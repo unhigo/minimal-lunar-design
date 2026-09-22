@@ -163,6 +163,78 @@ export const create = mutation({
   },
 });
 
+/**
+ * Enrich an existing (own) resource with the product fields captured by the
+ * /submit wizard — tagline, platforms, pricing model, features, gallery…
+ * Used by the wizard's "enrich existing resource" path.
+ */
+export const updateProductFields = mutation({
+  args: {
+    id: v.id("resources"),
+    tagline: v.string(),
+    platforms: v.array(v.string()),
+    ecosystems: v.array(v.string()),
+    tags: v.array(v.string()),
+    gallery: v.array(
+      v.object({
+        storageId: v.id("_storage"),
+        caption: v.optional(v.string()),
+      }),
+    ),
+    videoUrl: v.optional(v.string()),
+    pricing: v.string(),
+    pricingDetails: v.optional(v.string()),
+    license: v.string(),
+    discountCode: v.optional(v.string()),
+    discountPercent: v.optional(v.number()),
+    features: v.array(v.string()),
+    thumbStorageId: v.optional(v.id("_storage")),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new Error("Not signed in.");
+    const resource = await ctx.db.get(args.id);
+    if (!resource) throw new Error("Resource not found.");
+    if (resource.authorId !== userId) throw new Error("Not your resource.");
+    const {
+      id,
+      tagline,
+      platforms,
+      ecosystems,
+      tags,
+      gallery,
+      videoUrl,
+      pricing,
+      pricingDetails,
+      license,
+      discountCode,
+      discountPercent,
+      features,
+      thumbStorageId,
+    } = args;
+    await ctx.db.patch(id, {
+      productFields: {
+        tagline,
+        platforms,
+        ecosystems,
+        tags,
+        gallery,
+        videoUrl,
+        pricing,
+        pricingDetails,
+        license,
+        discountCode,
+        discountPercent,
+        features,
+        senderRole: "creator",
+        authorHandle: "",
+        authorLinks: [],
+      },
+      ...(thumbStorageId !== undefined ? { coverStorageId: thumbStorageId } : {}),
+    });
+  },
+});
+
 export const updateMine = mutation({
   args: {
     id: v.id("resources"),

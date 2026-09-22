@@ -3,18 +3,31 @@ import { Link, useNavigate } from "react-router";
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowLeft,
+  Check,
   Eye,
   EyeOff,
   Loader2,
   ShieldAlert,
   Star,
   Trash2,
+  Upload,
+  X,
 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatPrice, timeAgo } from "@/lib/catalog";
+import type { Doc } from "@/convex/_generated/dataModel";
+
+type SubmissionDoc = Doc<"submissions">;
+
+const SUB_STATUS: Record<SubmissionDoc["status"], string> = {
+  pending: "pendiente",
+  approved: "aprobada",
+  rejected: "descartada",
+  published: "publicada",
+};
 
 export default function Admin() {
   const { user } = useAuth();
@@ -30,6 +43,7 @@ export default function Admin() {
     api.resources.listRecentComments,
     isAdmin ? {} : "skip",
   );
+  const submissions = useQuery(api.submissions.listAll, isAdmin ? {} : "skip");
 
   const toggleVisibility = useMutation(api.resources.setVisibility);
   const toggleFeatured = useMutation(api.resources.toggleFeatured);
@@ -37,6 +51,8 @@ export default function Admin() {
   const removeComment = useMutation(api.resources.deleteComment);
   const setUserRole = useMutation(api.resources.setUserRole);
   const bootstrapAdmin = useMutation(api.resources.bootstrapAdmin);
+  const moderateSubmission = useMutation(api.submissions.moderate);
+  const publishSubmission = useMutation(api.submissions.publishAsResource);
 
   const [busy, setBusy] = useState(false);
   const [secret, setSecret] = useState("");
@@ -156,8 +172,100 @@ export default function Admin() {
           Panel de administración
         </h1>
         <p className="mt-2 text-[14px] text-muted-foreground">
-          Modera recursos y comentarios, y gestiona los roles de los usuarios.
+          Modera envíos, recursos y comentarios, y gestiona los roles de los usuarios.
         </p>
+
+        {/* Submissions queue */}
+        <section className="mt-10">
+          <h2 className="text-lg font-light tracking-tight">
+            Envíos ({submissions?.length ?? 0})
+          </h2>
+          {submissions === undefined ? (
+            <div className="mt-4 h-24 animate-pulse rounded-sm border border-border/60" />
+          ) : submissions.length === 0 ? (
+            <p className="mt-4 text-[13px] text-muted-foreground">
+              No hay envíos todavía.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-border/60 border-y border-border/60">
+              {submissions.map((s) => (
+                <li
+                  key={s._id}
+                  className="flex flex-col gap-3 py-4 lg:flex-row lg:items-start lg:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">
+                      {s.title}{" "}
+                      <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                        · {s.category} · {s.pricing}
+                      </span>
+                    </p>
+                    <p className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground">
+                      {s.tagline}
+                    </p>
+                    <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                      {s.authorHandle} · {timeAgo(s.createdAt)} ·{" "}
+                      <span className="uppercase">{SUB_STATUS[s.status]}</span>
+                      {s.scheduledDate &&
+                        ` · programado ${new Date(s.scheduledDate).toLocaleDateString("es-ES")}`}
+                    </p>
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 inline-block break-all font-mono text-[10px] text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                    >
+                      {s.url}
+                    </a>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap items-center gap-1">
+                    {s.status === "pending" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() =>
+                          void wrap(() =>
+                            moderateSubmission({ id: s._id, status: "approved" }),
+                          )
+                        }
+                      >
+                        <Check className="mr-1.5 size-3.5" /> Aprobar
+                      </Button>
+                    )}
+                    {s.status === "pending" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={busy}
+                        className="text-destructive hover:text-destructive"
+                        onClick={() =>
+                          void wrap(() =>
+                            moderateSubmission({ id: s._id, status: "rejected" }),
+                          )
+                        }
+                      >
+                        <X className="mr-1.5 size-3.5" /> Descartar
+                      </Button>
+                    )}
+                    {(s.status === "approved" || s.status === "pending") && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() =>
+                          void wrap(() => publishSubmission({ id: s._id }))
+                        }
+                      >
+                        <Upload className="mr-1.5 size-3.5" /> Publicar como recurso
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         {/* Resources */}
         <section className="mt-10">

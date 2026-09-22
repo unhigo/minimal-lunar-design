@@ -16,6 +16,52 @@ export const roleValidator = v.union(
 );
 export type Role = Infer<typeof roleValidator>;
 
+/**
+ * Product fields captured by the /submit wizard. Stored flat on `submissions`
+ * and embedded on `resources.productFields` when a submission is published.
+ */
+export const submissionValidator = v.object({
+  // Paso 1 — identidad
+  title: v.string(),
+  url: v.string(),
+  logoStorageId: v.optional(v.id("_storage")),
+  tagline: v.string(),
+  // Paso 2 — clasificación
+  category: v.string(),
+  platforms: v.array(v.string()),
+  ecosystems: v.array(v.string()),
+  tags: v.array(v.string()),
+  // Paso 3 — multimedia
+  gallery: v.array(
+    v.object({
+      storageId: v.id("_storage"),
+      caption: v.optional(v.string()),
+    }),
+  ),
+  thumbStorageId: v.optional(v.id("_storage")),
+  videoUrl: v.optional(v.string()),
+  // Paso 4 — pricing / licencia
+  pricing: v.string(),
+  pricingDetails: v.optional(v.string()),
+  license: v.string(),
+  discountCode: v.optional(v.string()),
+  discountPercent: v.optional(v.number()),
+  // Paso 5 — descripción
+  description: v.string(),
+  features: v.array(v.string()),
+  // Paso 6 — creador y moderación
+  senderRole: v.string(),
+  authorHandle: v.string(),
+  authorLinks: v.array(v.string()),
+  contactEmail: v.string(),
+  // Programación de lanzamientos (futuras publicaciones automatizadas)
+  scheduledDate: v.optional(v.number()),
+});
+export type SubmissionFields = Infer<typeof submissionValidator>;
+
+/** Spread into defineTable for `submissions` (adds submitterId/status/createdAt). */
+const submissionValidatorFields = submissionValidator.fields;
+
 const schema = defineSchema(
   {
     // default auth tables using convex auth.
@@ -57,6 +103,32 @@ const schema = defineSchema(
           height: v.optional(v.number()),
         }),
       ),
+      // Product metadata captured by the /submit wizard (embedded when a
+      // submission is published or an owner enriches an existing resource).
+      productFields: v.optional(
+        v.object({
+          tagline: v.optional(v.string()),
+          platforms: v.array(v.string()),
+          ecosystems: v.array(v.string()),
+          tags: v.array(v.string()),
+          gallery: v.array(
+            v.object({
+              storageId: v.id("_storage"),
+              caption: v.optional(v.string()),
+            }),
+          ),
+          videoUrl: v.optional(v.string()),
+          pricing: v.optional(v.string()),
+          pricingDetails: v.optional(v.string()),
+          license: v.optional(v.string()),
+          discountCode: v.optional(v.string()),
+          discountPercent: v.optional(v.number()),
+          features: v.array(v.string()),
+          senderRole: v.optional(v.string()),
+          authorHandle: v.optional(v.string()),
+          authorLinks: v.array(v.string()),
+        }),
+      ),
       createdAt: v.number(),
     })
       .index("by_status", ["status"])
@@ -81,6 +153,21 @@ const schema = defineSchema(
     })
       .index("by_user", ["userId"])
       .index("by_resource", ["resourceId"]),
+
+    // Directory submissions from the /submit wizard. Always created with
+    // status "pending"; admins moderate from /admin and can publish as a
+    // resource. `scheduledDate` supports future automated launches.
+    submissions: defineTable({
+      ...submissionValidatorFields,
+      submitterId: v.id("users"),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("approved"),
+        v.literal("rejected"),
+        v.literal("published"),
+      ),
+      createdAt: v.number(),
+    }).index("by_status", ["status"]),
 
     // Editable content blocks that compose a resource page. Any signed-in
     // user may add/edit blocks on any resource (open-lab moderation model).
