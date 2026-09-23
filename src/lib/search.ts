@@ -34,8 +34,19 @@ export interface ConvexResourceLike {
   coverUrl?: string | null;
 }
 
+/** Directory tool row coming from the Convex `tools` table. */
+export interface DirectoryToolLike {
+  _id: string;
+  name: string;
+  slug: string;
+  shortDescription: string;
+  category: string;
+  votes: number;
+}
+
 export type SearchHit =
   | { kind: "tool"; tool: Tool }
+  | { kind: "directory"; entry: DirectoryToolLike }
   | { kind: "resource"; resource: ConvexResourceLike }
   | { kind: "inspiration"; item: InspirationItem }
   | { kind: "project"; project: Project }
@@ -44,6 +55,7 @@ export type SearchHit =
 
 export interface SearchSummary {
   tools: number;
+  directory: number;
   resources: number;
   inspiration: number;
   projects: number;
@@ -54,6 +66,7 @@ export interface SearchSummary {
 export function searchAll(
   query: string,
   resources: ConvexResourceLike[] = [],
+  directory: DirectoryToolLike[] = [],
 ): { hits: SearchHit[]; summary: SearchSummary } {
   const tools = searchTools(query).slice(0, 6);
   const items = searchInspiration(query).slice(0, 6);
@@ -69,8 +82,25 @@ export function searchAll(
           r.category.toLowerCase().includes(needle),
       )
     : resources;
+  // DB-backed directory hits (highest-voted first). Static `tools` hits are
+  // kept for the demo/editorial entries that are not in the DB yet.
+  const matchedDirectory = needle
+    ? directory.filter(
+        (t) =>
+          t.name.toLowerCase().includes(needle) ||
+          t.shortDescription.toLowerCase().includes(needle) ||
+          t.category.toLowerCase().includes(needle),
+      )
+    : directory;
+  const matchedDirectorySorted = [...matchedDirectory].sort(
+    (a, b) => b.votes - a.votes,
+  );
 
   const hits: SearchHit[] = [
+    ...matchedDirectorySorted.slice(0, 6).map((t) => ({
+      kind: "directory" as const,
+      entry: t,
+    })),
     ...tools.map((t) => ({ kind: "tool" as const, tool: t })),
     ...matchedResources.slice(0, 6).map((r) => ({
       kind: "resource" as const,
@@ -85,6 +115,7 @@ export function searchAll(
   return {
     hits,
     summary: {
+      directory: matchedDirectory.length,
       tools: searchTools(query).length,
       resources: matchedResources.length,
       inspiration: searchInspiration(query).length,

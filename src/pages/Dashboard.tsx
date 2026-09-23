@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowUpRight,
+  Bookmark,
   Clock,
   Copy,
   Download,
@@ -346,6 +347,7 @@ export default function Dashboard() {
   const purchases = useQuery(api.resources.myPurchases);
   const myResources = useQuery(api.resources.listMine);
   const mySubmissions = useQuery(api.submissions.listMine);
+  const myFavorites = useQuery(api.tools.myFavorites, {});
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const removeResource = useMutation(api.resources.removeMine);
@@ -643,6 +645,70 @@ export default function Dashboard() {
             </ul>
           </section>
         )}
+
+        {/* Directory favorites */}
+        <section className="mt-14">
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="text-lg font-light tracking-tight">
+                Herramientas guardadas
+              </h2>
+              <p className="mt-1 text-[13px] text-muted-foreground">
+                {myFavorites === undefined
+                  ? "Cargando…"
+                  : myFavorites.length === 0
+                    ? "Guarda herramientas del directorio para tenerlas aquí."
+                    : `${myFavorites.length} ${myFavorites.length === 1 ? "favorito" : "favoritos"} del directorio.`}
+              </p>
+            </div>
+            <Link
+              to="/tools"
+              className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Explorar directorio
+            </Link>
+          </div>
+
+          {myFavorites === undefined ? (
+            <div className="mt-6 h-16 animate-pulse rounded-sm border border-border/60" />
+          ) : myFavorites.length === 0 ? (
+            <div className="mt-6 flex flex-col items-center gap-3 rounded-sm border border-dashed border-border/70 px-6 py-10 text-center">
+              <Bookmark className="size-5 text-muted-foreground" />
+              <p className="max-w-sm text-[13px] text-muted-foreground">
+                Marca herramientas con el icono de guardado en /tools y
+                aparecerán aquí.
+              </p>
+              <Link
+                to="/tools"
+                className="inline-flex h-9 items-center rounded-sm bg-foreground px-4 text-[13px] font-medium text-background transition-opacity hover:opacity-90"
+              >
+                Ir al directorio
+              </Link>
+            </div>
+          ) : (
+            <ul className="mt-6 divide-y divide-border/60 border-y border-border/60">
+              {myFavorites.map((f) => (
+                <li key={f._id} className="flex items-center gap-4 py-3.5">
+                  <Bookmark className="size-3.5 shrink-0 fill-current text-foreground" />
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      to={`/tools/${f.slug}`}
+                      className="truncate text-[14px] transition-colors hover:text-muted-foreground"
+                    >
+                      {f.name}
+                    </Link>
+                    <p className="truncate font-mono text-[10px] text-muted-foreground">
+                      {f.category} · {f.shortDescription}
+                    </p>
+                  </div>
+                  <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                    {timeAgo(f.favoritedAt)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         {/* Purchases */}
         <section className="mt-14">

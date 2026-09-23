@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatPrice, timeAgo } from "@/lib/catalog";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { AdminDirectorySection } from "@/pages/AdminDirectory";
 
 type SubmissionDoc = Doc<"submissions">;
 
@@ -53,6 +54,7 @@ export default function Admin() {
   const bootstrapAdmin = useMutation(api.resources.bootstrapAdmin);
   const moderateSubmission = useMutation(api.submissions.moderate);
   const publishSubmission = useMutation(api.submissions.publishAsResource);
+  const publishAsTool = useMutation(api.tools.publishSubmissionAsTool);
 
   const [busy, setBusy] = useState(false);
   const [secret, setSecret] = useState("");
@@ -175,6 +177,9 @@ export default function Admin() {
           Modera envíos, recursos y comentarios, y gestiona los roles de los usuarios.
         </p>
 
+        {/* Directory tools CRUD */}
+        <AdminDirectorySection />
+
         {/* Submissions queue */}
         <section className="mt-10">
           <h2 className="text-lg font-light tracking-tight">
@@ -258,6 +263,18 @@ export default function Admin() {
                         }
                       >
                         <Upload className="mr-1.5 size-3.5" /> Publicar como recurso
+                      </Button>
+                    )}
+                    {(s.status === "approved" || s.status === "pending") && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() =>
+                          void wrap(() => publishAsTool({ submissionId: s._id }))
+                        }
+                      >
+                        <Star className="mr-1.5 size-3.5" /> Publicar como herramienta
                       </Button>
                     )}
                   </div>

@@ -2,64 +2,41 @@ import { BRAND } from "@/lib/brand";
 import { Link, useParams } from "react-router";
 import {
   ArrowLeft,
+  ArrowUp,
   BadgeCheck,
   Bookmark,
   Check,
-  Code2,
   ExternalLink,
-  Minus,
-  Search,
+  ShieldAlert,
 } from "lucide-react";
-import { getToolBySlug, relatedTools } from "@/data/tools";
-import {
-  articlesAboutTool,
-  creatorsUsingTool,
-  projectsUsingTool,
-} from "@/data/community";
-import { searchAll } from "@/lib/search";
-import { ToolCard } from "@/components/ToolCard";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
+import { DirectoryCard } from "@/components/DirectoryCard";
 import NotFound from "@/pages/NotFound";
-import { useCollections } from "@/hooks/use-collections";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useAuth } from "@/hooks/use-auth";
-import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
+import { timeAgo } from "@/lib/catalog";
 
 export default function ToolDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const tool = slug ? getToolBySlug(slug) : undefined;
-  const { toggle, isSaved } = useCollections();
   const { isAuthenticated } = useAuth();
 
-  // Interlinking: community resources that may pair well with this tool,
-  // matched by tag/category overlap.
-  const allResources = useQuery(api.resources.listPublished, { search: "" });
-  const relatedResources = (allResources ?? [])
-    .filter((r) =>
-      tool
-        ? r.category.toLowerCase().includes(tool.category.toLowerCase()) ||
-          tool.tags.some((t) =>
-            (r.title + " " + r.description).toLowerCase().includes(t.toLowerCase()),
-          )
-        : false,
-    )
-    .slice(0, 3);
+  const tool = useQuery(
+    api.tools.getBySlug,
+    slug ? { slug } : "skip",
+  );
+  const interaction = useQuery(
+    api.tools.myInteraction,
+    slug && isAuthenticated ? { slug } : "skip",
+  );
 
-  const related = tool ? relatedTools(tool) : [];
-  const inspiration = tool
-    ? searchAll(tool.tags[0] ?? tool.category).hits.filter(
-        (h) => h.kind === "inspiration",
-      ).length
-    : 0;
-  const toolProjects = tool ? projectsUsingTool(tool.slug) : [];
-  const toolArticles = tool ? articlesAboutTool(tool.slug) : [];
-  const toolCreators = tool ? creatorsUsingTool(tool.slug) : [];
+  const toggleVote = useMutation(api.tools.toggleVote);
+  const toggleFavorite = useMutation(api.tools.toggleFavorite);
 
   usePageMeta({
-    title: tool
-      ? `${tool.name} — Herramientas · ${BRAND.mark}`
-      : "Herramienta no encontrada",
+    title: tool ? `${tool.name} — Herramientas · ${BRAND.mark}` : "Herramienta no encontrada",
     description: tool?.shortDescription ?? "",
     path: `/tools/${slug ?? ""}`,
     jsonLd: tool
@@ -75,11 +52,54 @@ export default function ToolDetail() {
       : undefined,
   });
 
-  if (!tool) {
+  if (tool === undefined) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background text-foreground">
+        <SiteHeader />
+        <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-24">
+          <div className="h-8 w-40 animate-pulse bg-muted" />
+          <div className="mt-6 h-16 w-2/3 animate-pulse bg-muted" />
+        </main>
+      </div>
+    );
+  }
+
+  if (tool === null) {
     return <NotFound />;
   }
 
-  const saved = isSaved("tool", tool.id);
+  const voted = interaction?.voted ?? false;
+  const favorited = interaction?.favorited ?? false;
+
+  const requireAuth = (message: string) => {
+    if (!isAuthenticated) {
+      toast(message, {
+        description: "Vota y guarda favoritos con tu cuenta del laboratorio.",
+        action: {
+          label: "Iniciar sesión",
+          onClick: () => {
+            window.location.href = `/auth?returnTo=${encodeURIComponent(`/tools/${tool.slug}`)}`;
+          },
+        },
+      });
+      return true;
+    }
+    return false;
+  };
+
+  const handleVote = () => {
+    if (requireAuth("Inicia sesión para votar")) return;
+    toggleVote({ slug: tool.slug }).catch((err: unknown) =>
+      toast.error(err instanceof Error ? err.message : "No se pudo votar."),
+    );
+  };
+
+  const handleFavorite = () => {
+    if (requireAuth("Inicia sesión para guardar favoritos")) return;
+    toggleFavorite({ slug: tool.slug }).catch((err: unknown) =>
+      toast.error(err instanceof Error ? err.message : "No se pudo guardar."),
+    );
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -125,17 +145,36 @@ export default function ToolDetail() {
               <ExternalLink className="size-4" />
             </a>
             <button
-              onClick={() => toggle("tool", tool.id)}
-              aria-pressed={saved}
+              onClick={() => void handleVote()}
+              aria-pressed={voted}
+              className={`inline-flex h-10 items-center gap-2 rounded-sm border px-4 text-sm transition-colors ${
+                voted
+                  ? "border-foreground/60 text-foreground"
+                  : "border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ArrowUp className={`size-4 ${voted ? "fill-current" : ""}`} />
+              {tool.votes}
+            </button>
+            <button
+              onClick={() => void handleFavorite()}
+              aria-pressed={favorited}
               className="inline-flex h-10 items-center gap-2 rounded-sm border border-border px-4 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               <Bookmark
-                className={`size-4 ${saved ? "fill-current text-foreground" : ""}`}
+                className={`size-4 ${favorited ? "fill-current text-foreground" : ""}`}
               />
-              {saved ? "Guardada" : "Guardar"}
+              {favorited ? "Guardada" : "Guardar"}
             </button>
           </div>
         </div>
+
+        {tool.status === "pending" && (
+          <div className="mt-6 flex items-center gap-2 rounded-sm border border-dashed border-border/70 p-4 text-[13px] text-muted-foreground">
+            <ShieldAlert className="size-4" />
+            Esta herramienta está pendiente de revisión — solo la ve su autor y el equipo.
+          </div>
+        )}
 
         {/* Facts grid */}
         <div className="mt-10 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-2">
@@ -143,14 +182,14 @@ export default function ToolDetail() {
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Licencia / precio
             </p>
-            <p className="mt-2 text-sm">{tool.pricingDetails}</p>
+            <p className="mt-2 text-sm">{tool.pricingDetails || "—"}</p>
           </div>
           <div className="bg-background p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               Plataformas
             </p>
             <p className="mt-2 font-mono text-[12px] text-muted-foreground">
-              {tool.platforms.join(" · ")}
+              {tool.platforms.length > 0 ? tool.platforms.join(" · ") : "—"}
             </p>
           </div>
           <div className="bg-background p-5">
@@ -168,181 +207,114 @@ export default function ToolDetail() {
           </div>
           <div className="bg-background p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              Pros y contras
+              Ficha
             </p>
-            <ul className="mt-2 space-y-1.5">
-              {tool.pros.map((p) => (
-                <li key={p} className="flex items-start gap-2 text-[13px]">
-                  <Check className="mt-0.5 size-3.5 shrink-0" />
-                  {p}
-                </li>
-              ))}
-              {tool.cons.map((c) => (
-                <li
-                  key={c}
-                  className="flex items-start gap-2 text-[13px] text-muted-foreground"
-                >
-                  <Minus className="mt-0.5 size-3.5 shrink-0" />
-                  {c}
-                </li>
-              ))}
-            </ul>
+            <dl className="mt-2 space-y-1.5 font-mono text-[12px] text-muted-foreground">
+              {tool.author && (
+                <div className="flex justify-between gap-4">
+                  <dt>autor</dt>
+                  <dd className="truncate text-foreground">{tool.author}</dd>
+                </div>
+              )}
+              <div className="flex justify-between gap-4">
+                <dt>slug</dt>
+                <dd className="text-foreground">{tool.slug}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt>publicada</dt>
+                <dd className="text-foreground">{timeAgo(tool.createdAt)}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt>tags</dt>
+                <dd className="text-right text-foreground">
+                  {tool.tags.slice(0, 4).join(" · ")}
+                </dd>
+              </div>
+            </dl>
           </div>
         </div>
 
-        {/* Lab-built: interactive tool app for internal entries */}
-        {tool.slug === "nyxhora-embed" && (
-          <Link
-            to="/tools/nyxhora-embed/app"
-            className="mt-10 flex flex-col gap-4 rounded-sm border border-foreground/25 bg-muted/30 p-6 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                construida en el laboratorio
-              </p>
-              <h2 className="mt-2 text-[15px] font-medium">
-                Abre el generador con vista previa en vivo
-              </h2>
-              <p className="mt-1 text-[13px] text-muted-foreground">
-                Configura, previsualiza y copia el código embed sin salir de la
-                app.
-              </p>
+        {/* Related tools (same category, tag overlap) */}
+        {tool.related.length > 0 && (
+          <section className="mt-14">
+            <h2 className="text-lg font-light tracking-tight">
+              Herramientas relacionadas
+            </h2>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {tool.related.map((t) => (
+                <DirectoryCard
+                  key={t._id}
+                  compact
+                  tool={{
+                    _id: t._id,
+                    name: t.name,
+                    slug: t.slug,
+                    shortDescription: t.shortDescription,
+                    category: t.category,
+                    tags: t.tags,
+                    pricing: t.pricing,
+                    pricingDetails: "",
+                    trending: false,
+                    verified: false,
+                    featured: false,
+                    votes: 0,
+                  }}
+                />
+              ))}
             </div>
-            <span className="inline-flex h-11 shrink-0 items-center gap-2 rounded-sm bg-foreground px-5 text-sm font-medium text-background">
-              <Code2 className="size-4" />
-              Abrir herramienta
-            </span>
-          </Link>
+          </section>
         )}
 
-        {/* Related tools */}
-        <section className="mt-14">
-          <h2 className="text-lg font-light tracking-tight">
-            Herramientas relacionadas
-          </h2>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {related.map((t) => (
-              <ToolCard key={t.id} tool={t} />
-            ))}
-          </div>
-        </section>
-
-        {/* Interlinking: platform content related to this tool */}
+        {/* Cross-links into the rest of the platform */}
         <section className="mt-14">
           <h2 className="text-lg font-light tracking-tight">
             En la plataforma
           </h2>
           <div className="mt-5 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-2 lg:grid-cols-3">
-            {toolProjects.length > 0 && (
-              <Link
-                to={`/projects?category=${encodeURIComponent(toolProjects[0].category)}`}
-                className="group bg-background p-5 transition-colors hover:bg-muted/40"
-              >
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  proyectos
-                </p>
-                <h3 className="mt-3 text-sm font-medium">
-                  {toolProjects.length} {toolProjects.length === 1 ? "proyecto" : "proyectos"} la usan
-                </h3>
-                <p className="mt-1 text-[12px] text-muted-foreground">
-                  {toolProjects
-                    .slice(0, 2)
-                    .map((p) => p.title)
-                    .join(" · ")}
-                </p>
-              </Link>
-            )}
-            {toolArticles.length > 0 && (
-              <Link
-                to={`/articles/${toolArticles[0].slug}`}
-                className="group bg-background p-5 transition-colors hover:bg-muted/40"
-              >
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  artículos
-                </p>
-                <h3 className="mt-3 text-sm font-medium">
-                  {toolArticles.length} {toolArticles.length === 1 ? "lectura" : "lecturas"}
-                </h3>
-                <p className="mt-1 line-clamp-1 text-[12px] text-muted-foreground">
-                  {toolArticles[0].title}
-                </p>
-              </Link>
-            )}
-            {toolCreators.length > 0 && (
-              <Link
-                to={`/creators/${toolCreators[0].slug}`}
-                className="group bg-background p-5 transition-colors hover:bg-muted/40"
-              >
-                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  creadores
-                </p>
-                <h3 className="mt-3 text-sm font-medium">
-                  {toolCreators.length} en su flujo de trabajo
-                </h3>
-                <p className="mt-1 text-[12px] text-muted-foreground">
-                  {toolCreators
-                    .slice(0, 2)
-                    .map((c) => c.name)
-                    .join(" · ")}
-                </p>
-              </Link>
-            )}
             <Link
               to={`/catalog?search=${encodeURIComponent(tool.name)}`}
               className="group bg-background p-5 transition-colors hover:bg-muted/40"
             >
-              <Search className="size-4 text-muted-foreground" />
-              <h3 className="mt-3 text-sm font-medium">
-                Recursos de la comunidad
-              </h3>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                recursos
+              </p>
+              <h3 className="mt-3 text-sm font-medium">Recursos de la comunidad</h3>
               <p className="mt-1 text-[12px] text-muted-foreground">
-                {relatedResources.length > 0
-                  ? `${relatedResources.length} relacionados con ${tool.name}`
-                  : "Busca recursos que la usen o la complementen."}
+                Busca recursos que la usen o la complementen.
               </p>
             </Link>
             <Link
               to={`/inspiration?tag=${encodeURIComponent(tool.tags[0] ?? tool.category)}`}
               className="group bg-background p-5 transition-colors hover:bg-muted/40"
             >
-              <Search className="size-4 text-muted-foreground" />
-              <h3 className="mt-3 text-sm font-medium">Inspiración</h3>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                inspiración
+              </p>
+              <h3 className="mt-3 text-sm font-medium">Referencias visuales</h3>
               <p className="mt-1 text-[12px] text-muted-foreground">
-                {inspiration > 0
-                  ? `${inspiration} referencias con “${tool.tags[0] ?? tool.category}”`
-                  : "Explora referencias de esta disciplina."}
+                Explora “{tool.tags[0] ?? tool.category}” en la sección de inspiración.
               </p>
             </Link>
             <Link
               to={`/discover?q=${encodeURIComponent(tool.name)}`}
               className="group bg-background p-5 transition-colors hover:bg-muted/40"
             >
-              <Search className="size-4 text-muted-foreground" />
-              <h3 className="mt-3 text-sm font-medium">Descubrir más</h3>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                descubrir
+              </p>
+              <h3 className="mt-3 text-sm font-medium">Todo sobre {tool.name}</h3>
               <p className="mt-1 text-[12px] text-muted-foreground">
-                Todo lo relacionado con {tool.name} en un vistazo.
+                Resultados globales en un vistazo.
               </p>
             </Link>
           </div>
         </section>
-
-        {!isAuthenticated && (
-          <p className="mt-12 border border-dashed border-border/70 p-4 text-[13px] text-muted-foreground">
-            <Link
-              to={`/auth?returnTo=${encodeURIComponent(`/tools/${tool.slug}`)}`}
-              className="underline underline-offset-2 hover:text-foreground"
-            >
-              Inicia sesión
-            </Link>{" "}
-            para guardar herramientas en tus colecciones.
-          </p>
-        )}
       </main>
 
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-4xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-            ${BRAND.mark} · ${BRAND.tagline}
+            {BRAND.mark} · {BRAND.tagline}
           </p>
         </div>
       </footer>

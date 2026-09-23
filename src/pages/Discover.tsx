@@ -28,6 +28,7 @@ function saveRecent(q: string) {
 
 const KIND_LABEL: Record<SearchHit["kind"], string> = {
   tool: "herramienta",
+  directory: "directorio",
   resource: "recurso",
   inspiration: "inspiración",
   project: "proyecto",
@@ -36,6 +37,27 @@ const KIND_LABEL: Record<SearchHit["kind"], string> = {
 };
 
 function HitCard({ hit }: { hit: SearchHit }) {
+  if (hit.kind === "directory") {
+    return (
+      <Link
+        to={`/tools/${hit.entry.slug}`}
+        className="group flex flex-col border border-border/60 bg-background p-5 transition-colors hover:bg-muted/40"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          directorio · {hit.entry.category}
+        </span>
+        <h3 className="mt-3 flex items-center justify-between gap-2 text-[15px] font-medium">
+          {hit.entry.name}
+          <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+            ▲ {hit.entry.votes}
+          </span>
+        </h3>
+        <p className="mt-1.5 line-clamp-2 text-[13px] text-muted-foreground">
+          {hit.entry.shortDescription}
+        </p>
+      </Link>
+    );
+  }
   if (hit.kind === "tool") {
     return (
       <Link
@@ -171,8 +193,12 @@ export default function Discover() {
     api.resources.listPublished,
     isAuthenticated ? { search: q || undefined } : { search: q || undefined },
   );
+  const directory = useQuery(api.tools.listAllPublished, {});
 
-  const { hits, summary } = useMemo(() => searchAll(q, resources ?? []), [q, resources]);
+  const { hits, summary } = useMemo(
+    () => searchAll(q, resources ?? [], directory ?? []),
+    [q, resources, directory],
+  );
 
   // Keep input in sync when arriving with ?q=
   useEffect(() => setInput(q), [q]);
@@ -250,7 +276,7 @@ export default function Discover() {
         {q && (
           <>
             <p className="mt-8 font-mono text-[11px] text-muted-foreground">
-          {summary.tools} herramientas · {summary.resources} recursos ·{" "}
+          {summary.directory} del directorio · {summary.tools} herramientas · {summary.resources} recursos ·{" "}
           {summary.projects} proyectos · {summary.articles} artículos ·{" "}
           {summary.creators} creadores · {summary.inspiration} inspiración para
           “{q}”

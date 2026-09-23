@@ -169,6 +169,64 @@ const schema = defineSchema(
       createdAt: v.number(),
     }).index("by_status", ["status"]),
 
+    // ── Lunar Tools Directory ────────────────────────────────────────────
+    // DB-backed tool catalog. Seeded from the curated static catalog and
+    // extended by admin CRUD + published submissions.
+    tools: defineTable({
+      name: v.string(),
+      slug: v.string(),
+      shortDescription: v.string(),
+      description: v.string(),
+      website: v.string(),
+      category: v.string(),
+      tags: v.array(v.string()),
+      pricing: v.union(
+        v.literal("free"),
+        v.literal("freemium"),
+        v.literal("open-source"),
+        v.literal("paid"),
+      ),
+      pricingDetails: v.string(),
+      platforms: v.array(v.string()),
+      features: v.array(v.string()),
+      logoStorageId: v.optional(v.id("_storage")),
+      screenshotStorageId: v.optional(v.id("_storage")),
+      author: v.optional(v.string()),
+      featured: v.boolean(),
+      trending: v.boolean(),
+      verified: v.boolean(),
+      status: v.union(
+        v.literal("published"),
+        v.literal("pending"),
+        v.literal("rejected"),
+      ),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+      .index("by_slug", ["slug"])
+      .index("by_status", ["status"])
+      .index("by_category", ["category", "status"]),
+
+    // One vote per user per tool.
+    toolVotes: defineTable({
+      toolId: v.id("tools"),
+      userId: v.id("users"),
+      createdAt: v.number(),
+    })
+      .index("by_tool", ["toolId"])
+      .index("by_tool_user", ["toolId", "userId"])
+      .index("by_user", ["userId"]),
+
+    // One favorite per user per tool.
+    toolFavorites: defineTable({
+      toolId: v.id("tools"),
+      userId: v.id("users"),
+      createdAt: v.number(),
+    })
+      .index("by_tool", ["toolId"])
+      .index("by_tool_user", ["toolId", "userId"])
+      .index("by_user", ["userId"]),
+
     // Editable content blocks that compose a resource page. Any signed-in
     // user may add/edit blocks on any resource (open-lab moderation model).
     resourceBlocks: defineTable({

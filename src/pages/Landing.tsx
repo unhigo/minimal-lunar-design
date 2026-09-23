@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { ArrowUpRight, Search } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { moonPath, moonPhase } from "@/lib/lunar";
 import { BRAND } from "@/lib/brand";
 import { CATEGORIES } from "@/lib/catalog";
 import { SiteHeader } from "@/components/SiteHeader";
-import { trendingTools, featuredTools } from "@/data/tools";
 import { PROJECTS } from "@/data/community";
 import { EditorialSection } from "@/components/editorial/EditorialSection";
 import { ParallaxImage } from "@/components/editorial/ParallaxImage";
@@ -129,8 +130,18 @@ export default function Landing() {
   const navigate = useNavigate();
   const [heroQuery, setHeroQuery] = useState("");
   const heroRef = useGsapReveal<HTMLDivElement>(0.1);
-  const trending = useMemo(() => trendingTools(5), []);
-  const featured = useMemo(() => featuredTools(3), []);
+
+  // Live directory data (DB-backed): ranked by votes, plus aggregate stats.
+  const directory = useQuery(api.tools.listAllPublished, {});
+  const dirStats = useQuery(api.tools.stats, {});
+  const trending = useMemo(
+    () => (directory ?? []).filter((t) => t.trending).slice(0, 5),
+    [directory],
+  );
+  const featured = useMemo(
+    () => (directory ?? []).filter((t) => t.featured).slice(0, 5),
+    [directory],
+  );
   const cases = useMemo(() => PROJECTS.slice(0, 3), []);
 
   return (
@@ -204,9 +215,15 @@ export default function Landing() {
                 className="mt-10 flex items-center gap-6 border-t border-border/60 pt-5 sm:gap-10"
               >
                 {[
-                  { v: String(CATEGORIES.length), k: "Categorías" },
+                  {
+                    v: dirStats ? String(dirStats.total) : "—",
+                    k: "Herramientas",
+                  },
+                  {
+                    v: dirStats ? String(dirStats.votes) : "—",
+                    k: "Votos",
+                  },
                   { v: "365", k: "Lunas" },
-                  { v: "4K", k: "Exportación" },
                 ].map((s) => (
                   <div key={s.k} className="border-l border-border/60 pl-4 first:border-l-0 first:pl-0">
                     <dt className="sr-only">{s.k}</dt>
@@ -433,7 +450,7 @@ export default function Landing() {
           <div className="mt-10 flex flex-wrap gap-2" data-reveal>
             {trending.map((t) => (
               <Link
-                key={t.id}
+                key={t._id}
                 to={`/tools/${t.slug}`}
                 className="inline-flex items-center gap-2 rounded-sm border border-border px-4 py-2.5 transition-colors hover:border-foreground/40"
               >
@@ -443,6 +460,11 @@ export default function Landing() {
                 </span>
               </Link>
             ))}
+            {directory !== undefined && trending.length === 0 && (
+              <p className="text-[13px] text-muted-foreground">
+                Sin herramientas en tendencia ahora mismo.
+              </p>
+            )}
           </div>
           <div className="mt-12 grid gap-10 lg:grid-cols-2">
             <div data-reveal>
@@ -451,18 +473,23 @@ export default function Landing() {
               </h3>
               <ul className="mt-4 divide-y divide-border/60 border-y border-border/60">
                 {featured.map((t) => (
-                  <li key={t.id}>
+                  <li key={t._id}>
                     <Link
                       to={`/tools/${t.slug}`}
                       className="flex items-center justify-between gap-4 py-3.5 transition-colors hover:text-muted-foreground"
                     >
                       <span className="shrink-0 text-[14px]">{t.name}</span>
                       <span className="truncate font-mono text-[11px] text-muted-foreground">
-                        {t.shortDescription.slice(0, 34)}…
+                        ▲ {t.votes} · {t.shortDescription.slice(0, 30)}…
                       </span>
                     </Link>
                   </li>
                 ))}
+                {directory !== undefined && featured.length === 0 && (
+                  <li className="py-3.5 text-[13px] text-muted-foreground">
+                    Aún no hay herramientas destacadas.
+                  </li>
+                )}
               </ul>
             </div>
             <div data-reveal>
