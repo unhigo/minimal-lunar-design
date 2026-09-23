@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ImageEditor, { type EditedImage } from "@/components/ImageEditor";
 import { CATEGORIES } from "@/lib/catalog";
+import { BRAND } from "@/lib/brand";
 import { uploadImage } from "@/lib/upload";
 
 type Stage =
@@ -354,7 +355,7 @@ export default function Upload() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-3xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-
+            {BRAND.footerLine}
           </p>
         </div>
       </footer>

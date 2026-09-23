@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/input-otp";
 
 import { useAuth } from "@/hooks/use-auth";
+import { BRAND } from "@/lib/brand";
 import { ArrowRight, Loader2, UserX } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
@@ -115,7 +116,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
               <span className="size-2 rounded-full bg-foreground/70" />
             </span>
             <span className="text-sm font-medium tracking-[0.22em] uppercase">
-
+              {BRAND.name}
             </span>
           </Link>
           <Link

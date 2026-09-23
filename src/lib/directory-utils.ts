@@ -35,3 +35,29 @@ export function mapSubmitCategoryToDirectory(category: string): string {
   if (category === "ai") return "ia";
   return category;
 }
+
+/**
+ * Map the curated static catalog categories (UI/UX, AI, Iconos…) onto the
+ * directory's canonical category set so seeded tools respond to the
+ * /tools category filters.
+ */
+const SEED_CATEGORY_MAP: Record<string, string> = {
+  "AI": "ia",
+  "Diseño": "diseño",
+  "UI/UX": "diseño",
+  "Color": "color",
+  "Tipografía": "tipografía",
+  "Iconos": "diseño",
+  "Imagen": "imagen",
+  "Motion": "diseño",
+  "3D": "3d",
+  "Astronomía": "astronomía",
+  "Fotografía": "fotografía",
+  "Código": "código",
+  "No-code": "no-code",
+  "Productividad": "productividad",
+};
+
+export function mapSeedCategoryToDirectory(category: string): string {
+  return SEED_CATEGORY_MAP[category] ?? category.toLowerCase();
+}

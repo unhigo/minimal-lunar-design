@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ImageEditor, { type EditedImage } from "@/components/ImageEditor";
 import { CATEGORIES, formatPrice, timeAgo } from "@/lib/catalog";
+import { BRAND } from "@/lib/brand";
 import { uploadImage } from "@/lib/upload";
 
 const QUICK_ACTIONS = [
@@ -406,7 +407,7 @@ export default function Dashboard() {
               <span className="size-2 rounded-full bg-foreground/70" />
             </span>
             <span className="text-sm font-medium uppercase tracking-[0.22em]">
-
+              {BRAND.name}
             </span>
           </Link>
           <nav className="flex items-center gap-1">
@@ -826,7 +827,7 @@ export default function Dashboard() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-
+            {BRAND.footerLine}
           </p>
         </div>
       </footer>

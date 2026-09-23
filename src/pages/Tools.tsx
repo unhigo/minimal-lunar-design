@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import { SiteHeader } from "@/components/SiteHeader";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import { useAuth } from "@/hooks/use-auth";
+import { useDirectorySeed } from "@/hooks/use-directory-seed";
 import { DirectoryCard } from "@/components/DirectoryCard";
 import { toast } from "sonner";
 
@@ -60,6 +61,8 @@ export default function Tools() {
 
   const [input, setInput] = useState(query);
   const { isAuthenticated } = useAuth();
+  // First-visit seed: fills the directory from the curated catalog.
+  useDirectorySeed();
 
   // Keep the visible input in sync with the URL query (browser back/forward).
   useEffect(() => setInput(query), [query]);

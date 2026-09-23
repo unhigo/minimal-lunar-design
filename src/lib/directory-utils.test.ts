@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { slugify, pricingFromSubmitCategory, mapSubmitCategoryToDirectory } from "./directory-utils";
+import {
+  slugify,
+  pricingFromSubmitCategory,
+  mapSubmitCategoryToDirectory,
+  mapSeedCategoryToDirectory,
+} from "./directory-utils";
 
 describe("slugify", () => {
   it("lowercases, strips accents and joins with dashes", () => {
@@ -45,5 +50,19 @@ describe("category mapping", () => {
 
   it("passes through other categories", () => {
     expect(mapSubmitCategoryToDirectory("ui-ux")).toBe("ui-ux");
+  });
+});
+
+describe("seed category mapping", () => {
+  it("maps curated catalog categories onto directory categories", () => {
+    expect(mapSeedCategoryToDirectory("UI/UX")).toBe("diseño");
+    expect(mapSeedCategoryToDirectory("AI")).toBe("ia");
+    expect(mapSeedCategoryToDirectory("Astronomía")).toBe("astronomía");
+    expect(mapSeedCategoryToDirectory("3D")).toBe("3d");
+    expect(mapSeedCategoryToDirectory("Iconos")).toBe("diseño");
+  });
+
+  it("falls back to a lowercased category", () => {
+    expect(mapSeedCategoryToDirectory("Testeo")).toBe("testeo");
   });
 });

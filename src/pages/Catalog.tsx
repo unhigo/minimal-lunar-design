@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Search, Store } from "lucide-react";
 import { ResourceCard } from "@/components/ResourceCard";
 import { CATEGORIES } from "@/lib/catalog";
+import { BRAND } from "@/lib/brand";
 
 export default function Catalog() {
   const [search, setSearch] = useState("");
@@ -23,7 +24,7 @@ export default function Catalog() {
               <span className="size-2 rounded-full bg-foreground/70" />
             </span>
             <span className="text-sm font-medium uppercase tracking-[0.22em]">
-
+              {BRAND.name}
             </span>
           </Link>
           <nav className="flex items-center gap-1">
@@ -50,7 +51,7 @@ export default function Catalog() {
               Catálogo
             </p>
             <h1 className="mt-3 h1-editorial tracking-tight">
-
+              Recursos
             </h1>
             <p className="mt-2 max-w-lg text-[15px] text-muted-foreground">
               Mockups, fuentes, texturas y plantillas seleccionadas por la
@@ -136,7 +137,7 @@ export default function Catalog() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-
+            {BRAND.footerLine}
           </p>
         </div>
       </footer>

@@ -7,6 +7,7 @@ import { moonPath, moonPhase } from "@/lib/lunar";
 import { BRAND } from "@/lib/brand";
 import { CATEGORIES } from "@/lib/catalog";
 import { SiteHeader } from "@/components/SiteHeader";
+import { useDirectorySeed } from "@/hooks/use-directory-seed";
 import { PROJECTS } from "@/data/community";
 import { EditorialSection } from "@/components/editorial/EditorialSection";
 import { ParallaxImage } from "@/components/editorial/ParallaxImage";
@@ -130,6 +131,8 @@ export default function Landing() {
   const navigate = useNavigate();
   const [heroQuery, setHeroQuery] = useState("");
   const heroRef = useGsapReveal<HTMLDivElement>(0.1);
+  // First-visit seed: fills the directory from the curated catalog.
+  useDirectorySeed();
 
   // Live directory data (DB-backed): ranked by votes, plus aggregate stats.
   const directory = useQuery(api.tools.listAllPublished, {});

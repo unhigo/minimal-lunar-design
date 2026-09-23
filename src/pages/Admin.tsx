@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatPrice, timeAgo } from "@/lib/catalog";
+import { BRAND } from "@/lib/brand";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { AdminDirectorySection } from "@/pages/AdminDirectory";
 
@@ -471,7 +472,7 @@ export default function Admin() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-6xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
- · Administración
+            {BRAND.mark} · Administración
           </p>
         </div>
       </footer>

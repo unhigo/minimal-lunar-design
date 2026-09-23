@@ -594,7 +594,7 @@ export default function ResourceDetail() {
       <footer className="border-t border-border/60">
         <div className="mx-auto w-full max-w-4xl px-5 py-6">
           <p className="font-mono text-[11px] text-muted-foreground">
-
+            {BRAND.footerLine}
           </p>
         </div>
       </footer>

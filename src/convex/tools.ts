@@ -7,6 +7,7 @@ import {
   slugify,
   pricingFromSubmitCategory,
   mapSubmitCategoryToDirectory,
+  mapSeedCategoryToDirectory,
 } from "../lib/directory-utils";
 
 /** Vote/favorite counter keyed by tool id. */
@@ -519,12 +520,15 @@ export const seedOne = internalMutation({
   },
 });
 
-/** Idempotent seed trigger (any signed-in user may run it once; it no-ops if data exists). */
+/**
+ * Idempotent seed trigger. Safe to call from any visitor (including
+ * anonymous sessions): it no-ops entirely when the directory already has
+ * data, and it only ever inserts the curated catalog payloads the client
+ * passes in — nothing user-controlled is stored unvalidated.
+ */
 export const seedFromCatalog = mutation({
   args: { tools: v.array(seedToolValidator) },
   handler: async (ctx, { tools }) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Inicia sesión.");
     const anyTool = await ctx.db.query("tools").first();
     if (anyTool !== null) return { skipped: true, inserted: 0 };
     let inserted = 0;
@@ -534,6 +538,7 @@ export const seedFromCatalog = mutation({
       if (!existing) {
         await ctx.db.insert("tools", {
           ...tool,
+          category: mapSeedCategoryToDirectory(tool.category),
           slug,
           status: "published",
           createdAt: tool.createdAt,
