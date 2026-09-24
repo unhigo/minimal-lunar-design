@@ -131,7 +131,7 @@ export function ControlPanel({ onNavigate }: { onNavigate?: () => void }) {
       } else {
         setAiText(
           result.reason === "missing-key"
-            ? "Gemini API key not configured. Add GEMINI_API_KEY in the Keys panel."
+            ? "AI key not configured. Add OPENLLM_API_KEY (or GEMINI_API_KEY) in the Keys panel."
             : "The cosmos is quiet right now — please try again in a moment.",
         );
         setAiState("error");
