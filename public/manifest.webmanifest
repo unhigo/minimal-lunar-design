@@ -1,7 +1,7 @@
 {
-  "name": "freebuff.com application",
-  "short_name": "freebuff.com",
-  "description": "freebuff.com application",
+  "name": "MOONØ.LAB APP",
+  "short_name": "MOONØ.LAB",
+  "description": "MOONØ.LAB lunar tools directory",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
