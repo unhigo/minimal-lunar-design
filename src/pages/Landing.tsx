@@ -3,10 +3,11 @@ import { Link, useNavigate } from "react-router";
 import { ArrowUpRight, Search } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { moonPath, moonPhase } from "@/lib/lunar";
+import { moonPhase } from "@/lib/lunar";
 import { BRAND } from "@/lib/brand";
 import { CATEGORIES } from "@/lib/catalog";
 import { SiteHeader } from "@/components/SiteHeader";
+import { LiquidOrbStage } from "@/components/LiquidOrb";
 import { useDirectorySeed } from "@/hooks/use-directory-seed";
 import { PROJECTS } from "@/data/community";
 import { EditorialSection } from "@/components/editorial/EditorialSection";
@@ -14,15 +15,15 @@ import { ParallaxImage } from "@/components/editorial/ParallaxImage";
 import { ContactFooter } from "@/components/editorial/ContactFooter";
 import { useGsapReveal } from "@/hooks/use-gsap";
 
-function useTodayMoon(radius = 44) {
+function useTodayMoon() {
   return useMemo(() => {
     const now = new Date();
     const phase = moonPhase(now.getFullYear(), now.getMonth() + 1, now.getDate());
     const illumination = Math.round(
       ((1 - Math.cos(2 * Math.PI * phase)) / 2) * 100,
     );
-    return { phase, illumination, d: moonPath(phase, radius, "N") };
-  }, [radius]);
+    return { phase, illumination };
+  }, []);
 }
 
 const STRATEGIES = [
@@ -127,7 +128,7 @@ const AREAS = [
 ] as const;
 
 export default function Landing() {
-  const { phase, illumination, d } = useTodayMoon(44);
+  const { phase, illumination } = useTodayMoon();
   const navigate = useNavigate();
   const [heroQuery, setHeroQuery] = useState("");
   const heroRef = useGsapReveal<HTMLDivElement>(0.1);
@@ -239,38 +240,12 @@ export default function Landing() {
               </dl>
             </div>
 
-            {/* Live moon — stacked below the copy on mobile, right column on lg */}
-            <div data-reveal className="relative mx-auto w-full max-w-[15rem] lg:max-w-sm">
-              <div className="relative flex aspect-square items-center justify-center rounded-full border border-border/70">
-                <div
-                  className="pointer-events-none absolute inset-6 rounded-full opacity-60"
-                  style={{
-                    background:
-                      "radial-gradient(circle at 38% 34%, color-mix(in oklab, var(--foreground) 6%, transparent), transparent 62%)",
-                  }}
-                />
-                <svg viewBox="-56 -56 112 112" className="size-36 sm:size-44 lg:size-52">
-                  <circle
-                    r={44}
-                    fill="var(--color-secondary)"
-                    stroke="currentColor"
-                    strokeOpacity="0.25"
-                    strokeWidth="0.5"
-                    className="text-muted-foreground"
-                  />
-                  <path
-                    d={d}
-                    fill="currentColor"
-                    className="text-foreground"
-                    opacity={0.92}
-                  />
-                </svg>
-                <p className="absolute bottom-5 left-1/2 w-max max-w-full -translate-x-1/2 px-3 text-center font-mono text-[11px] text-muted-foreground">
-                  esta noche · {illumination}% iluminada · fase {phase.toFixed(2)}
-                </p>
-              </div>
+            {/* Live liquid orb — theme-aware WebGL, preset switcher below.
+                Stacks under the copy on mobile, right column on lg. */}
+            <div data-reveal className="relative mx-auto w-full max-w-[16rem] sm:max-w-sm">
+              <LiquidOrbStage />
               <p className="mt-4 text-center text-[11px] uppercase tracking-wide text-muted-foreground">
-                Renderizada en vivo con la fecha de hoy
+                Orbe líquido · {illumination}% iluminada esta noche
               </p>
             </div>
           </div>

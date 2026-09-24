@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router";
-import { ArrowLeft, Moon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { BRAND } from "@/lib/brand";
+import { LiquidOrb } from "@/components/LiquidOrb";
 
 export default function NotFound() {
   return (
@@ -12,11 +13,8 @@ export default function NotFound() {
       className="flex min-h-screen flex-col bg-background text-foreground"
     >
       <div className="flex flex-1 flex-col items-center justify-center px-5 py-16">
-        <div className="relative mb-10 flex size-28 items-center justify-center">
-          <div className="absolute inset-0 rounded-full border border-border/70" />
-          <div className="absolute inset-4 rounded-full bg-secondary/60" />
-          <div className="absolute left-0 top-1/2 h-24 w-12 -translate-y-1/2 rounded-full bg-background" />
-          <Moon className="relative size-8 text-muted-foreground" />
+        <div className="relative mb-10 size-28">
+          <LiquidOrb preset="umbra" interactive={false} className="rounded-full" />
         </div>
 
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
