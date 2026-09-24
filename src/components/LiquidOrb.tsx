@@ -339,7 +339,10 @@ export function LiquidOrb({ preset = ORB_PRESETS[0], interactive = true, classNa
       ro.disconnect();
       themeObserver.disconnect();
       owner.removeEventListener("pointermove", onPointerMove);
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
+      // No loseContext(): under React StrictMode the effect re-runs on the
+      // same canvas, and a force-lost context can never be re-acquired.
+      // Resources leak one context (bounded); contexts themselves are GC'd
+      // with the canvas.
     };
     // Preset/interactivity flow through refs so switching styles does not
     // recycle the GL context; reduced-motion intentionally remounts.

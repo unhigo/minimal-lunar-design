@@ -38,8 +38,9 @@ export function parseCssColor(input: string): [number, number, number] | null {
     if (oklch[1].endsWith("%")) l /= 100;
     const c = parseFloat(oklch[2]);
     const h = (parseFloat(oklch[3]) * Math.PI) / 180;
+    // OKLab polar form: a and b are chroma projected on the hue axes.
     const a = Math.cos(h) * c;
-    const b = Math.sin(h) * converterB(c, h);
+    const b = Math.sin(h) * c;
     return oklabToSrgb(l, a, b);
   }
 
@@ -69,11 +70,6 @@ export function parseCssColor(input: string): [number, number, number] | null {
   return null;
 }
 
-/** oklch H is in degrees; helper keeps the a/b derivation readable. */
-function converterB(c: number, hRad: number): number {
-  return Math.sin(hRad) * 1;
-}
-
 function oklabToSrgb(
   L: number,
   a: number,
@@ -101,9 +97,9 @@ function srgbGamma(x: number): number {
 
 /** Read the active MOONØ.LAB palette for the shader. */
 export function readOrbPalette(): OrbPalette {
-  const dark = cssVar("--background").startsWith("oklch(0.2"); // .dark probe
-  const probe =
-    typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+  const dark =
+    typeof document !== "undefined" &&
+    document.documentElement.classList.contains("dark");
 
   const foreground = parseCssColor(cssVar("--foreground")) ?? [0.96, 0.96, 0.96];
   const background = parseCssColor(cssVar("--background")) ?? [0.13, 0.13, 0.13];
@@ -117,6 +113,6 @@ export function readOrbPalette(): OrbPalette {
     ink: foreground,
     ember,
     void_: background,
-    dark: probe || dark,
+    dark,
   };
 }
