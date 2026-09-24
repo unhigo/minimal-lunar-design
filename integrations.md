@@ -125,7 +125,7 @@ if (result.success) {
 
 ## Important Notes
 
-1. The integration key (`VLY_INTEGRATION_KEY`) is automatically injected during project creation
+1. The integration key (`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`) is automatically injected during project creation
 2. All API calls are automatically billed to your deployment based on usage
 3. Must be used in Convex actions with `"use node"` directive
 4. The integration key should never be exposed to the client
