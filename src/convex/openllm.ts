@@ -14,10 +14,32 @@ import { action } from "./_generated/server";
  * Aliases (`lite`, `plus`, `ultra`, …) resolve against the account's fallback
  * chain; concrete `provider/model` IDs pin one model (see
  * https://docs.openllm.sh/fallback-chains).
+ *
+ * Claude through OpenLLM:
+ * - API path: pin a concrete Claude ID (`anthropic/claude-…`) via the
+ *   `model` arg or the `OPENLLM_MODEL` env var — same OpenAI-compatible
+ *   endpoint, gateway routes the hop to the Anthropic provider.
+ * - Verify the exact IDs available to the account with the `listModels`
+ *   action (GET /v1/models is account-specific).
+ * - Terminal usage (outside this app): `openllm claude` launches Claude
+ *   Code through OpenLLM; requires the CLI/daemon installed on that machine
+ *   (Devices & keys → Add a device), not in this repository.
  */
 
 export const DEFAULT_BASE_URL = "https://www.openllm.sh/v1";
 const DEFAULT_MODEL = "plus";
+
+/**
+ * Common Claude concrete IDs to pin via the `model` arg or `OPENLLM_MODEL`.
+ * Suggestions only — the authoritative account-specific catalog comes from
+ * the `listModels` action (GET /v1/models).
+ */
+export const CLAUDE_MODEL_SUGGESTIONS = [
+  "anthropic/claude-sonnet-4-5",
+  "anthropic/claude-opus-4-1",
+  "anthropic/claude-haiku-4-5",
+] as const;
+
 const TIMEOUT_MS = 30_000;
 
 /** Env var the user must set in the Keys/API keys panel. */
@@ -53,22 +75,8 @@ function resolveBaseUrl(): string {
   return raw.replace(/\/+$/, "");
 }
 
-async function openllmFetch(
-  path: string,
-  body: unknown,
-): Promise<
-  { ok: true; data: unknown } | { ok: false; reason: "api-error" | "network" | "timeout" }
-> {
-  // Shared POST helper — kept for future endpoints; gatewayPost is the typed
-  // implementation used by the actions below.
-  const result = await gatewayPost(path, body);
-  return result.ok ? { ok: true, data: result.data } : result;
-}
-
-void openllmFetch;
-
 /** Low-level POST to the gateway with timeout + status handling. Shared by
- *  every action in this module; see openllmFetch for the generic wrapper. */
+ *  every request in this module. */
 async function gatewayPost(
   path: string,
   body: unknown,
