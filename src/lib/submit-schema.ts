@@ -15,13 +15,13 @@ import { submissionValidator } from "@/convex/schema";
 // ---------------------------------------------------------------------------
 
 export const SUBMIT_CATEGORIES = [
-  { id: "ai", label: "AI Tools", emoji: "🤖" },
-  { id: "web-apps", label: "Web Apps", emoji: "💻" },
-  { id: "software", label: "Software / Plugins", emoji: "🖥️" },
-  { id: "ui-ux", label: "UI/UX Design Systems", emoji: "🎨" },
-  { id: "resources", label: "Recursos Descargables", emoji: "📦" },
-  { id: "inspiration", label: "Inspiración", emoji: "👁️" },
-  { id: "education", label: "Educación", emoji: "📚" },
+  { id: "ai", label: "AI Tools", glyph: "01" },
+  { id: "web-apps", label: "Web Apps", glyph: "02" },
+  { id: "software", label: "Software / Plugins", glyph: "03" },
+  { id: "ui-ux", label: "UI/UX Design Systems", glyph: "04" },
+  { id: "resources", label: "Recursos Descargables", glyph: "05" },
+  { id: "inspiration", label: "Inspiración", glyph: "06" },
+  { id: "education", label: "Educación", glyph: "07" },
 ] as const;
 
 export const PLATFORMS = [
@@ -156,10 +156,10 @@ export function badgesFor(
 ): BadgeDef[] {
   const badges: BadgeDef[] = [];
   if (s.category === "ai") {
-    badges.push({ id: "ai", glyph: "⚡", label: "AI-Powered" });
+    badges.push({ id: "ai", glyph: "AI", label: "AI-Powered" });
   }
   if (s.license === "cc0" || s.license === "commercial-no-attribution") {
-    badges.push({ id: "commercial", glyph: "💎", label: "Free for Commercial Use" });
+    badges.push({ id: "commercial", glyph: "◇", label: "Free for Commercial Use" });
   }
   if (s.pricing === "free") {
     badges.push({ id: "free", glyph: "Ø", label: "Gratis" });
@@ -175,7 +175,7 @@ export function badgesFor(
     badges.push({ id: "video", glyph: "▶", label: "Video Demo" });
   }
   if (s.senderRole === "creator") {
-    badges.push({ id: "maker", glyph: "✳", label: "By the Maker" });
+    badges.push({ id: "maker", glyph: "∗", label: "By the Maker" });
   }
   return badges;
 }

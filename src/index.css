@@ -45,75 +45,106 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* CHANGE VALUES FOR THEME — ChatGPT theme by Tinte (tinte.dev/workbench/chatgpt) */
+/* CHANGE VALUES FOR THEME — MOONØ.LAB brand system (guidelines §15–§16).
+
+   §15 PRIMARY COLORS
+   · MOON BLACK  #050505  → depth · space · interface · laboratory
+   · MOON WHITE  #FFFFFF  → clarity · information · observation
+   · SIGNAL RED  #FF0033  → activity · data · interaction · alert
+     (signal only — never decorative)
+
+   §16 GRAYSCALE ROLES (dark interface)
+   · #EEEEEE → primary secondary text      · #555555 → inactive
+   · #DCDCDC → headings / interface        · #333333 → borders
+   · #C0C0C0 → secondary information       · #1C1C1C → surfaces
+   · #A0A0A0 → metadata                    · #0D0D0D → elevated backgrounds
+   · #777777 → labels
+
+   Light mode keeps a near-white paper (#F7F7F7) with the same grayscale
+   hierarchy inverted; the signal red is identical in both modes. */
 :root {
-  --radius: 16px;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.209 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0 0 0);
+  /* §15/§16 brand scale — exposed as tokens for direct brand use. */
+  --moon-black: #050505;
+  --moon-white: #ffffff;
+  --signal-red: #ff0033;
+  --gray-e: #eeeeee;
+  --gray-d: #dcdcdc;
+  --gray-c: #c0c0c0;
+  --gray-a: #a0a0a0;
+  --gray-7: #777777;
+  --gray-5: #555555;
+  --gray-3: #333333;
+  --gray-1c: #1c1c1c;
+  --gray-0d: #0d0d0d;
+
+  --radius: 4px;
+  --background: oklch(0.9734 0 0); /* #F7F7F7 paper */
+  --foreground: oklch(0.2423 0 0); /* #1C1C1C */
+  --card: oklch(1 0 0); /* #FFFFFF */
+  --card-foreground: oklch(0.2423 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0 0 0);
-  --primary: oklch(0.209 0 0);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.6993 0 0);
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.9067 0 0);
-  --muted-foreground: oklch(0.5244 0.0093 358.0669);
-  --accent: oklch(0.8665 0.0304 251.3051); /* subtle blue accent */
-  --accent-foreground: oklch(0 0 0);
-  --destructive: oklch(0.5538 0.1153 76.8511);
-  --border: oklch(0.9067 0 0);
-  --input: oklch(0.8078 0 0);
-  --ring: oklch(0.209 0 0);
-  --chart-1: oklch(0.209 0 0);
-  --chart-2: oklch(0.5243 0.21 328.768);
-  --chart-3: oklch(0.6993 0 0);
-  --chart-4: oklch(0.6017 0.193 263.2461);
-  --chart-5: oklch(0.4926 0 0);
-  --sidebar: oklch(0.9642 0 0);
-  --sidebar-foreground: oklch(0 0 0);
-  --sidebar-primary: oklch(0.209 0 0);
+  --popover-foreground: oklch(0.2423 0 0);
+  --primary: oklch(0.2423 0 0); /* #1C1C1C */
+  --primary-foreground: oklch(1 0 0); /* #FFFFFF */
+  --secondary: oklch(0.8848 0 0); /* #DCDCDC */
+  --secondary-foreground: oklch(0.2423 0 0);
+  --muted: oklch(0.9418 0 0); /* #EEEEEE */
+  --muted-foreground: oklch(0.5617 0 0); /* #777777 labels */
+  --accent: oklch(0.6807 0 0); /* #A0A0A0 — metadata tone */
+  --accent-foreground: oklch(0.2423 0 0);
+  --destructive: oklch(0.6273 0.2467 17.51); /* #FF0033 signal red */
+  --border: oklch(0.7614 0 0); /* #C0C0C0 hairline */
+  --input: oklch(0.7614 0 0);
+  --ring: oklch(0.2423 0 0);
+  --chart-1: oklch(0.2423 0 0);
+  --chart-2: oklch(0.6273 0.2467 17.51); /* signal */
+  --chart-3: oklch(0.6807 0 0);
+  --chart-4: oklch(0.5617 0 0);
+  --chart-5: oklch(0.4472 0 0);
+  --sidebar: oklch(0.9734 0 0);
+  --sidebar-foreground: oklch(0.2423 0 0);
+  --sidebar-primary: oklch(0.2423 0 0);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(1 0 0);
-  --sidebar-accent-foreground: oklch(0 0 0);
-  --sidebar-border: oklch(0.9067 0 0);
-  --sidebar-ring: oklch(0.209 0 0);
+  --sidebar-accent: oklch(0.9418 0 0);
+  --sidebar-accent-foreground: oklch(0.2423 0 0);
+  --sidebar-border: oklch(0.8848 0 0);
+  --sidebar-ring: oklch(0.2423 0 0);
 }
 
 .dark {
-  /* ChatGPT theme (Tinte) — deep blacks & neutral grays, subtle warm accents */
-  --background: oklch(0.2478 0 0); /* #212121 */
-  --foreground: oklch(0.9642 0 0); /* #f4f4f4 */
-  --card: oklch(0.285 0 0); /* #2f2f2f */
-  --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.2178 0 0); /* #1e1e1e */
-  --popover-foreground: oklch(1 0 0);
-  --primary: oklch(0.9642 0 0);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.4313 0 0);
-  --secondary-foreground: oklch(0.9642 0 0);
-  --muted: oklch(0.2283 0.008 4.121);
-  --muted-foreground: oklch(0.7324 0.0011 17.184);
-  --accent: oklch(0.4606 0.053 235.9102); /* subtle blue accent */
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.6813 0.1818 0.9701);
-  --border: oklch(0.3132 0 0);
-  --input: oklch(0.4128 0 0);
-  --ring: oklch(0.5965 0.1944 23.4408);
-  --chart-1: oklch(0.6233 0.2283 23.5924);
-  --chart-2: oklch(0.6398 0.1415 66.8954);
-  --chart-3: oklch(0.7552 0.1466 23.6271);
-  --chart-4: oklch(0.4446 0.1078 56.7856);
-  --chart-5: oklch(0.446 0.1817 26.8597);
-  --sidebar: oklch(0.209 0 0); /* #171717 */
-  --sidebar-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0.6962 0.1942 23.6149);
-  --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.209 0 0);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.3132 0 0);
-  --sidebar-ring: oklch(0.5965 0.1944 23.4408);
+  /* MOONØ.LAB dark interface — scientific software aesthetic (§21):
+     moon-black canvas, grayscale hierarchy, hairline borders, red signals. */
+  --background: oklch(0.1316 0 0); /* #050505 MOON BLACK */
+  --foreground: oklch(0.9365 0 0); /* #DCDCDC headings / interface */
+  --card: oklch(0.1616 0 0); /* #1C1C1C surfaces */
+  --card-foreground: oklch(0.9365 0 0);
+  --popover: oklch(0.1483 0 0); /* #0D0D0D elevated backgrounds */
+  --popover-foreground: oklch(0.9365 0 0);
+  --primary: oklch(1 0 0); /* #FFFFFF MOON WHITE */
+  --primary-foreground: oklch(0.1316 0 0);
+  --secondary: oklch(0.3019 0 0); /* #333333 */
+  --secondary-foreground: oklch(0.9365 0 0);
+  --muted: oklch(0.1616 0 0); /* #1C1C1C surfaces */
+  --muted-foreground: oklch(0.6807 0 0); /* #A0A0A0 metadata */
+  --accent: oklch(0.5236 0 0); /* #777777 labels */
+  --accent-foreground: oklch(0.9365 0 0);
+  --destructive: oklch(0.6273 0.2467 17.51); /* #FF0033 signal */
+  --border: oklch(0.3019 0 0); /* #333333 borders */
+  --input: oklch(0.3902 0 0); /* #555555 inactive */
+  --ring: oklch(0.7425 0 0); /* #C0C0C0 */
+  --chart-1: oklch(0.6807 0 0);
+  --chart-2: oklch(0.6273 0.2467 17.51); /* signal */
+  --chart-3: oklch(0.5236 0 0);
+  --chart-4: oklch(0.8439 0 0);
+  --chart-5: oklch(0.4472 0 0);
+  --sidebar: oklch(0.1483 0 0); /* #0D0D0D */
+  --sidebar-foreground: oklch(0.9365 0 0);
+  --sidebar-primary: oklch(1 0 0);
+  --sidebar-primary-foreground: oklch(0.1316 0 0);
+  --sidebar-accent: oklch(0.1616 0 0);
+  --sidebar-accent-foreground: oklch(0.9365 0 0);
+  --sidebar-border: oklch(0.3019 0 0);
+  --sidebar-ring: oklch(0.7425 0 0);
 }
 
 @layer base {
@@ -261,5 +292,48 @@
   }
   .btn-outline:hover {
     border-color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  }
+
+  /* ── MOONØ.LAB brand utilities (§15/§19/§21/§25) ─────────────────────── */
+
+  /* Mono label — the technical voice: coordinates, metadata, status. */
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Signal red — a signal, never decoration (§15). Dot, marker, live status. */
+  .signal-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: var(--signal-red, #ff0033);
+  }
+
+  /* Hairline grid backdrop — ORBIT/GRID graphic language (§19). */
+  .grid-technical {
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--foreground) 5%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 5%, transparent) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* Ø loading — slow orbit rotation, functional motion only (§25). */
+  @keyframes orbit-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .orbit-spin {
+    animation: orbit-spin 24s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbit-spin {
+      animation: none;
+    }
   }
 }

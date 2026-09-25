@@ -161,24 +161,23 @@ export default function Landing() {
                 data-reveal
                 className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground"
               >
-                {BRAND.tagline}
+                Digital tools · Creative technology · Observation systems
               </p>
               {/* display-editorial scales with the viewport: large but never
                   overflowing on mobile, monumental on desktop. */}
               <h1 className="display-editorial mt-6 uppercase" data-reveal>
-                Exploramos
+                Observe.
                 <br />
-                <span className="text-outline">lo que la luz</span>
+                <span className="text-outline">Explore.</span>
                 <br />
-                <span className="text-muted-foreground">deja ver.</span>
+                <span className="text-muted-foreground">Create.</span>
               </h1>
               <p
                 data-reveal
                 className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground"
               >
-                Herramientas, recursos y experimentos de exploración visual y
-                tecnológica. Descubre, guarda y compón con la comunidad —
-                empieza buscando.
+                {BRAND.statementEs} Explora el directorio, guarda lo que
+                importa y compón con la comunidad — empieza buscando.
               </p>
 
               <div data-reveal className="mt-8 max-w-md">
@@ -203,12 +202,12 @@ export default function Landing() {
                   />
                 </form>
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <Link to="/catalog" className="btn-solid">
-                    Explorar catálogo
+                  <Link to="/discover" className="btn-solid">
+                    Explore lab
                     <ArrowUpRight className="size-4" />
                   </Link>
-                  <Link to="/auth" className="btn-outline">
-                    Crear cuenta
+                  <Link to="/tools" className="btn-outline">
+                    View tools
                   </Link>
                 </div>
               </div>
@@ -229,9 +228,20 @@ export default function Landing() {
                   },
                   { v: "365", k: "Lunas" },
                 ].map((s) => (
-                  <div key={s.k} className="border-l border-border/60 pl-4 first:border-l-0 first:pl-0">
+                  <div
+                    key={s.k}
+                    className="border-l border-border/60 pl-4 first:border-l-0 first:pl-0"
+                  >
                     <dt className="sr-only">{s.k}</dt>
-                    <dd className="font-mono text-xl font-light">{s.v}</dd>
+                    <dd className="flex items-center gap-2 font-mono text-xl font-light">
+                      {s.k === "Votos" && (
+                        <span
+                          aria-hidden
+                          className="inline-block size-1.5 shrink-0 rounded-full bg-[#FF0033]"
+                        />
+                      )}
+                      {s.v}
+                    </dd>
                     <dd className="mt-0.5 text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
                       {s.k}
                     </dd>
@@ -244,9 +254,20 @@ export default function Landing() {
                 Stacks under the copy on mobile, right column on lg. */}
             <div data-reveal className="relative mx-auto w-full max-w-[16rem] sm:max-w-sm">
               <LiquidOrbStage />
-              <p className="mt-4 text-center text-[11px] uppercase tracking-wide text-muted-foreground">
-                Orbe líquido · {illumination}% iluminada esta noche
-              </p>
+              {/* §31 technical metadata — coordinates, status, signal. */}
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <span>Observation system</span>
+                <span
+                  aria-hidden
+                  className="inline-block size-1 shrink-0 rounded-full bg-[#FF0033]"
+                />
+                <span>Data / {new Date().getFullYear()}.{String(new Date().getMonth() + 1).padStart(2, "0")}.{String(new Date().getDate()).padStart(2, "0")}</span>
+                <span
+                  aria-hidden
+                  className="inline-block size-1 shrink-0 rounded-full bg-[#FF0033]"
+                />
+                <span>{illumination}% iluminada · status active</span>
+              </div>
             </div>
           </div>
         </div>

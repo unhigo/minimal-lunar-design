@@ -59,7 +59,13 @@ export function ResourceCard({ resource }: { resource: ResourceCardData }) {
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             {resource.category}
             {resource.featured && (
-              <span className="ml-2 text-foreground">★ destacado</span>
+              <span className="ml-2 inline-flex items-center gap-1.5 text-foreground">
+                <span
+                  aria-hidden
+                  className="inline-block size-1.5 shrink-0 rounded-full bg-[#FF0033]"
+                />
+                destacado
+              </span>
             )}
           </span>
           <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />

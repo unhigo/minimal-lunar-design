@@ -51,6 +51,9 @@ export function ContactFooter({
             <h2 className="h1-editorial mt-4 max-w-md">
               Trae tu próxima exploración al laboratorio.
             </h2>
+            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              MOONØ.LAB — a laboratory for curious minds
+            </p>
           </div>
           <div className="flex flex-col gap-4 lg:items-end" data-reveal>
             <a
@@ -73,7 +76,7 @@ export function ContactFooter({
               {BRAND.mark.replace("™", "")}
             </p>
             <p className="mt-2 max-w-[24ch] text-[13px] leading-relaxed text-muted-foreground">
-              {BRAND.tagline}. Herramientas, recursos y experimentos abiertos a
+              {BRAND.tagline} Herramientas, recursos y experimentos abiertos a
               la comunidad.
             </p>
           </div>

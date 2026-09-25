@@ -654,7 +654,12 @@ export default function Submit() {
                           : "border-border hover:border-foreground/30",
                       )}
                     >
-                      <span aria-hidden>{c.emoji}</span>
+                      <span
+                        aria-hidden
+                        className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
+                      >
+                        {c.glyph}
+                      </span>
                       <span className="text-[13px]">{c.label}</span>
                     </button>
                   ))}

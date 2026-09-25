@@ -2,7 +2,7 @@ import { Link, NavLink, useLocation } from "react-router";
 import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { BRAND } from "@/lib/brand";
+import { Logo, SignalDot } from "@/components/brand/Logo";
 
 const NAV = [
   { to: "/discover", label: "Discover" },
@@ -33,17 +33,12 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-5">
-        <Link to="/" className="flex shrink-0 items-center gap-2.5">
-          <span className="flex size-6 items-center justify-center rounded-full border border-foreground/40">
-            <span className="size-2 rounded-full bg-foreground/70" />
-          </span>
-          <span className="flex flex-col leading-none">
-            <span className="text-sm font-medium uppercase tracking-[0.22em]">
-              MOONØ.LAB
-            </span>
-            <span className="mt-0.5 hidden font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground xl:block">
-              {BRAND.tagline}
-            </span>
+        <Link to="/" className="group flex shrink-0 items-center gap-2.5" aria-label="MOONØ.LAB — inicio">
+          {/* §12 WORDMARK variant for navigation, with signal dot. */}
+          <Logo variant="wordmark" className="text-[15px]" />
+          <SignalDot className="size-1.5 transition-transform group-hover:scale-125" />
+          <span className="mt-0.5 hidden self-center font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground xl:block">
+            Observe · Explore · Create
           </span>
         </Link>
 

@@ -28,7 +28,7 @@ export default function ResourceEditor() {
     title: resource
       ? `Editar — ${resource.title} · ${BRAND.mark}`
       : `Editar recurso · ${BRAND.mark}`,
-    description: `Composición y personalización de bloques en ${BRAND.mark} — Digital Exploration Lab.`,
+    description: `Composición y personalización de bloques en ${BRAND.mark} — digital laboratory for tools, data and creative technology.`,
     path: resourceId ? `/resource/${resourceId}/edit` : "/",
   });
 
