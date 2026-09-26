@@ -1,11 +1,11 @@
 {
-  "name": "freebuff.com application",
-  "short_name": "freebuff.com",
-  "description": "freebuff.com application",
+  "name": "MOONØ.LAB",
+  "short_name": "MØ",
+  "description": "MOONØ.LAB — un laboratorio digital para explorar herramientas, datos y tecnología creativa.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "icons": [
     {
       "src": "/logo.png",

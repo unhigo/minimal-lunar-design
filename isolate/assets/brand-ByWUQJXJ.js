@@ -1,0 +1,1 @@
+const e={name:"MOONØ.LAB",mark:"MOONØ.LAB™",tagline:"Observe. Explore. Create.",statementEs:"Un laboratorio digital para explorar herramientas, datos y tecnología creativa.",footerLine:"MOONØ.LAB™ · Observe. Explore. Create."};export{e as B};

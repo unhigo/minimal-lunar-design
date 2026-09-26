@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { query, mutation, internalMutation } from "./_generated/server";
 import { ROLES } from "./schema";
@@ -91,13 +92,12 @@ export const listPublished = query({
         v.literal("name"),
       ),
     ),
-    cursor: v.optional(v.string()),
-    numItems: v.optional(v.number()),
+    // Native Convex pagination — consumed with usePaginatedQuery (Async Table).
+    paginationOpts: paginationOptsValidator,
   },
-  handler: async (ctx, args): Promise<PaginatedDirectoryTools> => {
+  handler: async (ctx, args) => {
     const search = (args.search ?? "").trim().toLowerCase();
     const tag = (args.tag ?? "").trim().toLowerCase();
-    const numItems = Math.min(Math.max(args.numItems ?? 12, 1), 48);
 
     let tools;
     const category = args.category && args.category !== "all" ? args.category : null;
@@ -149,11 +149,13 @@ export const listPublished = query({
       return b.votes - a.votes || b.createdAt - a.createdAt;
     });
 
-    // Cursor pagination: cursor is a plain numeric offset (the result set is
-    // fully materialized + sorted in this handler).
-    const start = args.cursor ? Number.parseInt(args.cursor, 10) || 0 : 0;
-    const page = rows.slice(start, start + numItems);
-    const nextStart = start + numItems;
+    // Native pagination: slice the fully materialized+sorted result set with
+    // paginationOpts (numItems + cursor offset provided by usePaginatedQuery).
+    const start = args.paginationOpts.cursor
+      ? Number.parseInt(args.paginationOpts.cursor, 10) || 0
+      : 0;
+    const page = rows.slice(start, start + args.paginationOpts.numItems);
+    const nextStart = start + args.paginationOpts.numItems;
     return {
       page,
       isDone: nextStart >= rows.length,
