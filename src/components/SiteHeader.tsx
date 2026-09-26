@@ -7,6 +7,7 @@ import { Logo, SignalDot } from "@/components/brand/Logo";
 const NAV = [
   { to: "/discover", label: "Discover" },
   { to: "/tools", label: "Herramientas" },
+  { to: "/directory", label: "Directorio" },
   { to: "/inspiration", label: "Inspiración" },
   { to: "/catalog", label: "Recursos" },
   { to: "/projects", label: "Proyectos" },

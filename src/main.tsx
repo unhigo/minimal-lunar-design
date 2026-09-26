@@ -32,6 +32,7 @@ const ArticleDetail = lazy(() => import("./pages/ArticleDetail.tsx"));
 const Collections = lazy(() => import("./pages/Collections.tsx"));
 const Submit = lazy(() => import("./pages/Submit.tsx"));
 const ResourceEditor = lazy(() => import("./pages/ResourceEditor.tsx"));
+const Directory = lazy(() => import("./pages/Directory.tsx"));
 
 // Simple loading fallback for route transitions
 function RouteLoading() {
@@ -161,6 +162,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/tools" element={<Tools />} />
               <Route path="/tools/:slug" element={<ToolDetail />} />
+              <Route path="/directory" element={<Directory />} />
               <Route
                 path="/tools/nyxhora-embed/app"
                 element={<EmbedGenerator />}
