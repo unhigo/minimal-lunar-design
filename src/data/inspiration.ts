@@ -18,7 +18,8 @@ export interface InspirationItem {
   creator: string;
   source: string;
   year: number;
-  demo: true;
+  /** Demo entries are internal placeholders; imported ones are real links. */
+  demo: boolean;
 }
 
 export const INSPIRATION_CATEGORIES = [
@@ -78,7 +79,73 @@ const SEED: Seed[] = [
   { id: "i-24", title: "Monograma LL", category: "branding", tags: ["monograma", "minimal"], gradient: G.crimson, aspect: "1/1", creator: "Estudio demo", source: "Demo interno", year: 2026 },
 ];
 
-export const INSPIRATION: InspirationItem[] = SEED.map((s) => ({ ...s, demo: true as const }));
+//
+// Imported galleries — real curated sites from the Unhigo Makers catalog.
+// These are NOT demo content: `source` names the curation and `url` links out.
+//
+
+interface ImportedSeed {
+  title: string;
+  url: string;
+  sub: "Interfaces" | "Galerías";
+  description: string;
+}
+
+const IMPORTED: ImportedSeed[] = [
+  {
+    title: "SaaS Interface",
+    url: "https://saasinterface.com/",
+    sub: "Interfaces",
+    description: "La mayor galería de ejemplos de UI/UX de apps SaaS.",
+  },
+  {
+    title: "saasui",
+    url: "https://www.saasui.design/",
+    sub: "Interfaces",
+    description: "Colección curada de diseños de aplicaciones SaaS.",
+  },
+  {
+    title: "calltoinspiration",
+    url: "https://calltoinspiration.com/",
+    sub: "Interfaces",
+    description: "Referencias de interfaz para diseñadores UX y desarrolladores.",
+  },
+  {
+    title: "Landing Love",
+    url: "https://www.landing.love/",
+    sub: "Galerías",
+    description: "Showcase de las mejores webs animadas.",
+  },
+  {
+    title: "Unsection",
+    url: "https://www.unsection.com/",
+    sub: "Galerías",
+    description: "Inspiración de secciones de web, sección a sección.",
+  },
+  {
+    title: "Curation of Curations",
+    url: "https://curationofcurations.com",
+    sub: "Galerías",
+    description: "Sitios curados, recopilados para ti.",
+  },
+];
+
+export const INSPIRATION: InspirationItem[] = [
+  ...SEED.map((s) => ({ ...s, demo: true as const })),
+  ...IMPORTED.map((item, i) => ({
+    id: `im-${String(i + 1).padStart(2, "0")}`, // im-01…im-06 (imported)
+    title: item.title,
+    // "web" / "ui" — existing InspirationCategory values; refined below.
+    category: item.sub === "Interfaces" ? ("ui" as const) : ("web" as const),
+    tags: ["unhigo makers", item.sub.toLowerCase()],
+    gradient: G.eclipse,
+    aspect: "4/3" as const,
+    creator: "Unhigo Makers",
+    source: item.url,
+    year: 2026,
+    demo: false as const,
+  })),
+];
 
 export function searchInspiration(query: string, category?: string): InspirationItem[] {
   const needle = query.trim().toLowerCase();

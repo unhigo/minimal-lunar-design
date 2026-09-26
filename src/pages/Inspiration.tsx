@@ -1,7 +1,7 @@
 import { BRAND } from "@/lib/brand";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
-import { Bookmark, LayoutGrid, Rows3, Rows4 } from "lucide-react";
+import { Bookmark, ExternalLink, LayoutGrid, Rows3, Rows4 } from "lucide-react";
 import {
   INSPIRATION,
   INSPIRATION_CATEGORIES,
@@ -41,7 +41,7 @@ function InspirationCard({
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-medium">{item.title}</p>
           <p className="font-mono text-[10px] text-muted-foreground">
-            {item.category} · {item.year}
+            {item.category} · {item.year} · {item.demo ? "demo" : "curada"}
           </p>
         </div>
         <button
@@ -56,8 +56,9 @@ function InspirationCard({
     );
   }
 
-  return (
-    <div className="group relative overflow-hidden border border-border/60 bg-background">
+  // Imported (non-demo) entries link out to the curated source site.
+  const cardInner = (
+    <>
       <div
         className="w-full"
         style={{
@@ -69,18 +70,41 @@ function InspirationCard({
         <div className="min-w-0">
           <p className="truncate text-[13px] font-medium">{item.title}</p>
           <p className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-            {item.category} · demo
+            {item.category} · {item.demo ? "demo" : "curada"}
           </p>
         </div>
-        <button
-          onClick={() => toggle("inspiration", item.id)}
-          aria-label={saved ? "Quitar de guardados" : "Guardar"}
-          aria-pressed={saved}
-          className="rounded-sm p-1.5 text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <Bookmark className={`size-3.5 ${saved ? "fill-current text-foreground" : ""}`} />
-        </button>
+        {!item.demo ? (
+          <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />
+        ) : (
+          <button
+            onClick={() => toggle("inspiration", item.id)}
+            aria-label={saved ? "Quitar de guardados" : "Guardar"}
+            aria-pressed={saved}
+            className="rounded-sm p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Bookmark className={`size-3.5 ${saved ? "fill-current text-foreground" : ""}`} />
+          </button>
+        )}
       </div>
+    </>
+  );
+
+  if (!item.demo) {
+    return (
+      <a
+        href={item.source}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="group block overflow-hidden border border-border/60 bg-background transition-colors hover:bg-muted/40"
+      >
+        {cardInner}
+      </a>
+    );
+  }
+
+  return (
+    <div className="group relative overflow-hidden border border-border/60 bg-background">
+      {cardInner}
     </div>
   );
 }
@@ -122,8 +146,8 @@ export default function Inspiration() {
               Inspiración
             </h1>
             <p className="mt-2 max-w-lg text-[15px] text-muted-foreground">
-              Una colección inicial de demo para mostrar el descubrimiento.
-              Publica tus referencias desde{" "}
+              Referencias de la comunidad y galerías curadas importadas del
+              directorio de Unhigo Makers. Publica las tuyas desde{" "}
               <code className="font-mono text-[12px]">/upload</code> cuando el
               envío comunitario esté activo.
             </p>
@@ -204,6 +228,53 @@ export default function Inspiration() {
             </p>
           </div>
         )}
+
+        {/* Imported galleries — Unhigo Makers, grouped by subcategory. */}
+        <section className="mt-16 border-t border-border/60 pt-10" aria-label="Galerías importadas">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-lg font-light tracking-tight">Galerías importadas</h2>
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Unhigo Makers
+            </span>
+          </div>
+          {(["interfaces", "galerías"] as const).map((sub) => {
+            const items = INSPIRATION.filter((i) => !i.demo && i.tags[1] === sub);
+            if (items.length === 0) return null;
+            return (
+              <div key={sub} className="mt-6">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {sub} · {String(items.length).padStart(2, "0")}
+                </p>
+                <ul className="mt-3 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-2 lg:grid-cols-3">
+                  {items.map((item) => (
+                    <li key={item.id} className="bg-background">
+                      <a
+                        href={item.source}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="group flex items-center justify-between gap-3 p-4 transition-colors hover:bg-muted/40"
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-[14px] font-medium">{item.title}</span>
+                          <span className="mt-0.5 block truncate font-mono text-[10px] text-muted-foreground">
+                            {(() => {
+                              try {
+                                return new URL(item.source).hostname.replace(/^www\./, "");
+                              } catch {
+                                return item.source;
+                              }
+                            })()}
+                          </span>
+                        </span>
+                        <ExternalLink className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </section>
       </main>
 
       <footer className="border-t border-border/60">
