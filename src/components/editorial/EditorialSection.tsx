@@ -14,6 +14,7 @@ export function EditorialSection({
   children,
   className = "",
   border = false,
+  id,
 }: {
   /** Section number, e.g. "02" — rendered with a hairline rule. */
   index?: string;
@@ -23,12 +24,15 @@ export function EditorialSection({
   children: ReactNode;
   className?: string;
   border?: boolean;
+  /** Anchor id — target of the section rail / in-page navigation. */
+  id?: string;
 }) {
   const ref = useGsapReveal<HTMLElement>(0.09);
 
   return (
     <section
       ref={ref}
+      id={id}
       className={`mx-auto w-full max-w-6xl px-5 section-pad ${border ? "border-t border-border/60" : ""} ${className}`}
     >
       <div

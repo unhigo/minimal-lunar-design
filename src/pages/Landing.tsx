@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { ArrowUpRight, Search } from "lucide-react";
 import { useQuery } from "convex/react";
@@ -13,6 +13,7 @@ import { PROJECTS } from "@/data/community";
 import { EditorialSection } from "@/components/editorial/EditorialSection";
 import { ParallaxImage } from "@/components/editorial/ParallaxImage";
 import { ContactFooter } from "@/components/editorial/ContactFooter";
+import { PreviewRail } from "@/components/motion/preview-rail";
 import { useGsapReveal } from "@/hooks/use-gsap";
 
 function useTodayMoon() {
@@ -127,6 +128,65 @@ const AREAS = [
   },
 ] as const;
 
+/**
+ * Landing section index — the PreviewRail ticks map 1:1 to the editorial
+ * sections below. Hover/tap/focus shows the preview card; select scrolls to
+ * the section; scroll lights the active tick (highlightActive).
+ */
+const SECTIONS_RAIL = [
+  { id: "estrategias", label: "Estrategias", description: "Cómo el laboratorio trabaja, paso a paso." },
+  { id: "laboratorio", label: "Laboratorio", description: "Una práctica, no un producto — el manifiesto." },
+  { id: "casos", label: "Casos", description: "Exploraciones recientes y el estudio lunar." },
+  { id: "ecosistema", label: "Ecosistema", description: "Las puertas del sistema: de Discover a Creadores." },
+  { id: "tendencia", label: "Tendencia", description: "Herramientas en órbita y destacadas." },
+  { id: "incluye", label: "Qué incluye", description: "Todo lo necesario. Nada de más." },
+] as const;
+
+function SectionRail() {
+  const [activeId, setActiveId] = useState<string>(SECTIONS_RAIL[0].id);
+
+  // Scroll spy: the section nearest the top of the viewport lights the tick.
+  useEffect(() => {
+    const sections = SECTIONS_RAIL.map((s) =>
+      document.getElementById(s.id),
+    );
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActiveId(entry.target.id);
+        }
+      },
+      { rootMargin: "-30% 0px -60% 0px" },
+    );
+    for (const el of sections) if (el) io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div className="pointer-events-none absolute top-1/2 left-4 hidden -translate-y-1/2 xl:block">
+      <div className="pointer-events-auto">
+        <PreviewRail
+          items={SECTIONS_RAIL.map((s) => ({
+            id: s.id,
+            label: s.label,
+            description: s.description,
+          }))}
+          label="Índice de secciones"
+          orientation="vertical"
+          previewSide="after"
+          highlightActive
+          itemSize={22}
+          onItemSelect={(item) =>
+            document
+              .getElementById(item.id)
+              ?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Landing() {
   const { phase, illumination } = useTodayMoon();
   const navigate = useNavigate();
@@ -152,7 +212,8 @@ export default function Landing() {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader />
 
-      <main className="flex-1">
+      <main className="relative flex-1">
+        <SectionRail />
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <div ref={heroRef} className="mx-auto w-full max-w-6xl px-5">
           <div className="grid gap-12 pb-16 pt-10 sm:pt-14 lg:grid-cols-[1.15fr_0.85fr] lg:items-end lg:gap-16 lg:pb-20 lg:pt-20">
@@ -274,6 +335,7 @@ export default function Landing() {
 
         {/* ── 01 · Strategies (numbered list) ─────────────────────────── */}
         <EditorialSection
+          id="estrategias"
           index="01"
           kicker="Estrategias"
           title="Cómo el laboratorio trabaja"
@@ -305,6 +367,7 @@ export default function Landing() {
 
         {/* ── 02 · About (manifesto) ──────────────────────────────────── */}
         <EditorialSection
+          id="laboratorio"
           index="02"
           kicker="Sobre el laboratorio"
           title="Una práctica, no un producto"
@@ -338,6 +401,7 @@ export default function Landing() {
 
         {/* ── 03 · Case studies (interactive, parallax) ───────────────── */}
         <EditorialSection
+          id="casos"
           index="03"
           kicker="Casos"
           title="Exploraciones recientes"
@@ -403,6 +467,7 @@ export default function Landing() {
 
         {/* ── 04 · Ecosystem areas ────────────────────────────────────── */}
         <EditorialSection
+          id="ecosistema"
           index="04"
           kicker="Ecosistema"
           title="Las puertas del ecosistema"
@@ -433,6 +498,7 @@ export default function Landing() {
 
         {/* ── 05 · Trending + featured ────────────────────────────────── */}
         <EditorialSection
+          id="tendencia"
           index="05"
           kicker="Tendencia"
           title="Herramientas en órbita"
@@ -523,6 +589,7 @@ export default function Landing() {
 
         {/* ── 06 · Features ───────────────────────────────────────────── */}
         <EditorialSection
+          id="incluye"
           index="06"
           kicker="Qué incluye"
           title="Todo lo necesario. Nada de más."
