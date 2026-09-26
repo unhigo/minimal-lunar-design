@@ -26,6 +26,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAction, useMutation } from "convex/react";
 import { Link } from "react-router";
 import {
+  WheelDay,
+  WheelMonth,
+  WheelYear,
+} from "@/components/ui/wheel-picker";
+import {
   Check,
   Globe,
   ImagePlus,
@@ -120,6 +125,76 @@ function hydrateDraft(): FormState {
       ? d.authorLinks
       : [""],
   };
+}
+
+/**
+ * Date drum trio for "Programar lanzamiento" — replaces the native date
+ * input with the brand wheel picker. Value stays "yyyy-mm-dd" or "".
+ */
+function ScheduleWheel({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [y, m, d] = value ? value.split("-").map(Number) : [0, 0, 0];
+  const now = new Date();
+  const years = Array.from({ length: now.getFullYear() - 2024 + 3 }, (_, i) => 2024 + i);
+  const has = Boolean(value);
+  const year = y || now.getFullYear();
+  const month = m || now.getMonth() + 1;
+  const day = d || now.getDate();
+
+  const commit = (ny: number, nm: number, nd: number) => {
+    const dim = new Date(ny, nm, 0).getDate();
+    const dd = Math.min(nd, dim);
+    onChange(
+      `${ny}-${String(nm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`,
+    );
+  };
+
+  return (
+    <div className="flex items-end gap-2">
+      <div className="flex items-end gap-2 rounded-sm border border-border bg-transparent px-2 py-1">
+        <WheelDay
+          value={day}
+          onChange={(nd) => commit(year, month, nd)}
+          year={year}
+          month={month}
+          ariaLabel="Día"
+        />
+        <span aria-hidden className="pb-3.5 font-mono text-[12px] text-muted-foreground">
+          /
+        </span>
+        <WheelMonth
+          value={month}
+          onChange={(nm) => commit(year, nm, day)}
+          ariaLabel="Mes"
+        />
+        <span aria-hidden className="pb-3.5 font-mono text-[12px] text-muted-foreground">
+          /
+        </span>
+        <WheelYear
+          value={year}
+          onChange={(ny) => commit(ny, month, day)}
+          from={2024}
+          to={years[years.length - 1]}
+          ariaLabel="Año"
+        />
+      </div>
+      {has && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          aria-label="Quitar fecha programada"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-border text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <X className="size-3.5" />
+        </button>
+      )}
+    </div>
+  );
 }
 
 /** Sections shown in the sticky index; ids anchor-scroll on click. */
@@ -1135,13 +1210,11 @@ export default function Submit() {
 
               <Field
                 label="Programar lanzamiento"
-                hint="Opcional — fecha futura de publicación"
+                hint="Opcional — rueda el día, el mes o el año; «—» desactiva la programación"
               >
-                <input
+                <ScheduleWheel
                   value={form.scheduledDate}
-                  onChange={(e) => set("scheduledDate", e.target.value)}
-                  type="date"
-                  className={inputCls(false, "font-mono")}
+                  onChange={(v) => set("scheduledDate", v)}
                 />
               </Field>
             </Section>

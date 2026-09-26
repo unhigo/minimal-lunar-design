@@ -79,6 +79,14 @@ export { ScrollArea, ScrollBar } from "./scroll-area"; // ~6KB - Custom scrollba
 export { Drawer, DrawerPortal, DrawerOverlay, DrawerTrigger, DrawerClose, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription } from "./drawer"; // ~12KB - Bottom sheet drawer
 export { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "./carousel"; // ~15KB - Image/content carousel (uses embla-carousel)
 export { Calendar } from "./calendar"; // ~12KB - Date picker calendar (uses react-day-picker)
+export {
+  WheelPicker,
+  WheelHour,
+  WheelMinute,
+  WheelYear,
+  WheelDay,
+  WheelMonth,
+} from "./wheel-picker"; // iOS-style drum picker (native scroll-snap, keyboard)
 export { Command, CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from "./command"; // ~10KB - Command palette (uses cmdk)
 export { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./pagination"; // ~5KB
 

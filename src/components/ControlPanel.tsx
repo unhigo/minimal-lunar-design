@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useAction } from "convex/react";
 import { Input } from "@/components/ui/input";
+import { WheelYear } from "@/components/ui/wheel-picker";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -168,15 +169,12 @@ export function ControlPanel({ onNavigate }: { onNavigate?: () => void }) {
           <>
             <Section title="Time" icon={CalendarDays}>
               <Row label="Year">
-                <Input
-                  type="number"
+                <WheelYear
                   value={state.year}
-                  onChange={(e) =>
-                    updateState({
-                      year: parseInt(e.target.value, 10) || state.year,
-                    })
-                  }
-                  className="h-9 border-border bg-transparent font-mono text-xs"
+                  onChange={(year) => updateState({ year })}
+                  from={1970}
+                  to={2060}
+                  className="w-24 shrink-0"
                 />
               </Row>
               <Row label="Hemisphere">
