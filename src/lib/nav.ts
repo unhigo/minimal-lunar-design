@@ -37,6 +37,18 @@ export interface NavSectionDef {
   groups: NavGroupDef[];
 }
 
+/**
+ * Does `href` cover the current `pathname`? Exact match, or the pathname
+ * lives *under* the link (prefix + "/") — so a second-segment link like
+ * /tools/:slug lights the section that owns /tools, while sibling routes
+ * (/tools vs /tools-archive) never cross-light. Query strings are ignored.
+ */
+export function isNavPathActive(pathname: string, href: string): boolean {
+  const base = href.split("?")[0];
+  if (base === "/") return pathname === "/";
+  return pathname === base || pathname.startsWith(`${base}/`);
+}
+
 const DIRECTORY_SECTIONS: NavLinkDef[] = [
   { label: "Ver todo el directorio", to: "/directory", hint: "/directory" },
   { label: "Tools", to: "/directory?s=tools" },

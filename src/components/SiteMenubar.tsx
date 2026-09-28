@@ -24,26 +24,20 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { NAV_SECTIONS, type NavLinkDef } from "@/lib/nav";
+import { NAV_SECTIONS, isNavPathActive, type NavLinkDef } from "@/lib/nav";
 import { cn } from "@/lib/utils";
-
-/** "/tools/slug" → "/tools" · "/" → "/" — for section highlighting. */
-function routeBase(pathname: string): string {
-  if (pathname === "/") return "/";
-  return `/${pathname.split("/")[1] ?? ""}`;
-}
 
 function MenuLink({
   link,
-  activeBase,
+  pathname,
   onNavigate,
 }: {
   link: NavLinkDef;
-  activeBase: string;
+  pathname: string;
   onNavigate: () => void;
 }) {
   const target = link.to.split("?")[0];
-  const active = target === activeBase;
+  const active = isNavPathActive(pathname, link.to);
   return (
     <MenubarItem asChild>
       <Link
@@ -72,16 +66,15 @@ function MenuLink({
 export function SiteMenubar({ className }: { className?: string }) {
   const [open, setOpen] = useState<string>("");
   const { pathname } = useLocation();
-  const base = routeBase(pathname);
 
   // Route changes (including menu-driven ones) collapse any open menu.
   useEffect(() => setOpen(""), [pathname]);
 
-  /** First section containing the current base route lights its trigger. */
+  /** First section owning the current pathname lights its trigger. */
   const activeSection = NAV_SECTIONS.find((section) =>
     section.groups.some((g) =>
       [...g.links, ...(g.subs ?? []).flatMap((s) => s.links)].some(
-        (l) => l.to.split("?")[0] === base,
+        (l) => isNavPathActive(pathname, l.to),
       ),
     ),
   )?.id;
@@ -129,7 +122,7 @@ export function SiteMenubar({ className }: { className?: string }) {
                     <MenuLink
                       key={link.to + link.label}
                       link={link}
-                      activeBase={base}
+                      pathname={pathname}
                       onNavigate={() => setOpen("")}
                     />
                   ))}
@@ -141,14 +134,17 @@ export function SiteMenubar({ className }: { className?: string }) {
                       <MenubarSubContent
                         sideOffset={10}
                         className={cn(
-                          "glass-panel max-h-[60dvh] min-w-[13rem] overflow-y-auto rounded-xl border-0 p-1.5 shadow-none",
+                          /* Solid popover on purpose: nested backdrop-filter
+                             panels glitch on Safari — glass stays on the
+                             top-level MenubarContent only. */
+                          "bg-popover text-popover-foreground max-h-[60dvh] min-w-[13rem] overflow-y-auto rounded-xl border-0 p-1.5 shadow-none",
                         )}
                       >
                         {sub.links.map((link) => (
                           <MenuLink
                             key={link.to + link.label}
                             link={link}
-                            activeBase={base}
+                            pathname={pathname}
                             onNavigate={() => setOpen("")}
                           />
                         ))}

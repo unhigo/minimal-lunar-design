@@ -9,21 +9,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Logo, SignalDot } from "@/components/brand/Logo";
 import { SiteMenubar } from "@/components/SiteMenubar";
-import { NAV_SECTIONS } from "@/lib/nav";
+import { NAV_SECTIONS, isNavPathActive } from "@/lib/nav";
 import { cn } from "@/lib/utils";
-
-/** "/tools/slug" → "/tools" · "/" → "/" — for section highlighting. */
-function routeBase(pathname: string): string {
-  if (pathname === "/") return "/";
-  return `/${pathname.split("/")[1] ?? ""}`;
-}
 
 export function SiteHeader() {
   const { user, isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const { pathname } = useLocation();
-  const base = routeBase(pathname);
 
   // Close the panel whenever the route changes (hash links included).
   useEffect(() => {
@@ -110,7 +103,7 @@ export function SiteHeader() {
           {NAV_SECTIONS.map((section) => {
             const sectionActive = section.groups.some((g) =>
               [...g.links, ...(g.subs ?? []).flatMap((s) => s.links)].some(
-                (l) => l.to.split("?")[0] === base,
+                (l) => isNavPathActive(pathname, l.to),
               ),
             );
             const isOpen = expanded === section.id;
@@ -149,7 +142,7 @@ export function SiteHeader() {
                                 to={l.to}
                                 className={cn(
                                   "block py-1.5 font-mono text-[13px]",
-                                  l.to.split("?")[0] === base
+                                  isNavPathActive(pathname, l.to)
                                     ? "text-foreground"
                                     : "text-muted-foreground",
                                 )}
@@ -171,7 +164,7 @@ export function SiteHeader() {
                                     to={l.to}
                                     className={cn(
                                       "block py-1.5 font-mono text-[13px]",
-                                      l.to.split("?")[0] === base
+                                      isNavPathActive(pathname, l.to)
                                         ? "text-foreground"
                                         : "text-muted-foreground",
                                     )}
