@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useNavigate } from "react-router";
 import { ArrowUpRight, Search } from "lucide-react";
 import { useQuery } from "convex/react";
@@ -14,7 +14,7 @@ import { EditorialSection } from "@/components/editorial/EditorialSection";
 import { ParallaxImage } from "@/components/editorial/ParallaxImage";
 import { ContactFooter } from "@/components/editorial/ContactFooter";
 import { PreviewRail } from "@/components/motion/preview-rail";
-import { useGsapReveal } from "@/hooks/use-gsap";
+import { SignalDot } from "@/components/brand/Logo";
 
 function useTodayMoon() {
   return useMemo(() => {
@@ -187,11 +187,13 @@ function SectionRail() {
   );
 }
 
+/** Entry-choreography beat — the Aurora reference timing sheet. */
+const beat = (delay: string): CSSProperties => ({ animationDelay: delay });
+
 export default function Landing() {
   const { phase, illumination } = useTodayMoon();
   const navigate = useNavigate();
   const [heroQuery, setHeroQuery] = useState("");
-  const heroRef = useGsapReveal<HTMLDivElement>(0.1);
   // First-visit seed: fills the directory from the curated catalog.
   useDirectorySeed();
 
@@ -209,39 +211,71 @@ export default function Landing() {
   const cases = useMemo(() => PROJECTS.slice(0, 3), []);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div
+      data-stage
+      className="relative flex min-h-screen flex-col bg-background text-foreground"
+    >
+      {/* Stage backdrop — the aurora field the glass sits over (fixed, so it
+          never scrolls away; deep teal-black like the reference sky). */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(120% 90% at 78% -10%, rgba(30,64,72,0.50) 0%, rgba(8,22,30,0.42) 42%, rgba(5,5,5,0) 72%)," +
+            "radial-gradient(90% 70% at 10% 110%, rgba(20,46,58,0.35) 0%, rgba(5,5,5,0) 60%)," +
+            "linear-gradient(180deg, #0a1116 0%, #050505 58%, #050505 100%)",
+        }}
+      />
       <SiteHeader />
 
       <main className="relative flex-1">
         <SectionRail />
-        {/* ── Hero ─────────────────────────────────────────────────────── */}
-        <div ref={heroRef} className="mx-auto w-full max-w-6xl px-5">
+        {/* ── Hero — liquid-glass entry choreography (beats .05→2.55s) ── */}
+        <div className="mx-auto w-full max-w-6xl px-5">
           <div className="grid gap-12 pb-16 pt-10 sm:pt-14 lg:grid-cols-[1.15fr_0.85fr] lg:items-end lg:gap-16 lg:pb-20 lg:pt-20">
             <div>
-              <p
-                data-reveal
-                className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground"
+              {/* Chip wipeRight @.44s — the reference's glass chip beat. */}
+              <div
+                className="rise-in"
+                style={{ ...beat(".14s"), "--ry": "8px" } as CSSProperties}
               >
-                Digital tools · Creative technology · Observation systems
-              </p>
-              {/* display-editorial scales with the viewport: large but never
-                  overflowing on mobile, monumental on desktop. */}
-              <h1 className="display-editorial mt-6 uppercase" data-reveal>
-                Observe.
-                <br />
-                <span className="text-outline">Explore.</span>
-                <br />
-                <span className="text-muted-foreground">Create.</span>
+                <span
+                  className="glass-chip sheen-coda wipe-right inline-flex items-center gap-2.5 px-4 py-2"
+                  style={beat(".44s")}
+                >
+                  <SignalDot className="size-1.5" />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                    Digital tools · Creative technology · Observation systems
+                  </span>
+                </span>
+              </div>
+              {/* Headline mask reveal — lineUp beats .56/.67/.78s. */}
+              <h1 className="display-editorial headline-tight mt-6 uppercase">
+                <span className="ln">
+                  <span style={beat(".56s")}>Observe.</span>
+                </span>
+                <span className="ln">
+                  <span className="text-outline" style={beat(".67s")}>
+                    Explore.
+                  </span>
+                </span>
+                <span className="ln">
+                  <span className="text-muted-foreground" style={beat(".78s")}>
+                    Create.
+                  </span>
+                </span>
               </h1>
+              {/* Blurb wipeDown @.90s. */}
               <p
-                data-reveal
-                className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground"
+                className="wipe-down mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground"
+                style={beat(".90s")}
               >
                 {BRAND.statementEs} Explora el directorio, guarda lo que
                 importa y compón con la comunidad — empieza buscando.
               </p>
 
-              <div data-reveal className="mt-8 max-w-md">
+              <div className="rise-in mt-8 max-w-md" style={beat("1.05s")}>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -259,7 +293,7 @@ export default function Landing() {
                     onChange={(e) => setHeroQuery(e.target.value)}
                     placeholder="Herramientas, recursos, proyectos…"
                     aria-label="Buscador global"
-                    className="h-12 w-full rounded-sm border border-border bg-transparent pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40"
+                    className="glass-panel h-12 w-full rounded-full border border-border/60 pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40"
                   />
                 </form>
                 <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -275,8 +309,8 @@ export default function Landing() {
 
               {/* Stats — hairline-separated, compact on mobile */}
               <dl
-                data-reveal
-                className="mt-10 flex items-center gap-6 border-t border-border/60 pt-5 sm:gap-10"
+                className="rise-in mt-10 flex items-center gap-6 border-t border-border/60 pt-5 sm:gap-10"
+                style={beat("1.26s")}
               >
                 {[
                   {
@@ -313,7 +347,10 @@ export default function Landing() {
 
             {/* Live liquid orb — theme-aware WebGL, preset switcher below.
                 Stacks under the copy on mobile, right column on lg. */}
-            <div data-reveal className="relative mx-auto w-full max-w-[16rem] sm:max-w-sm">
+            <div
+              className="slide-right sheen-coda relative mx-auto w-full max-w-[16rem] sm:max-w-sm"
+              style={beat(".80s")}
+            >
               <LiquidOrbStage />
               {/* §31 technical metadata — coordinates, status, signal. */}
               <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -447,7 +484,7 @@ export default function Landing() {
             ))}
             {/* Studio case — the exportable lunar calendar */}
             <Link data-reveal to="/studio" className="group block">
-              <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-sm border border-border/60 bg-muted transition-colors group-hover:bg-accent">
+              <div className="glass-panel relative flex aspect-[4/3] items-center justify-center overflow-hidden">
                 <span className="select-none text-5xl font-light tracking-tight text-outline-muted transition-colors group-hover:[-webkit-text-stroke-color:var(--foreground)] sm:text-6xl">
                   365
                 </span>
@@ -479,7 +516,7 @@ export default function Landing() {
                 key={a.to}
                 data-reveal
                 to={a.to}
-                className="group bg-background p-6 transition-colors hover:bg-muted/40"
+                className="glass-panel group p-6 transition-colors"
               >
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                   {a.meta}
@@ -600,7 +637,7 @@ export default function Landing() {
               <div
                 key={f.title}
                 data-reveal
-                className="bg-background p-7 transition-colors hover:bg-muted/40"
+                className="glass-panel p-7"
               >
                 <p className="font-mono text-[10px] text-muted-foreground">
                   {String(i + 1).padStart(2, "0")}

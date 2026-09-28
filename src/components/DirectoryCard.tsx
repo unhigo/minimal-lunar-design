@@ -51,7 +51,7 @@ export function DirectoryCard({
   };
 
   return (
-    <div className="group relative flex flex-col border border-border/60 bg-background p-5 transition-colors hover:bg-muted/40">
+    <div className="glass-card sheen-coda group relative flex flex-col p-5">
       <div className="flex items-start justify-between gap-3">
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           {tool.category}

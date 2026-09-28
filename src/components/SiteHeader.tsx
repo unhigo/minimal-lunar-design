@@ -33,7 +33,7 @@ export function SiteHeader() {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
+    <header className="glass-panel sticky top-0 z-40 border-b border-border/60">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-5">
         <Link to="/" className="group flex shrink-0 items-center gap-2.5" aria-label="MOONØ.LAB — inicio">
           {/* §12 WORDMARK variant for navigation, with signal dot. */}
@@ -115,7 +115,7 @@ export function SiteHeader() {
       {open && (
         <nav
           aria-label="Navegación principal"
-          className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-border/60 px-5 py-4 lg:hidden"
+          className="glass-panel max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-border/60 px-5 py-4 lg:hidden"
         >
           <ul className="space-y-0.5">
             {NAV.map((n) => (

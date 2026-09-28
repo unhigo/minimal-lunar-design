@@ -169,7 +169,7 @@ export default function Tools() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Buscar: luna, mapa, color, figma…"
               aria-label="Buscar herramientas"
-              className="h-11 w-full rounded-sm border border-border bg-transparent pl-9 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40"
+              className="glass-panel h-11 w-full rounded-full border border-border/60 pl-9 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40"
             />
           </form>
 
@@ -179,10 +179,10 @@ export default function Tools() {
               <button
                 onClick={() => setParam("cat", "all", "all")}
                 aria-pressed={category === "all"}
-                className={`rounded-sm border px-3 py-1.5 font-mono text-[11px] transition-colors ${
+                className={`glass-chip px-3 py-1.5 font-mono text-[11px] transition-colors ${
                   category === "all"
-                    ? "border-foreground/50 text-foreground"
-                    : "border-border text-muted-foreground hover:text-foreground"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 todas
@@ -192,10 +192,10 @@ export default function Tools() {
                   key={c}
                   onClick={() => setParam("cat", c, "all")}
                   aria-pressed={category === c}
-                  className={`rounded-sm border px-3 py-1.5 font-mono text-[11px] transition-colors ${
+                  className={`glass-chip px-3 py-1.5 font-mono text-[11px] transition-colors ${
                     category === c
-                      ? "border-foreground/50 text-foreground"
-                      : "border-border text-muted-foreground hover:text-foreground"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {c}
@@ -208,7 +208,7 @@ export default function Tools() {
               value={pricing}
               onChange={(e) => setParam("pricing", e.target.value, "all")}
               aria-label="Filtrar por tipo de precio"
-              className="h-8 rounded-sm border border-border bg-background px-2 font-mono text-[11px] outline-none focus:border-foreground/50"
+              className="glass-panel h-8 rounded-full px-3 font-mono text-[11px] outline-none focus:border-foreground/50"
             >
               {PRICINGS.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -222,7 +222,7 @@ export default function Tools() {
               value={sort}
               onChange={(e) => setParam("sort", e.target.value, "popular")}
               aria-label="Ordenar"
-              className="h-8 rounded-sm border border-border bg-background px-2 font-mono text-[11px] outline-none focus:border-foreground/50"
+              className="glass-panel h-8 rounded-full px-3 font-mono text-[11px] outline-none focus:border-foreground/50"
             >
               {SORTS.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -244,7 +244,7 @@ export default function Tools() {
         {firstLoad ? (
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-40 animate-pulse border border-border/40" />
+              <div key={i} className="glass-panel h-40 animate-pulse" />
             ))}
           </div>
         ) : (
@@ -267,7 +267,7 @@ export default function Tools() {
         {loadingMore && (
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-40 animate-pulse border border-border/40" />
+              <div key={i} className="glass-panel h-40 animate-pulse" />
             ))}
           </div>
         )}

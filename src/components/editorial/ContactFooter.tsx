@@ -48,7 +48,7 @@ export function ContactFooter({
             <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
               Contacto
             </p>
-            <h2 className="h1-editorial mt-4 max-w-md">
+            <h2 className="headline-tight h1-editorial mt-4 max-w-md">
               Trae tu próxima exploración al laboratorio.
             </h2>
             <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -66,6 +66,45 @@ export function ContactFooter({
             <Link to="/auth" className="btn-solid">
               Crear cuenta
             </Link>
+          </div>
+        </div>
+
+        {/* Signal line — the lab's wave, drawn in with the pen easing
+            (scroll-scrubbed where view timelines are supported). */}
+        <div aria-hidden className="border-t border-border/60">
+          <div className="relative mx-auto h-20 w-full max-w-6xl px-5">
+            <svg
+              viewBox="0 0 835 90"
+              preserveAspectRatio="none"
+              className="h-full w-full"
+              fill="none"
+            >
+              <defs>
+                <linearGradient
+                  id="signal-stroke"
+                  gradientUnits="userSpaceOnUse"
+                  x1="0"
+                  y1="0"
+                  x2="835"
+                  y2="0"
+                >
+                  <stop offset="0" stopColor="#ffffff" stopOpacity="0.05" />
+                  <stop offset="0.5" stopColor="#ffffff" stopOpacity="0.85" />
+                  <stop offset="1" stopColor="#ffffff" stopOpacity="0.05" />
+                </linearGradient>
+              </defs>
+              <path
+                className="wline wline-scrub"
+                pathLength={1}
+                d="M0,52 C70,24 130,74 205,50 C280,26 330,18 400,44 C470,70 530,74 610,46 C690,18 760,30 835,50"
+                stroke="url(#signal-stroke)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+            <span className="signal-dot absolute left-[6%] top-[58%]" />
+            <span className="signal-dot absolute right-[6%] top-[55%]" />
           </div>
         </div>
 
@@ -107,7 +146,7 @@ export function ContactFooter({
             © {new Date().getFullYear()} {BRAND.mark} — {BRAND.tagline}
           </p>
           <p>
-            Fase {phase.toFixed(3)} · {illumination}% iluminada esta noche
+            Fase {phase.toFixed(3)} · {illumination}% iluminada esta noche · coda 2.55s
           </p>
         </div>
       </div>

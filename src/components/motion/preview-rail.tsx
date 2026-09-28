@@ -52,7 +52,7 @@ function DefaultPreview({ item }: { item: PreviewRailItem }) {
   return (
     <div
       data-slot="preview-rail-card"
-      className="rounded-sm border border-border bg-card p-4 shadow-sm"
+      className="glass-card sheen-coda p-4"
     >
       <p
         data-slot="preview-rail-title"

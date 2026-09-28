@@ -44,7 +44,7 @@ export function EditorialSection({
             {index ? `${index} — ` : ""}
             {kicker}
           </p>
-          <h2 className="h2-editorial mt-3 max-w-xl">{title}</h2>
+          <h2 className="headline-tight h2-editorial mt-3 max-w-xl">{title}</h2>
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>

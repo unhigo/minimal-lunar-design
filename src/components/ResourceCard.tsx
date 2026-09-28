@@ -35,10 +35,7 @@ export interface ResourceCardData {
 
 export function ResourceCard({ resource }: { resource: ResourceCardData }) {
   return (
-    <Link
-      to={`/resource/${resource._id}`}
-      className="group flex flex-col overflow-hidden border border-border/60 bg-background transition-colors hover:bg-muted/40"
-    >
+    <div className="glass-card sheen-coda group flex flex-col overflow-visible">
       <div className="relative h-40 w-full overflow-hidden border-b border-border/60 bg-muted/30">
         {resource.coverUrl ? (
           <img
@@ -71,7 +68,13 @@ export function ResourceCard({ resource }: { resource: ResourceCardData }) {
           <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
         </div>
         <h3 className="mt-3 text-[15px] font-medium leading-snug">
-          {resource.title}
+          <Link
+            to={`/resource/${resource._id}`}
+            className="group/title flex items-start gap-1"
+          >
+            {resource.title}
+            <ArrowUpRight className="mt-0.5 size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          </Link>
         </h3>
         <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
           {resource.description}
@@ -114,6 +117,6 @@ export function ResourceCard({ resource }: { resource: ResourceCardData }) {
           </span>
         </div>
       </div>
-      </Link>
+    </div>
   );
 }
