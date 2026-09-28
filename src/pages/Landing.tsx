@@ -216,15 +216,15 @@ export default function Landing() {
       className="relative flex min-h-screen flex-col bg-background text-foreground"
     >
       {/* Stage backdrop — the aurora field the glass sits over (fixed, so it
-          never scrolls away; deep teal-black like the reference sky). */}
+          never scrolls away; teal glows dying into the true-black base). */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
           background:
-            "radial-gradient(120% 90% at 78% -10%, rgba(30,64,72,0.50) 0%, rgba(8,22,30,0.42) 42%, rgba(5,5,5,0) 72%)," +
-            "radial-gradient(90% 70% at 10% 110%, rgba(20,46,58,0.35) 0%, rgba(5,5,5,0) 60%)," +
-            "linear-gradient(180deg, #0a1116 0%, #050505 58%, #050505 100%)",
+            "radial-gradient(120% 90% at 78% -10%, rgba(30,64,72,0.50) 0%, rgba(8,22,30,0.42) 42%, rgba(0,0,0,0) 72%)," +
+            "radial-gradient(90% 70% at 10% 110%, rgba(20,46,58,0.35) 0%, rgba(0,0,0,0) 60%)," +
+            "linear-gradient(180deg, #0a1116 0%, #030303 46%, var(--bg-base) 100%)",
         }}
       />
       <SiteHeader />

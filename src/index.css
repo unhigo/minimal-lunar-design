@@ -112,23 +112,25 @@
 }
 
 .dark {
-  --background: #151515;
-  --foreground: oklch(96% 0 0);
-  --card: #1c1c1c;
-  --card-foreground: oklch(96% 0 0);
-  --popover: #1c1c1c;
-  --popover-foreground: oklch(96% 0 0);
+  /* The canvas is the reference's true black; text voices ride the
+     --c-text tokens (98% ink / 62% muted), card bodies ride --card-bg. */
+  --background: var(--bg-base);
+  --foreground: var(--c-text);
+  --card: #121212;
+  --card-foreground: var(--c-text);
+  --popover: #121212;
+  --popover-foreground: var(--c-text);
   --primary: oklch(72% 0.16 290);
   --primary-foreground: oklch(15% 0 0);
   --secondary: #1c1c1c;
   --secondary-foreground: oklch(96% 0 0);
   --muted: #1c1c1c;
-  --muted-foreground: oklch(62% 0 0);
+  --muted-foreground: var(--c-text-muted);
   --accent: oklch(72% 0.16 290);
   --accent-foreground: oklch(15% 0 0);
   --destructive: oklch(62% 0.22 25);
-  --border: rgb(255 255 255 / 0.05);
-  --input: rgb(255 255 255 / 0.05);
+  --border: rgb(255 255 255 / 0.08);
+  --input: rgb(255 255 255 / 0.08);
   --ring: oklch(72% 0.16 290 / 0.55);
   --chart-1: oklch(72% 0.16 290);
   --chart-2: oklch(62% 0.22 25);
@@ -154,7 +156,12 @@
 :root {
   --u: min(100vw / 1357, 100dvh / 871);
   --ink: #ffffff;
-  --glass-line: rgba(5, 5, 5, 0.08);
+  --bg-base: #000000;
+  --card-bg: rgba(18, 18, 18, 0.92);
+  --card-border: rgba(255, 255, 255, 0.18);
+  --glass-line: rgba(255, 255, 255, 0.25);
+  --c-text: rgba(255, 255, 255, 0.98);
+  --c-text-muted: rgba(255, 255, 255, 0.62);
   --e-out: cubic-bezier(0.16, 1, 0.3, 1); /* == EASE_OUT (src/lib/ease.ts) */
   --e-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
   --e-pen: cubic-bezier(0.37, 0.01, 0.2, 1);
@@ -169,9 +176,6 @@
   :root {
     --u: min(100vw / 430, 1.22px);
   }
-}
-.dark {
-  --glass-line: rgba(255, 255, 255, 0.14);
 }
 
 @layer base {
@@ -372,17 +376,18 @@
   }
 
   /* ── Liquid glass language (Aurora reference recipes) ────────────────
-     Frosted translucency over the stage: layered white gradients +
-     backdrop-filter. Never opaque, no shadow stacks, no purple. */
+     Dark card bodies (--card-bg family) over the black canvas, sealed
+     with a white hairline (--card-border / --glass-line). Never opaque
+     flat, no shadow stacks, no purple. */
 
   /* Sidebar / dock weight — the lightest pane. */
   .glass-panel {
     background: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.125) 0%,
-      rgba(255, 255, 255, 0.135) 13%,
-      rgba(255, 255, 255, 0.098) 34%,
-      rgba(255, 255, 255, 0.092) 100%
+      rgba(18, 18, 18, 0.86) 0%,
+      rgba(18, 18, 18, 0.88) 13%,
+      rgba(12, 12, 12, 0.9) 34%,
+      rgba(10, 10, 10, 0.9) 100%
     );
     -webkit-backdrop-filter: blur(calc(18 * var(--u))) saturate(115%);
     backdrop-filter: blur(calc(18 * var(--u))) saturate(115%);
@@ -394,57 +399,40 @@
     position: relative;
     background: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.2) 0%,
-      rgba(255, 255, 255, 0.258) 24%,
-      rgba(255, 255, 255, 0.252) 78%,
-      rgba(255, 255, 255, 0.232) 100%
+      rgba(24, 24, 24, 0.94) 0%,
+      rgba(18, 18, 18, 0.92) 24%,
+      rgba(16, 16, 16, 0.92) 78%,
+      rgba(14, 14, 14, 0.9) 100%
     );
     -webkit-backdrop-filter: blur(calc(26 * var(--u))) saturate(118%);
     backdrop-filter: blur(calc(26 * var(--u))) saturate(118%);
-    box-shadow: inset 0 0 0 1px var(--glass-line);
+    box-shadow: inset 0 0 0 1px var(--card-border);
     border-radius: calc(24 * var(--u));
-  }
-  .dark .glass-card {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.085) 0%,
-      rgba(255, 255, 255, 0.125) 24%,
-      rgba(255, 255, 255, 0.118) 78%,
-      rgba(255, 255, 255, 0.098) 100%
-    );
   }
 
   /* Chip / pill weight. */
   .glass-chip {
     position: relative;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.175);
+    background: rgba(18, 18, 18, 0.85);
     -webkit-backdrop-filter: blur(calc(16 * var(--u))) saturate(115%);
     backdrop-filter: blur(calc(16 * var(--u))) saturate(115%);
     box-shadow: inset 0 0 0 1px var(--glass-line);
     border-radius: 9999px;
-  }
-  .dark .glass-chip {
-    background: rgba(255, 255, 255, 0.09);
   }
 
   /* Tool / icon button — circle 52u in the reference, content-sized here. */
   .glass-tool {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(18, 18, 18, 0.8);
     -webkit-backdrop-filter: blur(calc(16 * var(--u))) saturate(115%);
     backdrop-filter: blur(calc(16 * var(--u))) saturate(115%);
     box-shadow: inset 0 0 0 1px var(--glass-line);
     border-radius: 9999px;
-    transition: background 0.2s var(--e-soft);
+    transition: background 0.2s var(--e-soft), box-shadow 0.2s var(--e-soft);
   }
   .glass-tool:hover {
-    background: rgba(255, 255, 255, 0.24);
-  }
-  .dark .glass-tool {
-    background: rgba(255, 255, 255, 0.08);
-  }
-  .dark .glass-tool:hover {
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(30, 30, 30, 0.9);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
   }
 
   /* Specular sheen coda — one light pass per surface, at the end of the
