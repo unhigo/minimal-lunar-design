@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Search, Store } from "lucide-react";
@@ -9,7 +9,21 @@ import { BRAND } from "@/lib/brand";
 
 export default function Catalog() {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  // Deep-linkable category: /catalog?cat=mockups (menubar links target these).
+  // Falls back to "all" when absent or invalid — same default as before.
+  const [params] = useSearchParams();
+  const catParam = params.get("cat");
+  const [category, setCategory] = useState<string>(
+    catParam && (CATEGORIES as readonly string[]).includes(catParam)
+      ? catParam
+      : "all",
+  );
+  // Same-route deep links (?cat= changes without a remount) stay in sync.
+  useEffect(() => {
+    if (catParam && (CATEGORIES as readonly string[]).includes(catParam)) {
+      setCategory(catParam);
+    }
+  }, [catParam]);
   const published = useQuery(api.resources.listPublished, {
     search: search || undefined,
     category: category === "all" ? undefined : category,

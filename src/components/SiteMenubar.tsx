@@ -103,8 +103,8 @@ export function SiteMenubar({ className }: { className?: string }) {
               onMouseEnter={() => setOpen(section.id)}
               className={cn(
                 "rounded-full px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.22em]",
-                "focus:bg-white/10 focus:text-foreground data-highlighted:bg-white/10 data-highlighted:text-foreground",
-                "data-state-open:bg-white/10 data-state-open:text-foreground",
+                "focus:bg-white/10 focus:text-foreground data-[highlighted]:bg-white/10 data-[highlighted]:text-foreground",
+                "data-[state=open]:bg-white/10 data-[state=open]:text-foreground",
                 sectionActive ? "text-foreground" : "text-muted-foreground",
               )}
             >
@@ -135,7 +135,7 @@ export function SiteMenubar({ className }: { className?: string }) {
                   ))}
                   {group.subs?.map((sub) => (
                     <MenubarSub key={sub.label}>
-                      <MenubarSubTrigger className="rounded-sm px-2.5 py-1.5 font-mono text-[12px] tracking-wide text-muted-foreground data-state-open:bg-white/10 data-state-open:text-foreground">
+                      <MenubarSubTrigger className="rounded-sm px-2.5 py-1.5 font-mono text-[12px] tracking-wide text-muted-foreground data-[state=open]:bg-white/10 data-[state=open]:text-foreground">
                         {sub.label}
                       </MenubarSubTrigger>
                       <MenubarSubContent

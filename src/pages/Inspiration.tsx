@@ -1,5 +1,5 @@
 import { BRAND } from "@/lib/brand";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { Bookmark, ExternalLink, LayoutGrid, Rows3, Rows4 } from "lucide-react";
 import {
@@ -126,6 +126,15 @@ export default function Inspiration() {
       : "all",
   );
   const [view, setView] = useState<ViewMode>("masonry");
+  // Same-route deep links (?tag= changes without a remount) stay in sync.
+  useEffect(() => {
+    if (
+      initialTag &&
+      INSPIRATION_CATEGORIES.includes(initialTag as never)
+    ) {
+      setCategory(initialTag);
+    }
+  }, [initialTag]);
 
   const results = useMemo(
     () => searchInspiration(query, category),

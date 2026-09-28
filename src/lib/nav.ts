@@ -7,10 +7,9 @@
  * filters each page honors:
  *
  * · /discover?q=      → global search (Discover reads `q`)
- * · /directory?s=     → directory section tabs (tools/resources/framer/inspiration)
+ * · /directory?s=     → directory section (see Directory deep-link wiring)
  * · /inspiration?tag= → inspiration category filter
  * · /catalog?cat=     → catalog category filter
- * · /tools?sort=      → tools ordering (popular/recent/name)
  */
 
 export interface NavLinkDef {
@@ -143,9 +142,7 @@ export const NAV_SECTIONS: NavSectionDef[] = [
         label: "Herramientas",
         links: [
           { label: "Directorio de herramientas", to: "/tools", hint: "/tools" },
-          { label: "Por popularidad", to: "/tools?sort=popular" },
-          { label: "Más recientes", to: "/tools?sort=recent" },
-          { label: "A — Z", to: "/tools?sort=name" },
+          { label: "Enviar herramienta", to: "/submit" },
         ],
       },
     ],

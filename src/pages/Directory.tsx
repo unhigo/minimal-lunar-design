@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import { ArrowUpRight, Search } from "lucide-react";
 import {
   DIRECTORY,
@@ -88,8 +88,26 @@ export default function Directory() {
     path: "/directory",
   });
 
-  const [section, setSection] = useState<DirectorySection>("tools");
+  // Deep-linkable section: /directory?s=tools (menubar links target these).
+  // Falls back to "tools" when absent or invalid — same default as before.
+  const [params] = useSearchParams();
+  const sectionParam = params.get("s");
+  const [section, setSection] = useState<DirectorySection>(
+    sectionParam &&
+      (DIRECTORY_SECTIONS as readonly string[]).includes(sectionParam)
+      ? (sectionParam as DirectorySection)
+      : "tools",
+  );
   const [query, setQuery] = useState("");
+  // Same-route deep links (?s= changes without a remount) stay in sync.
+  useEffect(() => {
+    if (
+      sectionParam &&
+      (DIRECTORY_SECTIONS as readonly string[]).includes(sectionParam)
+    ) {
+      setSection(sectionParam as DirectorySection);
+    }
+  }, [sectionParam]);
 
   const groups = useMemo(() => {
     const needle = query.trim().toLowerCase();
