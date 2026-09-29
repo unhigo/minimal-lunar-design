@@ -161,6 +161,10 @@ export const metaPreview = action({
     if (target.protocol !== "http:" && target.protocol !== "https:") {
       return { ok: false, reason: "url-invalida" };
     }
+    // SSRF guard: never fetch loopback / private / link-local hosts.
+    if (isPrivateHost(target.hostname)) {
+      return { ok: false, reason: "host-no-permitido" };
+    }
 
     try {
       const res = await fetch(target.toString(), {
@@ -224,6 +228,28 @@ export const metaPreview = action({
     }
   },
 });
+
+/**
+ * SSRF protection: reject hostnames that resolve into loopback, private,
+ * link-local, CGNAT or reserved ranges before any network request is made.
+ */
+function isPrivateHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local")) {
+    return true;
+  }
+  if (host === "::1" || host === "0:0:0:0:0:0:0:1") return true;
+  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  if (!m) return false; // public domain — DNS is resolved by the fetch runtime
+  const [a, b] = [Number(m[1]), Number(m[2])];
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 169 && b === 254) return true; // link-local (cloud metadata)
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+  if (a >= 224) return true; // multicast / reserved
+  return false;
+}
 
 function decodeEntities(s: string): string {
   return s

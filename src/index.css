@@ -655,4 +655,46 @@
       display: none;
     }
   }
+
+  /* ── ADMIN SYSTEM — semantic surface tokens (PHASE 1) ──────────────────
+     Semantic aliases over the existing brand scale for the future admin
+     shell. Pure tokens: no visual change anywhere until PHASE 2 consumes
+     them. Definitions live in docs/admin-audit.md. */
+  .admin-surface {
+    background: var(--gray-0d);
+  }
+  .admin-panel {
+    background: var(--gray-1c);
+  }
+  .admin-border {
+    border-color: var(--gray-3);
+  }
+  .admin-border-strong {
+    border-color: var(--gray-5);
+  }
+  .admin-meta {
+    color: var(--gray-a);
+  }
+  .admin-meta-dim {
+    color: var(--gray-7);
+  }
+  .admin-accent {
+    color: var(--signal-red);
+  }
+  .admin-accent-bg {
+    background: var(--signal-red);
+  }
+  /* Status dot — reuses the signal-dot geometry with semantic colors. */
+  .admin-status-online {
+    background: #2ecc71;
+  }
+  .admin-status-ready {
+    background: var(--signal-red);
+  }
+  /* Dense data-cell rhythm for future DataTable consumers. */
+  .admin-cell {
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
 }
