@@ -50,7 +50,7 @@ export const listPublished = query({
           authorName: author?.name ?? author?.email ?? "Unknown",
           coverUrl: r.coverStorageId
             ? await ctx.storage.getUrl(r.coverStorageId)
-            : null,
+            : (r.coverCloudUrl ?? null),
         };
       }),
     );
@@ -72,7 +72,7 @@ export const getPublished = query({
         : null,
       coverUrl: resource.coverStorageId
         ? await ctx.storage.getUrl(resource.coverStorageId)
-        : null,
+        : (resource.coverCloudUrl ?? null),
     };
   },
 });
@@ -99,7 +99,7 @@ export const listMine = query({
           sales: sales.length,
           coverUrl: r.coverStorageId
             ? await ctx.storage.getUrl(r.coverStorageId)
-            : null,
+            : (r.coverCloudUrl ?? null),
           fileUrl: r.fileStorageId
             ? await ctx.storage.getUrl(r.fileStorageId)
             : null,
@@ -179,6 +179,8 @@ export const updateProductFields = mutation({
       v.object({
         storageId: v.id("_storage"),
         caption: v.optional(v.string()),
+        cloudUrl: v.optional(v.string()),
+        cloudPublicId: v.optional(v.string()),
       }),
     ),
     videoUrl: v.optional(v.string()),
@@ -189,6 +191,8 @@ export const updateProductFields = mutation({
     discountPercent: v.optional(v.number()),
     features: v.array(v.string()),
     thumbStorageId: v.optional(v.id("_storage")),
+    thumbCloudUrl: v.optional(v.string()),
+    thumbCloudPublicId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -211,6 +215,8 @@ export const updateProductFields = mutation({
       discountPercent,
       features,
       thumbStorageId,
+      thumbCloudUrl,
+      thumbCloudPublicId,
     } = args;
     await ctx.db.patch(id, {
       productFields: {
@@ -231,6 +237,10 @@ export const updateProductFields = mutation({
         authorLinks: [],
       },
       ...(thumbStorageId !== undefined ? { coverStorageId: thumbStorageId } : {}),
+      // Cloudinary cover: only applied when no Convex storage cover was set.
+      ...(thumbStorageId === undefined && thumbCloudUrl !== undefined
+        ? { coverCloudUrl: thumbCloudUrl, coverCloudPublicId: thumbCloudPublicId }
+        : {}),
     });
   },
 });
@@ -603,7 +613,7 @@ export const getMineForEdit = query({
         : null,
       coverUrl: resource.coverStorageId
         ? await ctx.storage.getUrl(resource.coverStorageId)
-        : null,
+        : (resource.coverCloudUrl ?? null),
     };
   },
 });

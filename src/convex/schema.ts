@@ -25,6 +25,9 @@ export const submissionValidator = v.object({
   title: v.string(),
   url: v.string(),
   logoStorageId: v.optional(v.id("_storage")),
+  // Cloudinary CDN mirror (optional): direct signed upload + public id for cleanup.
+  logoCloudUrl: v.optional(v.string()),
+  logoCloudPublicId: v.optional(v.string()),
   tagline: v.string(),
   // Paso 2 — clasificación
   category: v.string(),
@@ -36,9 +39,14 @@ export const submissionValidator = v.object({
     v.object({
       storageId: v.id("_storage"),
       caption: v.optional(v.string()),
+      // Cloudinary mirror (optional): URL renders directly from the CDN.
+      cloudUrl: v.optional(v.string()),
+      cloudPublicId: v.optional(v.string()),
     }),
   ),
   thumbStorageId: v.optional(v.id("_storage")),
+  thumbCloudUrl: v.optional(v.string()),
+  thumbCloudPublicId: v.optional(v.string()),
   videoUrl: v.optional(v.string()),
   // Paso 4 — pricing / licencia
   pricing: v.string(),
@@ -94,6 +102,9 @@ const schema = defineSchema(
       // the cover preview shown on cards and detail pages.
       fileStorageId: v.optional(v.id("_storage")),
       coverStorageId: v.optional(v.id("_storage")),
+      // Cloudinary CDN cover (optional): used when coverStorageId is absent.
+      coverCloudUrl: v.optional(v.string()),
+      coverCloudPublicId: v.optional(v.string()),
       fileMeta: v.optional(
         v.object({
           name: v.string(),

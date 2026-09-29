@@ -59,11 +59,21 @@ export interface FormState {
   platforms: string[];
   ecosystems: string[];
   tags: string[];
-  gallery: { storageId: string; url: string; caption?: string }[];
+  gallery: {
+    storageId: string;
+    url: string;
+    caption?: string;
+    cloudUrl?: string;
+    cloudPublicId?: string;
+  }[];
   thumbStorageId: string | null;
   thumbUrl: string | null;
+  thumbCloudUrl: string | null;
+  thumbCloudPublicId: string | null;
   logoStorageId: string | null;
   logoUrl: string | null;
+  logoCloudUrl: string | null;
+  logoCloudPublicId: string | null;
   videoUrl: string;
   pricing: string;
   pricingDetails: string;
@@ -91,8 +101,12 @@ export const EMPTY_FORM: FormState = {
   gallery: [],
   thumbStorageId: null,
   thumbUrl: null,
+  thumbCloudUrl: null,
+  thumbCloudPublicId: null,
   logoStorageId: null,
   logoUrl: null,
+  logoCloudUrl: null,
+  logoCloudPublicId: null,
   videoUrl: "",
   pricing: "free",
   pricingDetails: "",

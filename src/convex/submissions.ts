@@ -110,6 +110,12 @@ export const publishAsResource = mutation({
       status: "published",
       fileStorageId: (sub.thumbStorageId ?? sub.logoStorageId) as never,
       coverStorageId: (sub.thumbStorageId ?? sub.gallery[0]?.storageId) as never,
+      // Cloudinary mirrors: prefer the cover, then the first gallery shot.
+      coverCloudUrl:
+        sub.thumbCloudUrl ?? sub.gallery.find((g) => g.cloudUrl)?.cloudUrl,
+      coverCloudPublicId:
+        sub.thumbCloudPublicId ??
+        sub.gallery.find((g) => g.cloudPublicId)?.cloudPublicId,
       productFields: {
         tagline: sub.tagline,
         platforms: sub.platforms,

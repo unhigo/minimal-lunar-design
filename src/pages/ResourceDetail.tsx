@@ -26,6 +26,35 @@ import {
   type SubmitPayload,
 } from "@/lib/submit-schema";
 
+/**
+ * Gallery image — Cloudinary CDN URL when present, otherwise resolves a
+ * Convex storage id to its public URL (null while loading).
+ */
+function GalleryImage({
+  item,
+  alt,
+}: {
+  item: { storageId: string; caption?: string; cloudUrl?: string };
+  alt: string;
+}) {
+  const url = useQuery(
+    api.files.getUrl,
+    item.cloudUrl ? "skip" : { storageId: item.storageId as never },
+  );
+  const src = item.cloudUrl ?? url;
+  if (!src) {
+    return <div className="aspect-[4/3] w-full animate-pulse bg-muted/40" />;
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className="aspect-[4/3] w-full rounded-sm border border-border/60 object-cover"
+    />
+  );
+}
+
 /** Resolves a Convex storage id to a public URL (null while loading). */
 function StorageImage({
   storageId,
@@ -274,9 +303,9 @@ export default function ResourceDetail() {
                 </p>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {pf.gallery.map((g) => (
-                    <StorageImage
+                    <GalleryImage
                       key={g.storageId}
-                      storageId={g.storageId}
+                      item={g}
                       alt={g.caption ?? resource.title}
                     />
                   ))}

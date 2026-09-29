@@ -83,6 +83,9 @@ export const submitSchema = z.object({
   title: trimmed(2, 80),
   url: z.url("Introduce una URL válida (https://…)"),
   logoStorageId: z.string().optional(),
+  // Cloudinary CDN mirror (optional)
+  logoCloudUrl: z.string().url().optional(),
+  logoCloudPublicId: z.string().max(200).optional(),
   tagline: trimmed(4, 100),
   // Paso 2
   category: z.enum(SUBMIT_CATEGORIES.map((c) => c.id) as [string, ...string[]]),
@@ -90,8 +93,20 @@ export const submitSchema = z.object({
   ecosystems: z.array(z.enum(ECOSYSTEMS)).default([]),
   tags: z.array(trimmed(1, 24)).max(8).default([]),
   // Paso 3
-  gallery: z.array(z.object({ storageId: z.string(), caption: z.string().optional() })).max(4).default([]),
+  gallery: z
+    .array(
+      z.object({
+        storageId: z.string(),
+        caption: z.string().optional(),
+        cloudUrl: z.string().url().optional(),
+        cloudPublicId: z.string().max(200).optional(),
+      }),
+    )
+    .max(4)
+    .default([]),
   thumbStorageId: z.string().optional(),
+  thumbCloudUrl: z.string().url().optional(),
+  thumbCloudPublicId: z.string().max(200).optional(),
   videoUrl: z
     .string()
     .trim()

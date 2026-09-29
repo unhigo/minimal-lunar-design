@@ -28,7 +28,7 @@ import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 import { SiteHeader } from "@/components/SiteHeader";
 import { usePageMeta } from "@/hooks/use-page-meta";
-import { uploadImage } from "@/lib/upload";
+import { uploadImageSmart } from "@/lib/cloudinary";
 import { BRAND } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 import {
@@ -76,6 +76,8 @@ export default function Submit() {
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const attach = useMutation(api.files.attach);
   const metaPreview = useAction(api.submissions.metaPreview);
+  const signUpload = useAction(api.cloudinary.signUpload);
+  const destroyAssets = useAction(api.cloudinary.destroyMany);
   const myFavorites = useQuery(api.tools.myFavorites, {});
 
   // ------------------------------------------------------------------
@@ -160,21 +162,37 @@ export default function Submit() {
   };
 
   // ------------------------------------------------------------------
-  // Uploads through the real pipeline
+  // Uploads — Cloudinary CDN first, Convex storage fallback (see lib)
   // ------------------------------------------------------------------
-  const uploadFile = async (file: File) => {
-    const up = await uploadImage(generateUploadUrl, attach, file);
-    return {
-      storageId: up.storageId as unknown as string,
-      url: URL.createObjectURL(file),
-    };
-  };
+  const uploadFile = async (
+    file: File,
+  ): Promise<
+    | { kind: "cloud"; url: string; publicId: string | null }
+    | { kind: "convex"; storageId: string; url: string }
+  > =>
+    uploadImageSmart(signUpload, generateUploadUrl, attach, file);
 
   const handleLogo = async (file: File) => {
     setUploadBusy("logo");
     try {
       const up = await uploadFile(file);
-      setForm((f) => ({ ...f, logoStorageId: up.storageId, logoUrl: up.url }));
+      if (up.kind === "cloud") {
+        setForm((f) => ({
+          ...f,
+          logoStorageId: null,
+          logoUrl: up.url,
+          logoCloudUrl: up.url,
+          logoCloudPublicId: up.publicId,
+        }));
+      } else {
+        setForm((f) => ({
+          ...f,
+          logoStorageId: up.storageId,
+          logoUrl: up.url,
+          logoCloudUrl: null,
+          logoCloudPublicId: null,
+        }));
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo subir la imagen.");
     } finally {
@@ -186,7 +204,23 @@ export default function Submit() {
     setUploadBusy("thumb");
     try {
       const up = await uploadFile(file);
-      setForm((f) => ({ ...f, thumbStorageId: up.storageId, thumbUrl: up.url }));
+      if (up.kind === "cloud") {
+        setForm((f) => ({
+          ...f,
+          thumbStorageId: null,
+          thumbUrl: up.url,
+          thumbCloudUrl: up.url,
+          thumbCloudPublicId: up.publicId,
+        }));
+      } else {
+        setForm((f) => ({
+          ...f,
+          thumbStorageId: up.storageId,
+          thumbUrl: up.url,
+          thumbCloudUrl: null,
+          thumbCloudPublicId: null,
+        }));
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo subir la imagen.");
     } finally {
@@ -204,7 +238,15 @@ export default function Submit() {
     try {
       for (const file of files.slice(0, room)) {
         const up = await uploadFile(file);
-        setForm((f) => ({ ...f, gallery: [...f.gallery, up] }));
+        setForm((f) => ({
+          ...f,
+          gallery: [
+            ...f.gallery,
+            up.kind === "cloud"
+              ? { storageId: `cloud:${up.publicId ?? up.url}`, url: up.url, cloudUrl: up.url, cloudPublicId: up.publicId ?? undefined }
+              : { storageId: up.storageId, url: up.url },
+          ],
+        }));
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo subir la imagen.");
@@ -213,11 +255,39 @@ export default function Submit() {
     }
   };
 
-  const removeShot = (storageId: string) =>
+  const removeShot = (storageId: string) => {
+    const shot = form.gallery.find((g) => g.storageId === storageId);
+    // Best-effort CDN cleanup for Cloudinary-hosted shots (fire & forget).
+    if (shot?.cloudPublicId) void destroyAssets({ publicIds: [shot.cloudPublicId] }).catch(() => {});
     setForm((f) => ({
       ...f,
       gallery: f.gallery.filter((g) => g.storageId !== storageId),
     }));
+  };
+
+  const removeLogo = () => {
+    if (form.logoCloudPublicId)
+      void destroyAssets({ publicIds: [form.logoCloudPublicId] }).catch(() => {});
+    setForm((f) => ({
+      ...f,
+      logoStorageId: null,
+      logoUrl: null,
+      logoCloudUrl: null,
+      logoCloudPublicId: null,
+    }));
+  };
+
+  const removeThumb = () => {
+    if (form.thumbCloudPublicId)
+      void destroyAssets({ publicIds: [form.thumbCloudPublicId] }).catch(() => {});
+    setForm((f) => ({
+      ...f,
+      thumbStorageId: null,
+      thumbUrl: null,
+      thumbCloudUrl: null,
+      thumbCloudPublicId: null,
+    }));
+  };
 
   // ------------------------------------------------------------------
   // Duplicate detection (client-side hint over the real tools table)
@@ -309,9 +379,18 @@ export default function Submit() {
     platforms: form.platforms,
     ecosystems: form.ecosystems,
     tags: form.tags,
-    gallery: form.gallery.map((g) => ({ storageId: g.storageId as never, caption: g.caption })),
+    gallery: form.gallery.map((g) => ({
+      storageId: g.storageId as never,
+      caption: g.caption,
+      ...(g.cloudUrl ? { cloudUrl: g.cloudUrl } : {}),
+      ...(g.cloudPublicId ? { cloudPublicId: g.cloudPublicId } : {}),
+    })),
     ...(form.logoStorageId ? { logoStorageId: form.logoStorageId as never } : {}),
+    ...(form.logoCloudUrl ? { logoCloudUrl: form.logoCloudUrl } : {}),
+    ...(form.logoCloudPublicId ? { logoCloudPublicId: form.logoCloudPublicId } : {}),
     ...(form.thumbStorageId ? { thumbStorageId: form.thumbStorageId as never } : {}),
+    ...(form.thumbCloudUrl ? { thumbCloudUrl: form.thumbCloudUrl } : {}),
+    ...(form.thumbCloudPublicId ? { thumbCloudPublicId: form.thumbCloudPublicId } : {}),
     ...(form.videoUrl.trim() ? { videoUrl: form.videoUrl.trim() } : {}),
     pricing: form.pricing,
     ...(form.pricingDetails.trim() ? { pricingDetails: form.pricingDetails.trim() } : {}),
@@ -576,9 +655,7 @@ export default function Submit() {
                 onDetect={() => void detectMeta()}
                 logoBusy={uploadBusy === "logo"}
                 onLogoFile={(f) => void handleLogo(f)}
-                onRemoveLogo={() =>
-                  setForm((f) => ({ ...f, logoStorageId: null, logoUrl: null }))
-                }
+                onRemoveLogo={removeLogo}
               />
             )}
             {step === "classification" && <ClassificationStep {...stepProps} />}
@@ -592,15 +669,11 @@ export default function Submit() {
                 gallery={form.gallery}
                 thumbUrl={form.thumbUrl}
                 onLogoFile={(f) => void handleLogo(f)}
-                onRemoveLogo={() =>
-                  setForm((f) => ({ ...f, logoStorageId: null, logoUrl: null }))
-                }
+                onRemoveLogo={removeLogo}
                 onShots={(files) => void handleShots(files)}
                 onRemoveShot={removeShot}
                 onThumbFile={(f) => void handleThumb(f)}
-                onRemoveThumb={() =>
-                  setForm((f) => ({ ...f, thumbStorageId: null, thumbUrl: null }))
-                }
+                onRemoveThumb={removeThumb}
                 videoUrl={form.videoUrl}
                 onVideoUrlChange={(v) => set("videoUrl", v)}
                 videoError={errors.videoUrl}
