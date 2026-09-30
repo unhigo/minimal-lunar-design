@@ -86,6 +86,13 @@ const schema = defineSchema(
       role: v.optional(roleValidator), // role of the user. do not remove
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
+    // One-shot system latches (e.g. "admin bootstrap already used").
+    systemFlags: defineTable({
+      key: v.string(),
+      value: v.string(),
+      createdAt: v.number(),
+    }).index("by_key", ["key"]),
+
     // add other tables here
 
     // Marketplace: user-submitted editing & design resources.

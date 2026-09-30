@@ -71,12 +71,45 @@ export const getUrl = query({
   },
 });
 
-/** Permanently delete an image blob (used when replacing/removing covers). */
+/**
+ * Permanently delete an image blob (used when replacing/removing covers).
+ * P0: only the authenticated OWNER of a document that references the blob
+ * (or an admin) may delete it — the old version let any signed-in user
+ * destroy arbitrary storage.
+ */
 export const clearFile = mutation({
   args: { storageId: v.id("_storage") },
   handler: async (ctx, { storageId }) => {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Inicia sesión.");
+
+    const user = await ctx.db.get(userId);
+    const isAdmin = user?.role === "admin";
+
+    const ownsCover = await ctx.db
+      .query("resources")
+      .withIndex("by_author", (q) => q.eq("authorId", userId))
+      .filter((q) => q.eq(q.field("coverStorageId"), storageId))
+      .first();
+    const ownsFile = ownsCover
+      ? null
+      : await ctx.db
+          .query("resources")
+          .withIndex("by_author", (q) => q.eq("authorId", userId))
+          .filter((q) => q.eq(q.field("fileStorageId"), storageId))
+          .first();
+    const ownsBlock =
+      ownsCover || ownsFile
+        ? null
+        : await ctx.db
+            .query("resourceBlocks")
+            .filter((q) => q.eq(q.field("authorId"), userId))
+            .filter((q) => q.eq(q.field("storageId"), storageId))
+            .first();
+
+    if (!isAdmin && !ownsCover && !ownsFile && !ownsBlock) {
+      throw new Error("No puedes eliminar este archivo.");
+    }
     await ctx.storage.delete(storageId);
   },
 });

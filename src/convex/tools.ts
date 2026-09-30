@@ -4,6 +4,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { query, mutation, internalMutation } from "./_generated/server";
 import { ROLES } from "./schema";
 import type { Id, Doc } from "./_generated/dataModel";
+import { TOOLS } from "../data/tools";
 import {
   slugify,
   pricingFromSubmitCategory,
@@ -523,31 +524,50 @@ export const seedOne = internalMutation({
 });
 
 /**
- * Idempotent seed trigger. Safe to call from any visitor (including
- * anonymous sessions): it no-ops entirely when the directory already has
- * data, and it only ever inserts the curated catalog payloads the client
- * passes in — nothing user-controlled is stored unvalidated.
+ * ADMIN-ONLY seed (P0 fix: was a public mutation with a client-controlled
+ * payload — poisonable while the directory was empty). The curated payload
+ * comes from the server-side catalog module; nothing user-controlled is
+ * stored. Idempotent: no-ops entirely once the directory has any tool.
  */
-export const seedFromCatalog = mutation({
-  args: { tools: v.array(seedToolValidator) },
-  handler: async (ctx, { tools }) => {
+export const seedAdminFromCatalog = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new Error("Not signed in.");
+    const user = await ctx.db.get(userId);
+    if (user?.role !== ROLES.ADMIN) throw new Error("Admins only.");
+
     const anyTool = await ctx.db.query("tools").first();
     if (anyTool !== null) return { skipped: true, inserted: 0 };
+
     let inserted = 0;
-    for (const tool of tools) {
+    for (const tool of TOOLS) {
       const slug = slugify(tool.name);
-      const existing = await ctx.db.query("tools").withIndex("by_slug", (q) => q.eq("slug", slug)).unique();
-      if (!existing) {
-        await ctx.db.insert("tools", {
-          ...tool,
-          category: mapSeedCategoryToDirectory(tool.category),
-          slug,
-          status: "published",
-          createdAt: tool.createdAt,
-          updatedAt: tool.createdAt,
-        });
-        inserted++;
-      }
+      const existing = await ctx.db
+        .query("tools")
+        .withIndex("by_slug", (q) => q.eq("slug", slug))
+        .unique();
+      if (existing) continue;
+      await ctx.db.insert("tools", {
+        name: tool.name,
+        shortDescription: tool.shortDescription,
+        description: tool.description,
+        website: tool.website,
+        category: mapSeedCategoryToDirectory(tool.category),
+        tags: tool.tags,
+        pricing: tool.pricing,
+        pricingDetails: tool.pricingDetails,
+        platforms: tool.platforms,
+        features: tool.features,
+        verified: tool.verified,
+        featured: tool.featured,
+        trending: tool.trending,
+        slug,
+        status: "published",
+        createdAt: tool.createdAt,
+        updatedAt: tool.createdAt,
+      });
+      inserted++;
     }
     return { skipped: false, inserted };
   },

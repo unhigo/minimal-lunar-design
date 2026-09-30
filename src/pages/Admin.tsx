@@ -53,11 +53,13 @@ export default function Admin() {
   const removeComment = useMutation(api.resources.deleteComment);
   const setUserRole = useMutation(api.resources.setUserRole);
   const bootstrapAdmin = useMutation(api.resources.bootstrapAdmin);
+  const seedAdmin = useMutation(api.tools.seedAdminFromCatalog);
   const moderateSubmission = useMutation(api.submissions.moderate);
   const publishSubmission = useMutation(api.submissions.publishAsResource);
   const publishAsTool = useMutation(api.tools.publishSubmissionAsTool);
 
   const [busy, setBusy] = useState(false);
+  const [seedState, setSeedState] = useState<"idle" | "seeded">("idle");
   const [secret, setSecret] = useState("");
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);
   const [bootstrapDone, setBootstrapDone] = useState(false);
@@ -107,7 +109,9 @@ export default function Admin() {
             </p>
             <p className="text-[12px] leading-relaxed text-muted-foreground">
               Si eres el propietario del estudio, introduce la clave de
-              arranque para activar tu cuenta como administradora.
+              arranque (la variable ADMIN_BOOTSTRAP_SECRET definida en el
+              servidor) para activar tu cuenta. Solo funciona una vez, para el
+              primer administrador.
             </p>
             <Input
               value={secret}
@@ -180,6 +184,38 @@ export default function Admin() {
 
         {/* Directory tools CRUD */}
         <AdminDirectorySection />
+
+        {/* Seed — admin-only import of the curated catalog (one-shot). */}
+        <section className="mt-10 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-border/60 p-4">
+          <div>
+            <p className="text-sm font-medium">Catálogo curado</p>
+            <p className="mt-0.5 text-[12px] text-muted-foreground">
+              Importa el directorio curado una sola vez. No hace nada si el
+              directorio ya tiene herramientas.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={busy || seedState === "seeded"}
+            onClick={() =>
+              void wrap(async () => {
+                const r = await seedAdmin({});
+                setSeedState(r.skipped || r.inserted > 0 ? "seeded" : "idle");
+              })
+            }
+          >
+            {seedState === "seeded" ? (
+              <>
+                <Check className="mr-1.5 size-3.5" /> Catálogo listo
+              </>
+            ) : (
+              <>
+                <Upload className="mr-1.5 size-3.5" /> Importar catálogo
+              </>
+            )}
+          </Button>
+        </section>
 
         {/* Submissions queue */}
         <section className="mt-10">
