@@ -144,7 +144,6 @@ export default function ResourceDetail() {
   );
 
   const beginCheckout = useMutation(api.resources.beginCheckout);
-  const confirmCheckout = useMutation(api.resources.confirmCheckout);
   const addComment = useMutation(api.resources.addComment);
   const deleteComment = useMutation(api.resources.deleteComment);
 
@@ -189,8 +188,8 @@ export default function ResourceDetail() {
       } else if (result.status === "completed") {
         setCheckoutMsg("Listo. El recurso ya está disponible en tu espacio.");
       } else {
-        await confirmCheckout({ purchaseId: result.purchaseId });
-        setCheckoutMsg("Pago simulado completado. Ya tienes el recurso.");
+        // result.status === "unavailable" — no fake payments (P0 hardening).
+        setCheckoutMsg("Los pagos todavía no están disponibles en el laboratorio.");
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Algo salió mal.");
@@ -447,7 +446,7 @@ export default function ResourceDetail() {
               <p className="text-sm text-muted-foreground">
                 {resource.price === 0
                   ? "Es gratis. Añádelo a tu espacio."
-                  : "Pago simulado en esta demo — no se cobra nada real."}
+                  : "Recurso de pago: los pagos todavía no están disponibles."}
               </p>
             )}
             {checkoutMsg && (

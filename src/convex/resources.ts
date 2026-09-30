@@ -4,12 +4,13 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import {
   query,
   mutation,
+  internalMutation,
   type QueryCtx,
   type MutationCtx,
 } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { ROLES, roleValidator } from "./schema";
-import { ADMIN_BOOTSTRAP_FLAG, timingSafeEqual } from "./admin-bootstrap";
+import { ADMIN_BOOTSTRAP_FLAG, timingSafeEqual } from "./admin_bootstrap";
 
 /** Admin-gate helper: throws unless the caller has the admin role. */
 async function requireAdmin(ctx: QueryCtx | MutationCtx): Promise<Id<"users">> {
@@ -19,6 +20,9 @@ async function requireAdmin(ctx: QueryCtx | MutationCtx): Promise<Id<"users">> {
   if (user?.role !== ROLES.ADMIN) throw new Error("Admins only.");
   return userId;
 }
+
+/** systemFlags key for the one-time legacy pending-purchase migration. */
+export const LEGACY_PURCHASES_FLAG = "purchases.legacy.cancelled";
 
 /** True when the user has a completed purchase of the resource. */
 async function hasCompletedPurchase(
@@ -454,6 +458,38 @@ export const beginCheckout = mutation({
       createdAt: Date.now(),
     });
     return { status: "completed" as const, purchaseId };
+  },
+});
+
+/**
+ * One-time migration: legacy pending purchases (created by the removed demo
+ * checkout) can never complete — there is no provider to confirm them. This
+ * internal mutation marks them "cancelled" so no orphan state remains.
+ * Latched via systemFlags so it runs at most once per deployment.
+ */
+export const cancelLegacyPurchases = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const latch = await ctx.db
+      .query("systemFlags")
+      .withIndex("by_key", (q) => q.eq("key", LEGACY_PURCHASES_FLAG))
+      .unique();
+    if (latch) return { cancelled: 0, alreadyRan: true };
+    let cancelled = 0;
+    const pending = await ctx.db
+      .query("purchases")
+      .filter((q) => q.eq(q.field("status"), "pending"))
+      .collect();
+    for (const p of pending) {
+      await ctx.db.patch(p._id, { status: "cancelled" });
+      cancelled++;
+    }
+    await ctx.db.insert("systemFlags", {
+      key: LEGACY_PURCHASES_FLAG,
+      value: "1",
+      createdAt: Date.now(),
+    });
+    return { cancelled, alreadyRan: false };
   },
 });
 

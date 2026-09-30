@@ -15,6 +15,17 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new Error("Inicia sesión para enviar propuestas.");
 
+    // Server-side URL hardening: only http(s) — never javascript:, data:, file:…
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(submission.url);
+    } catch {
+      throw new Error("URL no válida.");
+    }
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      throw new Error("Solo se permiten enlaces http(s).");
+    }
+
     // Duplicate guard: same URL from anyone still in the queue.
     const queue = await ctx.db.query("submissions").collect();
     const urlKey = submission.url.replace(/\/+$/, "").toLowerCase();

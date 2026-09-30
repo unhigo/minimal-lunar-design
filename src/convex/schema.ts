@@ -162,11 +162,19 @@ const schema = defineSchema(
     }).index("by_resource", ["resourceId"]),
 
     // Purchases. amount is stored in cents; 0 means the resource is free.
+    // Status lifecycle (§ payments): pending → completed | failed | cancelled,
+    // refunded after the fact. Free items are created directly as completed.
     purchases: defineTable({
       resourceId: v.id("resources"),
       userId: v.id("users"),
       amount: v.number(),
-      status: v.union(v.literal("pending"), v.literal("completed")),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("completed"),
+        v.literal("failed"),
+        v.literal("cancelled"),
+        v.literal("refunded"),
+      ),
       createdAt: v.number(),
     })
       .index("by_user", ["userId"])

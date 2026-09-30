@@ -66,7 +66,7 @@ const FEATURES = [
   },
   {
     title: "Compra en un clic",
-    body: "Pago simulado en la demo: adquieres el recurso y queda guardado en tu espacio.",
+    body: "Los recursos gratuitos quedan guardados en tu espacio en un clic; los pagos llegarán con el proveedor de pago.",
   },
   {
     title: "Estudio lunar incluido",
@@ -85,7 +85,7 @@ const FEATURES = [
 const STEPS = [
   { n: "01", title: "Explora", body: "Busca y filtra el catálogo por categoría." },
   { n: "02", title: "Abre una ficha", body: "Detalles, autor, precio y comentarios." },
-  { n: "03", title: "Consíguelo", body: "Gratis o con pago simulado, en un clic." },
+  { n: "03", title: "Consíguelo", body: "Recursos gratuitos en un clic; pagos próximamente." },
   { n: "04", title: "Crea", body: "Descarga el recurso o compón en el estudio lunar." },
 ] as const;
 
