@@ -78,73 +78,102 @@
   --gray-0d: #0d0d0d;
 
   --radius: 4px;
-  --background: oklch(99% 0 0);
-  --foreground: oklch(15% 0 0);
-  --card: oklch(97% 0 0);
-  --card-foreground: oklch(15% 0 0);
-  --popover: oklch(97% 0 0);
-  --popover-foreground: oklch(15% 0 0);
-  --primary: oklch(55% 0.2 290);
-  --primary-foreground: oklch(99% 0 0);
-  --secondary: oklch(97% 0 0);
-  --secondary-foreground: oklch(15% 0 0);
-  --muted: oklch(97% 0 0);
-  --muted-foreground: oklch(50% 0 0);
-  --accent: oklch(55% 0.2 290);
-  --accent-foreground: oklch(99% 0 0);
-  --destructive: oklch(62% 0.22 25);
-  --border: oklch(15% 0 0 / 0.06);
-  --input: oklch(15% 0 0 / 0.06);
-  --ring: oklch(55% 0.2 290 / 0.5);
-  --chart-1: oklch(55% 0.2 290);
-  --chart-2: oklch(62% 0.22 25);
-  --chart-3: oklch(50% 0 0);
-  --chart-4: oklch(72% 0.16 290);
-  --chart-5: oklch(35% 0 0);
-  --sidebar: oklch(97% 0 0);
-  --sidebar-foreground: oklch(15% 0 0);
-  --sidebar-primary: oklch(55% 0.2 290);
-  --sidebar-primary-foreground: oklch(99% 0 0);
-  --sidebar-accent: oklch(97% 0 0);
-  --sidebar-accent-foreground: oklch(15% 0 0);
-  --sidebar-border: oklch(15% 0 0 / 0.06);
-  --sidebar-ring: oklch(55% 0.2 290 / 0.5);
+  /* OPENLLM-INSPIRED MONOCHROME LIGHT PALETTE (unused while html.dark is
+     fixed, but kept correct so a future theme switch inherits the system). */
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --primary: #111111;
+  --primary-foreground: #fafafa;
+  --secondary: #fafafa;
+  --secondary-foreground: #111111;
+  --muted: #fafafa;
+  --muted-foreground: #71717a;
+  --accent: #f5f5f5;
+  --accent-foreground: #111111;
+  --destructive: #ff0033;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: rgb(255 0 51 / 0.6);
+  --chart-1: #111111;
+  --chart-2: #ff0033;
+  --chart-3: #71717a;
+  --chart-4: #a1a1aa;
+  --chart-5: #e5e5e5;
+  --sidebar: #fafafa;
+  --sidebar-foreground: #111111;
+  --sidebar-primary: #111111;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f5f5f5;
+  --sidebar-accent-foreground: #111111;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: rgb(255 0 51 / 0.6);
+}
+
+/* OPENLLM-INSPIRED SYSTEM EXTENSIONS — additive tokens (PHASE 2).
+   Radius scale (xs joins the existing --radius ladder) and a semantic
+   spacing/motion vocabulary. Motion tokens mirror the microinteraction
+   spec: fast 150ms / normal 200ms / medium 250ms / slow 300ms.
+   Consumed via var() and Tailwind arbitrary values (duration-[var(--motion-fast)]). */
+:root {
+  --radius-xs: 2px;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --motion-fast: 150ms;
+  --motion-normal: 200ms;
+  --motion-medium: 250ms;
+  --motion-slow: 300ms;
+  /* Status voice (§14): small indicators + badge variants. The red stays
+     reserved for error/critical/accent per the monochrome spec. */
+  --status-success: #22c55e;
+  --status-warning: #eab308;
+  --status-info: #a1a1aa;
 }
 
 .dark {
-  /* The canvas is the reference's true black; text voices ride the
-     --c-text tokens (98% ink / 62% muted), card bodies ride --card-bg. */
-  --background: var(--bg-base);
-  --foreground: var(--c-text);
-  --card: #121212;
-  --card-foreground: var(--c-text);
-  --popover: #121212;
-  --popover-foreground: var(--c-text);
-  --primary: oklch(72% 0.16 290);
-  --primary-foreground: oklch(15% 0 0);
+  /* OPENLLM-INSPIRED MONOCHROME SYSTEM — true-black canvas, stepped
+     surfaces, hairline #262626 borders, #FF0033 strictly as signal
+     (focus ring / destructive). No purple, no chromatic noise. */
+  --background: #050505;
+  --foreground: #fafafa;
+  --card: #141414;
+  --card-foreground: #fafafa;
+  --popover: #0a0a0a;
+  --popover-foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #050505;
   --secondary: #1c1c1c;
-  --secondary-foreground: oklch(96% 0 0);
+  --secondary-foreground: #fafafa;
   --muted: #1c1c1c;
-  --muted-foreground: var(--c-text-muted);
-  --accent: oklch(72% 0.16 290);
-  --accent-foreground: oklch(15% 0 0);
-  --destructive: oklch(62% 0.22 25);
-  --border: rgb(255 255 255 / 0.08);
-  --input: rgb(255 255 255 / 0.08);
-  --ring: oklch(72% 0.16 290 / 0.55);
-  --chart-1: oklch(72% 0.16 290);
-  --chart-2: oklch(62% 0.22 25);
-  --chart-3: oklch(62% 0 0);
-  --chart-4: oklch(80% 0.12 290);
-  --chart-5: oklch(45% 0 0);
-  --sidebar: #1c1c1c;
-  --sidebar-foreground: oklch(96% 0 0);
-  --sidebar-primary: oklch(72% 0.16 290);
-  --sidebar-primary-foreground: oklch(15% 0 0);
+  --muted-foreground: #a1a1aa;
+  --accent: #1c1c1c;
+  --accent-foreground: #fafafa;
+  --destructive: #ff0033;
+  --border: #262626;
+  --input: #262626;
+  --ring: rgb(255 0 51 / 0.55);
+  --chart-1: #fafafa;
+  --chart-2: #ff0033;
+  --chart-3: #a1a1aa;
+  --chart-4: #71717a;
+  --chart-5: #52525b;
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #fafafa;
+  --sidebar-primary-foreground: #050505;
   --sidebar-accent: #1c1c1c;
-  --sidebar-accent-foreground: oklch(96% 0 0);
-  --sidebar-border: rgb(255 255 255 / 0.05);
-  --sidebar-ring: oklch(72% 0.16 290 / 0.55);
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #1c1c1c;
+  --sidebar-ring: rgb(255 0 51 / 0.55);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -185,6 +214,8 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "kern" 1;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
   button:not([disabled]),
   [role="button"]:not([disabled]) {

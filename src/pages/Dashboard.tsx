@@ -282,7 +282,7 @@ function EditResourceDialog({
               className="h-9 rounded-sm border-border bg-transparent"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <label className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 Categoría
@@ -546,7 +546,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
+                  <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
                     <Button
                       variant="ghost"
                       size="sm"

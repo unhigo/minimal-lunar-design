@@ -606,7 +606,7 @@ export default function Landing() {
                   Ver todo
                 </Link>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-3">
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {PROJECTS.slice(3, 6).map((i) => (
                   <Link
                     key={i.id}

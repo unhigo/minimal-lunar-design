@@ -139,7 +139,7 @@ function CreateToolDialog({ onClose }: { onClose: () => void }) {
               className="min-h-16 rounded-sm border-border bg-transparent"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <label className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 Categoría
