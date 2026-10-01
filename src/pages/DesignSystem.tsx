@@ -149,6 +149,128 @@ function Swatch({ token, hex, role }: { token: string; hex: string; role: string
   );
 }
 
+function FramerDarkDemo() {
+  const [seg, setSeg] = useState("9:16");
+  const [playing, setPlaying] = useState(false);
+  return (
+    <div className="framer-theme rounded-2xl border border-(--color-border-subtle) p-6 sm:p-8">
+      <p className="ft-display">
+        MOONØ.LAB
+        <span className="text-(--color-text-muted)"> / Dark</span>
+      </p>
+      <p className="ft-body mt-2 max-w-xl">
+        Tema encapsulado: tokens <code className="font-mono">--color-*</code> en
+        :root, componentes prefijados <code className="font-mono">.ft-*</code>.
+        El acento #FF0033 solo como señal: foco, progreso y estado activo.
+      </p>
+
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <button className="ft-btn ft-btn--primary">Primary</button>
+        <button className="ft-btn ft-btn--accent">CTA clave</button>
+        <button className="ft-btn ft-btn--secondary">Secondary</button>
+        <button className="ft-btn ft-btn--ghost">Ghost</button>
+        <button className="ft-btn ft-btn--secondary ft-btn--sm" disabled>
+          Disabled
+        </button>
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className="ft-segmented" role="group" aria-label="Card ratio">
+          {["9:16", "3:4", "4:5", "1:1"].map((r) => (
+            <button
+              key={r}
+              aria-pressed={seg === r}
+              onClick={() => setSeg(r)}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+        <span className="ft-badge">
+          <span className="ft-dot" /> live
+        </span>
+        <span className="ft-badge ft-badge--accent">signal</span>
+      </div>
+
+      <div className="ft-bento mt-6">
+        <div className="ft-card ft-card--interactive ft-bento__half">
+          <div>
+            <p className="ft-label">Analytics</p>
+            <p className="mt-2 text-(--color-text-secondary)">
+              Visitas únicas del laboratorio esta semana.
+            </p>
+          </div>
+          <p className="ft-num text-3xl">1.7M</p>
+          <div className="ft-progress">
+            <div className="ft-progress__bar" style={{ width: "72%" }} />
+          </div>
+        </div>
+        <div className="ft-card ft-card--interactive">
+          <p className="ft-label">Uptime</p>
+          <p className="ft-num text-3xl">99.99%</p>
+          <p className="ft-meta">últimos 90 días</p>
+        </div>
+        <div className="ft-card ft-card--interactive ft-bento__wide">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="ft-heading">Preview del editor</p>
+              <p className="ft-meta mt-1">Controles flotantes al hover · glass</p>
+            </div>
+            <div className="hidden gap-2 sm:flex">
+              <span className="ft-badge">{seg}</span>
+              <span className="ft-badge">16–24px</span>
+            </div>
+          </div>
+          <div className="ft-media mt-4">
+            <div className="ft-media__area">
+              <button
+                className="ft-btn ft-btn--secondary"
+                onClick={() => setPlaying((p) => !p)}
+                aria-pressed={playing}
+              >
+                <Play className="size-3.5" />
+                {playing ? "Pausar" : "Reproducir"}
+              </button>
+            </div>
+            <div className="ft-media__controls">
+              <button
+                className={`ft-media__icon ${playing ? "ft-media__icon--active" : ""}`}
+                aria-label="Play"
+                onClick={() => setPlaying((p) => !p)}
+              >
+                <Play className="size-3.5" />
+              </button>
+              <div className="ft-progress w-40">
+                <div
+                  className="ft-progress__bar transition-[width] duration-500"
+                  style={{ width: playing ? "64%" : "12%" }}
+                />
+              </div>
+              <button className="ft-media__icon" aria-label="Más opciones">
+                <MoreHorizontal className="size-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 grid max-w-xl gap-4 sm:grid-cols-2">
+        <label className="ft-field">
+          <span className="ft-label">Nombre</span>
+          <input className="ft-input" placeholder="Jane Smith" />
+        </label>
+        <label className="ft-field">
+          <span className="ft-label">Email</span>
+          <input className="ft-input" type="email" placeholder="jane@lab.dev" />
+        </label>
+      </div>
+
+      <p className="ft-meta mt-6">
+        Tokens en :root · componentes .ft-* prefijados · reduced-motion respetado
+      </p>
+    </div>
+  );}
+
 export default function DesignSystem() {
   const [open, setOpen] = useState(false);
   const [play, setPlay] = useState(0);
@@ -546,6 +668,14 @@ export default function DesignSystem() {
                   </TableBody>
                 </Table>
               </div>
+            </Section>
+
+            <Section
+              id="framer"
+              title="Framer Dark Theme"
+              note="Capa modular MOONØ.LAB / Framer Dark: tokens --color-* globales, superficies #050505→#1C1C1C, squircles 16–24px, botones píldora, Bento Grid y glass sutil. El acento #FF0033 solo como señal."
+            >
+              <FramerDarkDemo />
             </Section>
 
             <Card>
