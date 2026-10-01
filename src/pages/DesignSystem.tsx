@@ -54,6 +54,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { BLOCK_LIMITS, BLOCK_REGISTRY } from "@/lib/block-registry";
+import { Play, MoreHorizontal } from "lucide-react";
 
 const SECTIONS = [
   { id: "color", label: "Color" },
@@ -67,6 +68,7 @@ const SECTIONS = [
   { id: "overlays", label: "Overlays" },
   { id: "data", label: "Datos" },
   { id: "blocks", label: "Block registry" },
+  { id: "framer", label: "Framer Dark" },
 ];
 
 const SWATCHES: { token: string; hex: string; role: string }[] = [

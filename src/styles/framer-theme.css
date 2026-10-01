@@ -1,0 +1,395 @@
+/*
+ * FRAMER DARK THEME — capa visual aislada para MOONØ.LAB.
+ *
+ * Todo el sistema vive bajo el prefijo `.framer-theme` con variables
+ * `--ft-*`: cero selectores globales, cero colisiones con el tema base
+ * (rojo señal #FF0033 / bordes #1C1C1C / radius 4-12px). Se activa añadiendo
+ * la clase `framer-theme` a cualquier contenedor — sin tocar el DOM raíz.
+ *
+ * Identidad del tema:
+ *  - Canvas OLED #050505, superficies translúcidas rgba(255,255,255,0.03)
+ *  - Acento azul eléctrico (gradiente 135deg #0070F3 → #00C2FF), solo señal
+ *  - Bordes hairline rgba(255,255,255,0.08) · texto #FFF / #9CA3AF
+ *  - Squircles 16-24px (contenedores/bento) · 8-12px (controles internos)
+ *  - Glassmorphism blur(12px) solo en barras flotantes/menús
+ */
+
+.framer-theme {
+  /* ── Tokens ─────────────────────────────────────────────────────────── */
+  --ft-bg: #050505;
+  --ft-surface: rgba(255, 255, 255, 0.03);
+  --ft-surface-2: rgba(255, 255, 255, 0.05);
+  --ft-surface-hover: rgba(255, 255, 255, 0.07);
+  --ft-border: rgba(255, 255, 255, 0.08);
+  --ft-border-strong: rgba(255, 255, 255, 0.14);
+  --ft-text: #ffffff;
+  --ft-text-secondary: #9ca3af;
+  --ft-text-muted: #8a8a8a;
+  --ft-accent: #0070f3;
+  --ft-accent-2: #00c2ff;
+  --ft-accent-gradient: linear-gradient(135deg, #0070f3, #00c2ff);
+  --ft-accent-soft: rgba(0, 112, 243, 0.14);
+  --ft-radius-lg: 24px;
+  --ft-radius-md: 16px;
+  --ft-radius-sm: 12px;
+  --ft-radius-xs: 8px;
+  --ft-fast: 120ms;
+  --ft-normal: 180ms;
+  --ft-medium: 240ms;
+
+  background: var(--ft-bg);
+  color: var(--ft-text);
+  font-family:
+    "Inter",
+    "Plus Jakarta Sans",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
+}
+
+.framer-theme ::selection {
+  background: var(--ft-accent-soft);
+  color: var(--ft-text);
+}
+
+.framer-theme ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.framer-theme ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.framer-theme ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+}
+.framer-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Headings: peso fuerte, blanco puro ───────────────────────────────── */
+.framer-theme .ft-display {
+  font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  color: var(--ft-text);
+}
+.framer-theme .ft-heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ft-text);
+}
+.framer-theme .ft-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ft-text-muted);
+}
+.framer-theme .ft-body {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--ft-text-secondary);
+}
+.framer-theme .ft-meta {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ft-text-muted);
+}
+
+/* ── Superficies: card elevada, glass, bento ──────────────────────────── */
+.framer-theme .ft-card {
+  background: var(--ft-surface);
+  border: 1px solid var(--ft-border);
+  border-radius: var(--ft-radius-md);
+  padding: 20px;
+  transition:
+    background var(--ft-normal) ease,
+    border-color var(--ft-normal) ease,
+    transform var(--ft-normal) ease;
+}
+.framer-theme .ft-card--lg {
+  border-radius: var(--ft-radius-lg);
+  padding: 24px;
+}
+.framer-theme .ft-card--interactive:hover {
+  background: var(--ft-surface-2);
+  border-color: var(--ft-border-strong);
+  transform: translateY(-1px);
+}
+
+.framer-theme .ft-glass {
+  background: rgba(10, 10, 10, 0.6);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid var(--ft-border);
+  border-radius: var(--ft-radius-md);
+}
+
+/* Bento grid: celdas simétricas/asimétricas que respiran. */
+.framer-theme .ft-bento {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.framer-theme .ft-bento > .ft-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}
+.framer-theme .ft-bento__wide {
+  grid-column: span 2;
+}
+@media (min-width: 768px) {
+  .framer-theme .ft-bento {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .framer-theme .ft-bento__wide {
+    grid-column: span 4;
+  }
+  .framer-theme .ft-bento__half {
+    grid-column: span 2;
+  }
+}
+
+/* ── Botones píldora ──────────────────────────────────────────────────── */
+.framer-theme .ft-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding-inline: 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    opacity var(--ft-fast) ease,
+    transform var(--ft-fast) ease,
+    background var(--ft-fast) ease,
+    border-color var(--ft-fast) ease;
+}
+.framer-theme .ft-btn:active {
+  transform: scale(0.97);
+}
+.framer-theme .ft-btn:focus-visible {
+  outline: 2px solid var(--ft-accent-2);
+  outline-offset: 2px;
+}
+.framer-theme .ft-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.framer-theme .ft-btn--primary {
+  background: var(--ft-accent-gradient);
+  color: #ffffff;
+}
+.framer-theme .ft-btn--primary:hover {
+  opacity: 0.88;
+}
+.framer-theme .ft-btn--secondary {
+  background: var(--ft-surface);
+  border-color: var(--ft-border);
+  color: var(--ft-text);
+}
+.framer-theme .ft-btn--secondary:hover {
+  background: var(--ft-surface-hover);
+  border-color: var(--ft-border-strong);
+}
+.framer-theme .ft-btn--ghost {
+  background: transparent;
+  color: var(--ft-text-secondary);
+}
+.framer-theme .ft-btn--ghost:hover {
+  background: var(--ft-surface);
+  color: var(--ft-text);
+}
+.framer-theme .ft-btn--sm {
+  height: 30px;
+  padding-inline: 12px;
+  font-size: 12px;
+}
+
+/* Toggle/segmented control: pill activa iluminada en azul. */
+.framer-theme .ft-segmented {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--ft-surface);
+  border: 1px solid var(--ft-border);
+}
+.framer-theme .ft-segmented button {
+  height: 28px;
+  padding-inline: 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ft-text-secondary);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition:
+    background var(--ft-fast) ease,
+    color var(--ft-fast) ease;
+}
+.framer-theme .ft-segmented button:hover {
+  color: var(--ft-text);
+}
+.framer-theme .ft-segmented button[aria-pressed="true"] {
+  background: var(--ft-accent-soft);
+  color: var(--ft-accent-2);
+}
+
+/* ── Inputs ───────────────────────────────────────────────────────────── */
+.framer-theme .ft-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.framer-theme .ft-input {
+  height: 38px;
+  padding-inline: 14px;
+  border-radius: var(--ft-radius-xs);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--ft-border);
+  color: var(--ft-text);
+  font-size: 13px;
+  outline: none;
+  transition:
+    border-color var(--ft-fast) ease,
+    background var(--ft-fast) ease;
+}
+.framer-theme .ft-input::placeholder {
+  color: var(--ft-text-muted);
+}
+.framer-theme .ft-input:hover {
+  border-color: var(--ft-border-strong);
+}
+.framer-theme .ft-input:focus {
+  border-color: var(--ft-accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Widget multimedia con controles flotantes ────────────────────────── */
+.framer-theme .ft-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ft-radius-md);
+  border: 1px solid var(--ft-border);
+  background: var(--ft-surface);
+}
+.framer-theme .ft-media__area {
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(0, 112, 243, 0.1), transparent 60%),
+    var(--ft-surface);
+}
+.framer-theme .ft-media__controls {
+  position: absolute;
+  inset-inline: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.65);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--ft-border);
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity var(--ft-normal) ease,
+    transform var(--ft-normal) ease;
+}
+.framer-theme .ft-media:hover .ft-media__controls,
+.framer-theme .ft-media:focus-within .ft-media__controls {
+  opacity: 1;
+  transform: translateY(0);
+}
+.framer-theme .ft-media__icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--ft-text);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background var(--ft-fast) ease;
+}
+.framer-theme .ft-media__icon:hover {
+  background: var(--ft-surface-hover);
+}
+.framer-theme .ft-media__icon--active {
+  background: var(--ft-accent-soft);
+  color: var(--ft-accent-2);
+}
+
+/* Barra de progreso con acento gradiente. */
+.framer-theme .ft-progress {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.framer-theme .ft-progress__bar {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ft-accent-gradient);
+}
+
+/* ── Badge píldora ────────────────────────────────────────────────────── */
+.framer-theme .ft-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding-inline: 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--ft-surface);
+  border: 1px solid var(--ft-border);
+  color: var(--ft-text-secondary);
+}
+.framer-theme .ft-badge--accent {
+  background: var(--ft-accent-soft);
+  border-color: transparent;
+  color: var(--ft-accent-2);
+}
+.framer-theme .ft-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ft-accent-gradient);
+}
+
+/* ── Motion: respetar reduced motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .framer-theme .ft-card--interactive:hover {
+    transform: none;
+  }
+  .framer-theme .ft-btn:active {
+    transform: none;
+  }
+  .framer-theme .ft-media__controls {
+    transition: none;
+  }
+}
