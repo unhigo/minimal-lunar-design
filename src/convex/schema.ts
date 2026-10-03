@@ -285,6 +285,24 @@ const schema = defineSchema(
       ),
       createdAt: v.number(),
     }).index("by_resource", ["resourceId", "order"]),
+
+    // ── Footer contact links ───────────────────────────────────────────
+    // Base de datos de enlaces de contacto del pie de página. Sembrada
+    // desde src/data/footer-links.ts y gestionada vía /admin. Los iconos
+    // son claves string resueltas en cliente (src/lib/footer-icons.ts).
+    footerLinks: defineTable({
+      category: v.string(),
+      name: v.string(),
+      url: v.string(),
+      handle: v.string(),
+      description: v.string(),
+      icon: v.string(),
+      sortOrder: v.number(),
+      visible: v.boolean(),
+      createdAt: v.number(),
+    })
+      .index("by_visible", ["visible"])
+      .index("by_category", ["category"]),
   },
   {
     schemaValidation: false,

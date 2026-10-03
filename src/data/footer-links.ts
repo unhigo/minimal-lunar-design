@@ -1,32 +1,52 @@
-import {
-  Bot,
-  CreditCard,
-  Dribbble,
-  Layers,
-  Moon,
-  Sparkles,
-  Ticket,
-  Twitch,
-  type LucideIcon,
-} from "lucide-react";
-
 /**
- * Base de datos de enlaces externos del pie de página.
- * Fuente única: CSV de contacto MOONØ.LAB (categoría, nombre, URL, handle, descripción).
- * Los iconos de marca (Dribbble, Twitch) vienen de lucide; el resto, iconos semánticos.
+ * Base de datos de enlaces del pie de página — fuente única (CSV MOONØ.LAB).
+ *
+ * Este módulo es PURO (sin imports de UI): lo consume el cliente, el panel
+ * de administración y el backend Convex (`src/convex/footer_links.ts`) para
+ * sembrar la tabla `footerLinks`. Los iconos se guardan como claves string;
+ * el mapeo clave → componente vive en `src/lib/footer-icons.ts`.
  */
+
+export const FOOTER_ICON_KEYS = [
+  "dribbble",
+  "twitch",
+  "credit-card",
+  "sparkles",
+  "ticket",
+  "bot",
+  "moon",
+  "layers",
+] as const;
+
+export type FooterIconKey = (typeof FOOTER_ICON_KEYS)[number];
+
 export type FooterContactLink = {
   name: string;
   url: string;
   handle: string;
   description: string;
-  icon: LucideIcon;
+  icon: FooterIconKey;
 };
 
 export type FooterLinkGroup = {
   category: string;
   links: FooterContactLink[];
 };
+
+/** Orden editorial de las categorías (las desconocidas van al final). */
+export const CATEGORY_ORDER = [
+  "Portafolio",
+  "Redes Sociales",
+  "Monetización",
+  "Inteligencia Artificial",
+  "Referidos",
+] as const;
+
+/** Rango de ordenación de una categoría; desconocidas → después de todas. */
+export function categoryRank(category: string): number {
+  const i = (CATEGORY_ORDER as readonly string[]).indexOf(category);
+  return i === -1 ? CATEGORY_ORDER.length : i;
+}
 
 export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
   {
@@ -37,7 +57,7 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
         url: "https://dribbble.com/UnhigoStudio",
         handle: "@UnhigoStudio",
         description: "Estudio de diseño y UI/UX",
-        icon: Dribbble,
+        icon: "dribbble",
       },
     ],
   },
@@ -49,7 +69,7 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
         url: "https://www.twitch.tv/unhigomakers",
         handle: "@unhigomakers",
         description: "Directos de desarrollo y maker",
-        icon: Twitch,
+        icon: "twitch",
       },
     ],
   },
@@ -61,7 +81,7 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
         url: "https://stripe.com",
         handle: "@juananguirao",
         description: "Pasarela de pagos y monetización",
-        icon: CreditCard,
+        icon: "credit-card",
       },
     ],
   },
@@ -73,14 +93,14 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
         url: "https://poe.com/Claude-Sonnet-5.5",
         handle: "Claude Sonnet 5.5",
         description: "Modelo LLM avanzado en Poe",
-        icon: Sparkles,
+        icon: "sparkles",
       },
       {
         name: "Invitación Poe",
         url: "https://poe.com/invite/c27d7e81ac184e2e88bf21c1e5ca0913",
         handle: "Poe Invite",
         description: "Enlace de invitación a plataforma Poe",
-        icon: Ticket,
+        icon: "ticket",
       },
     ],
   },
@@ -92,21 +112,21 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
         url: "https://manus.im/invitation/MZHUIKIINNGC?utm_source=invitation&utm_medium=social&utm_campaign=copy_link",
         handle: "Manus Invites",
         description: "Acceso de invitación a plataforma de agentes IA",
-        icon: Bot,
+        icon: "bot",
       },
       {
         name: "Lunar Cyber",
         url: "https://lunarcyber.com/?affID=LN7PZP3FSN",
         handle: "Lunar Cyber",
         description: "Enlace de afiliado y cyber herramientas",
-        icon: Moon,
+        icon: "moon",
       },
       {
         name: "FreeBuff",
         url: "https://freebuff.com/?ref=ref-0777a7f6-c9df-4df2-80d0-dc6a1628b34e",
         handle: "FreeBuff",
         description: "Plataforma de recursos y herramientas",
-        icon: Layers,
+        icon: "layers",
       },
     ],
   },

@@ -21,6 +21,7 @@ import { formatPrice, timeAgo } from "@/lib/catalog";
 import { BRAND } from "@/lib/brand";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { AdminDirectorySection } from "@/pages/AdminDirectory";
+import { AdminFooterLinksSection } from "@/pages/AdminFooterLinks";
 
 type SubmissionDoc = Doc<"submissions">;
 
@@ -184,6 +185,9 @@ export default function Admin() {
 
         {/* Directory tools CRUD */}
         <AdminDirectorySection />
+
+        {/* Footer contact links CRUD */}
+        <AdminFooterLinksSection />
 
         {/* Seed — admin-only import of the curated catalog (one-shot). */}
         <section className="mt-10 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-border/60 p-4">

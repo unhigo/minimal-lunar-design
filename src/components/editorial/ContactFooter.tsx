@@ -1,5 +1,21 @@
 import { Link } from "react-router";
-import { ArrowUpRight, BadgeCheck, MessageCircle } from "lucide-react";
+import {
+  ArrowUpRight,
+  BadgeCheck,
+  Bot,
+  CreditCard,
+  Dribbble,
+  ExternalLink,
+  Layers,
+  MessageCircle,
+  Moon,
+  Sparkles,
+  Ticket,
+  Twitch,
+  type LucideIcon,
+} from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { BRAND } from "@/lib/brand";
 import {
   FOOTER_LINK_GROUPS,
@@ -7,6 +23,34 @@ import {
   OFFICIAL_BADGES,
   WHATSAPP,
 } from "@/data/footer-links";
+
+/**
+ * Registro de iconos del footer: los enlaces guardan una clave string
+ * (tabla `footerLinks.icon` en Convex) que se resuelve aquí a su
+ * componente lucide; clave desconocida → ExternalLink.
+ */
+const FOOTER_ICONS: Record<string, LucideIcon> = {
+  dribbble: Dribbble,
+  twitch: Twitch,
+  "credit-card": CreditCard,
+  sparkles: Sparkles,
+  ticket: Ticket,
+  bot: Bot,
+  moon: Moon,
+  layers: Layers,
+};
+
+function getFooterIcon(key: string): LucideIcon {
+  return FOOTER_ICONS[key] ?? ExternalLink;
+}
+
+type FooterLinkItem = {
+  name: string;
+  url: string;
+  handle: string;
+  description: string;
+  icon: string;
+};
 
 const COLUMNS = [
   {
@@ -45,6 +89,14 @@ export function ContactFooter({
   phase: number;
   illumination: number;
 }) {
+  // Base de datos gestionable: fuente Convex con fallback estático
+  // (mientras carga o si la tabla aún no está sembrada).
+  const dbGroups = useQuery(api.footer_links.getGroups);
+  const linkGroups: Array<{ category: string; links: FooterLinkItem[] }> =
+    dbGroups !== undefined && dbGroups.length > 0
+      ? dbGroups
+      : FOOTER_LINK_GROUPS;
+
   return (
     <footer className="border-t border-border/60" data-contact>
       <div className="mx-auto w-full max-w-6xl px-5">
@@ -165,19 +217,20 @@ export function ContactFooter({
               Base de datos de enlaces
             </p>
             <p className="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:block">
-              {
-                FOOTER_LINK_GROUPS.reduce((n, g) => n + g.links.length, 0)
-              } enlaces externos
+              {linkGroups.reduce((n, g) => n + g.links.length, 0)} enlaces
+              externos
             </p>
           </div>
           <div className="mt-6 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-            {FOOTER_LINK_GROUPS.map((group) => (
+            {linkGroups.map((group) => (
               <div key={group.category}>
                 <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                   {group.category}
                 </p>
                 <ul className="mt-3 space-y-1">
-                  {group.links.map((link) => (
+                  {group.links.map((link) => {
+                    const Icon = getFooterIcon(link.icon);
+                    return (
                     <li key={link.name}>
                       <a
                         href={link.url}
@@ -185,7 +238,7 @@ export function ContactFooter({
                         rel="noopener noreferrer"
                         className="group -mx-2 flex items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted/60"
                       >
-                        <link.icon
+                        <Icon
                           className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
                           aria-hidden
                         />
@@ -208,7 +261,8 @@ export function ContactFooter({
                         />
                       </a>
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               </div>
             ))}
