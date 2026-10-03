@@ -1,6 +1,12 @@
 import { Link } from "react-router";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, MessageCircle } from "lucide-react";
 import { BRAND } from "@/lib/brand";
+import {
+  FOOTER_LINK_GROUPS,
+  MUZLI_PICKS,
+  OFFICIAL_BADGES,
+  WHATSAPP,
+} from "@/data/footer-links";
 
 const COLUMNS = [
   {
@@ -63,9 +69,21 @@ export function ContactFooter({
               hola@moon0.lab
               <ArrowUpRight className="size-4 translate-y-0.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
-            <Link to="/auth" className="btn-solid">
-              Crear cuenta
-            </Link>
+            <div className="flex flex-wrap gap-3 lg:justify-end">
+              <a
+                href={WHATSAPP.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-outline"
+                aria-label={`WhatsApp — ${WHATSAPP.label} ${WHATSAPP.phone}`}
+              >
+                <MessageCircle className="size-4" aria-hidden />
+                {WHATSAPP.label} · {WHATSAPP.phone}
+              </a>
+              <Link to="/auth" className="btn-solid">
+                Crear cuenta
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -138,6 +156,106 @@ export function ContactFooter({
               </ul>
             </nav>
           ))}
+        </div>
+
+        {/* Contact database — external links, grouped by category */}
+        <div className="border-t border-border/60 py-12">
+          <div className="flex items-baseline justify-between gap-4">
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              Base de datos de enlaces
+            </p>
+            <p className="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:block">
+              {
+                FOOTER_LINK_GROUPS.reduce((n, g) => n + g.links.length, 0)
+              } enlaces externos
+            </p>
+          </div>
+          <div className="mt-6 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+            {FOOTER_LINK_GROUPS.map((group) => (
+              <div key={group.category}>
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {group.category}
+                </p>
+                <ul className="mt-3 space-y-1">
+                  {group.links.map((link) => (
+                    <li key={link.name}>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group -mx-2 flex items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted/60"
+                      >
+                        <link.icon
+                          className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
+                          aria-hidden
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="flex flex-wrap items-baseline gap-x-2">
+                            <span className="text-[13px] font-medium text-foreground">
+                              {link.name}
+                            </span>
+                            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                              {link.handle}
+                            </span>
+                          </span>
+                          <span className="mt-0.5 block text-[12px] leading-relaxed text-muted-foreground">
+                            {link.description}
+                          </span>
+                        </span>
+                        <ArrowUpRight
+                          className="mt-1 size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                          aria-hidden
+                        />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Official widgets & badges */}
+        <div className="border-t border-border/60 py-12">
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            MOONØ.LAB // Widgets e incrustados oficiales
+          </p>
+          <p className="mt-3 max-w-[60ch] text-[13px] leading-relaxed text-muted-foreground">
+            Colección de badges, insignias y widgets de Product Hunt, PeerPush,
+            DANG! y Muzli.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            {OFFICIAL_BADGES.map((badge) => (
+              <a
+                key={badge.id}
+                href={badge.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={badge.label}
+                className="inline-flex items-center rounded-lg border border-border/60 bg-black/40 p-3 transition-colors hover:border-border"
+              >
+                <img
+                  src={badge.src}
+                  alt={badge.alt}
+                  width={badge.width}
+                  height={badge.height}
+                  loading="lazy"
+                  decoding="async"
+                  className={`block ${badge.imgClassName}`}
+                />
+              </a>
+            ))}
+            <a
+              href={MUZLI_PICKS.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Muzli Picks"
+              className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-black/40 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:border-border hover:text-foreground"
+            >
+              <BadgeCheck className="size-4" aria-hidden />
+              {MUZLI_PICKS.label}
+            </a>
+          </div>
         </div>
 
         {/* Meta line */}
