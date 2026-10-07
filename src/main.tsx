@@ -8,6 +8,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
 import "./styles/framer-theme.css";
+import { ThemeChrome } from "@/components/ThemeChrome";
 
 // Lazy load route components for better code splitting
 const Landing = lazy(() => import("./pages/Landing.tsx"));
@@ -210,6 +211,8 @@ createRoot(document.getElementById("root")!).render(
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          {/* Chrome global del tema: barra de cookies + popup de suscripción. */}
+          <ThemeChrome />
         </BrowserRouter>
         <Toaster />
       </ConvexAuthProvider>

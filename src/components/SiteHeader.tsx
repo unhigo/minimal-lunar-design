@@ -19,14 +19,41 @@ export function SiteHeader() {
   const { pathname } = useLocation();
 
   // Close the panel whenever the route changes (hash links included).
-  useEffect(() => {
+  // Reset during render on pathname change — the React-approved pattern that
+  // avoids the cascading render of a synchronous setState inside an effect.
+  const [lastPath, setLastPath] = useState(pathname);
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
     setOpen(false);
     setExpanded(null);
-  }, [pathname]);
+  }
+
+  // Sticky header with initial offset 150 (options_global_page_header_
+  // sticky_initial_offset): compact + stronger glass once scrolled past 150px.
+  const [scrolled, setScrolled] = useState(() => window.scrollY > 150);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 150);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="glass-panel sticky top-0 z-40 border-b border-border/60">
-      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-5">
+    <header
+      className={cn(
+        // Sticky solo en desktop (options_global_page_header_mobile_sticky=0);
+        // en móvil el header hace scroll con la página.
+        "glass-panel z-40 border-b transition-all duration-300 lg:sticky lg:top-0",
+        scrolled
+          ? "border-border/80 shadow-lg shadow-black/25 backdrop-blur-xl"
+          : "border-border/60",
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-5 transition-all duration-300",
+          scrolled ? "h-12" : "h-14",
+        )}
+      >
         <Link
           to="/"
           className="group flex shrink-0 items-center gap-2.5"

@@ -82,6 +82,13 @@ const FEATURES = [
   },
 ] as const;
 
+/** Offer banner (offer_banner_effect "flipping", intervalo 3500ms). */
+const OFFER_MESSAGES = [
+  "⚡ Lanzamiento: 35% de descuento en recursos Pro del laboratorio",
+  "Únete a 19.000+ creadores que ya observan, exploran y crean",
+  "La oferta termina el 17 de abril, 12:59pm (UTC)",
+];
+
 const STEPS = [
   { n: "01", title: "Explora", body: "Busca y filtra el catálogo por categoría." },
   { n: "02", title: "Abre una ficha", body: "Detalles, autor, precio y comentarios." },
@@ -166,6 +173,7 @@ function SectionRail() {
     <div className="pointer-events-none absolute top-1/2 left-4 hidden -translate-y-1/2 xl:block">
       <div className="pointer-events-auto">
         <PreviewRail
+          activeId={activeId}
           items={SECTIONS_RAIL.map((s) => ({
             id: s.id,
             label: s.label,
@@ -210,6 +218,25 @@ export default function Landing() {
   );
   const cases = useMemo(() => PROJECTS.slice(0, 3), []);
 
+  // Preloader double-bounce (options_global_page_preloader_visibility=1):
+  // two bars bouncing on the true-black base for the first beat of the page.
+  const [booting, setBooting] = useState(true);
+  useEffect(() => {
+    const t = window.setTimeout(() => setBooting(false), 900);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  // Offer banner flipping (options_global_page_offer_banner_effect=flipping,
+  // options_global_page_offer_banner_flipping_effect_interval=3500).
+  const [offerIdx, setOfferIdx] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(
+      () => setOfferIdx((i) => (i + 1) % OFFER_MESSAGES.length),
+      3500,
+    );
+    return () => window.clearInterval(id);
+  }, []);
+
   return (
     <div
       data-stage
@@ -227,6 +254,47 @@ export default function Landing() {
             "linear-gradient(180deg, #0a1116 0%, #030303 46%, var(--bg-base) 100%)",
         }}
       />
+      {/* Preloader — double-bounce bars (preloader_type "double_bounce"). */}
+      {booting && (
+        <div
+          role="status"
+          aria-label="Cargando"
+          className="fixed inset-0 z-[100] grid place-items-center bg-background"
+        >
+          <div className="flex items-end gap-1.5">
+            <span className="preloader-bar" />
+            <span className="preloader-bar preloader-bar-b" />
+          </div>
+        </div>
+      )}
+      {/* Offer banner — flipping messages, whole bar is a link (as_link=1). */}
+      <Link
+        to="/auth"
+        className="group relative z-40 block overflow-hidden bg-[var(--signal-red)] text-white transition-opacity hover:opacity-95"
+      >
+        <div className="mx-auto flex h-10 w-full max-w-6xl items-center justify-between gap-4 px-5">
+          <div className="relative h-4 min-w-0 flex-1 overflow-hidden">
+            {OFFER_MESSAGES.map(
+              (msg, i) =>
+                i === offerIdx && (
+                  <p
+                    key={i}
+                    aria-live="polite"
+                    className="promo-flip absolute inset-0 truncate text-[11px] font-semibold uppercase tracking-[0.14em]"
+                  >
+                    {msg}
+                  </p>
+                ),
+            )}
+          </div>
+          <span
+            aria-hidden
+            className="hidden h-7 shrink-0 items-center rounded-sm border border-white/70 px-3 text-[11px] font-semibold transition-colors group-hover:bg-white group-hover:text-[var(--signal-red)] sm:inline-flex"
+          >
+            Ver oferta
+          </span>
+        </div>
+      </Link>
       <SiteHeader />
 
       <main className="relative flex-1">
@@ -332,7 +400,7 @@ export default function Landing() {
                       {s.k === "Votos" && (
                         <span
                           aria-hidden
-                          className="inline-block size-1.5 shrink-0 rounded-full bg-[#FF0033]"
+                          className="inline-block size-1.5 shrink-0 rounded-full bg-signal-red"
                         />
                       )}
                       {s.v}
@@ -357,12 +425,12 @@ export default function Landing() {
                 <span>Observation system</span>
                 <span
                   aria-hidden
-                  className="inline-block size-1 shrink-0 rounded-full bg-[#FF0033]"
+                  className="inline-block size-1 shrink-0 rounded-full bg-signal-red"
                 />
                 <span>Data / {new Date().getFullYear()}.{String(new Date().getMonth() + 1).padStart(2, "0")}.{String(new Date().getDate()).padStart(2, "0")}</span>
                 <span
                   aria-hidden
-                  className="inline-block size-1 shrink-0 rounded-full bg-[#FF0033]"
+                  className="inline-block size-1 shrink-0 rounded-full bg-signal-red"
                 />
                 <span>{illumination}% iluminada · status active</span>
               </div>

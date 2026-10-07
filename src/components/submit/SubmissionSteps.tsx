@@ -85,7 +85,7 @@ export function SubmissionStepList({
               aria-hidden
               className={cn(
                 "w-5 text-right",
-                isCurrent && "text-[#FF0033]",
+                isCurrent && "text-signal-red",
               )}
             >
               {isDone ? <Check className="inline size-3" /> : s.n}

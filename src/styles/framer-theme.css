@@ -6,7 +6,7 @@
  * 2) Capa de componentes prefijada `.framer-theme` con clases `.ft-*`:
  *    ningún selector suelto, cero colisiones con el sistema base.
  *
- * Reglas del acento: #FF0033 SOLO como señal (foco, selección, progreso,
+ * Reglas del acento: #D90A2C SOLO como señal (foco, selección, progreso,
  * estado activo, crítico). Prohibido como fondo dominante o bloques grandes.
  */
 
@@ -32,11 +32,11 @@
   --color-text-subtle: #777777;
 
   /* Accent Color (Strict Control) */
-  --color-accent: #ff0033;
+  --color-accent: #d90a2c;
 
   /* Extensiones derivadas (no sustituyen el bloque canónico) */
-  --color-accent-soft: rgb(255 0 51 / 0.12);
-  --color-accent-hover: #e6002e;
+  --color-accent-soft: rgb(217 10 44 / 0.12);
+  --color-accent-hover: #b80823;
   --color-surface-glass: rgb(10 10 10 / 0.65);
   --radius-squircle-lg: 24px;
   --radius-squircle-md: 16px;

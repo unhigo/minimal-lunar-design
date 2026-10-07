@@ -6,8 +6,10 @@
 /* DO NOT CHANGE */
 @theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* WP-spec heading face (options_global_page_headings_typo: DM Sans 700). */
+  --font-display: "DM Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --color-signal-red: var(--signal-red);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -50,7 +52,7 @@
    §15 PRIMARY COLORS
    · MOON BLACK  #050505  → depth · space · interface · laboratory
    · MOON WHITE  #FFFFFF  → clarity · information · observation
-   · SIGNAL RED  #FF0033  → activity · data · interaction · alert
+   · SIGNAL RED  #D90A2C  → activity · data · interaction · alert
      (signal only — never decorative)
 
    §16 GRAYSCALE ROLES (dark interface)
@@ -66,7 +68,10 @@
   /* §15/§16 brand scale — exposed as tokens for direct brand use. */
   --moon-black: #050505;
   --moon-white: #ffffff;
-  --signal-red: #ff0033;
+  --signal-red: #d90a2c;
+  /* WP-spec link voice: base #DC405A, hover #D90A2C. */
+  --link: #dc405a;
+  --link-hover: #d90a2c;
   --gray-e: #eeeeee;
   --gray-d: #dcdcdc;
   --gray-c: #c0c0c0;
@@ -98,12 +103,12 @@
   --muted-foreground: #71717a;
   --accent: #f5f5f5;
   --accent-foreground: #111111;
-  --destructive: #ff0033;
+  --destructive: #d90a2c;
   --border: #e5e5e5;
   --input: #e5e5e5;
-  --ring: rgb(255 0 51 / 0.6);
+  --ring: rgb(217 10 44 / 0.6);
   --chart-1: #111111;
-  --chart-2: #ff0033;
+  --chart-2: #d90a2c;
   --chart-3: #71717a;
   --chart-4: #a1a1aa;
   --chart-5: #e5e5e5;
@@ -146,7 +151,7 @@
 .dark {
   /* FRAMER-LAYER SURFACE SYSTEM — true-black canvas, stepped surfaces,
      hairline #1C1C1C structural borders, #333333 interactive borders,
-     #FF0033 strictly as signal (focus / accent / destructive).
+     #D90A2C strictly as signal (focus / accent / destructive).
      Hierarchy: #050505 app → #0D0D0D surface → #111111 nested →
      #1C1C1C hover/separation → #333333 borders. */
   --background: #050505;
@@ -163,12 +168,12 @@
   --muted-foreground: #a0a0a0;
   --accent: #1c1c1c;
   --accent-foreground: #ffffff;
-  --destructive: #ff0033;
+  --destructive: #d90a2c;
   --border: #1c1c1c;
   --input: #333333;
-  --ring: rgb(255 0 51 / 0.55);
+  --ring: rgb(217 10 44 / 0.55);
   --chart-1: #ffffff;
-  --chart-2: #ff0033;
+  --chart-2: #d90a2c;
   --chart-3: #a0a0a0;
   --chart-4: #777777;
   --chart-5: #555555;
@@ -200,7 +205,7 @@
   --e-out: cubic-bezier(0.16, 1, 0.3, 1); /* == EASE_OUT (src/lib/ease.ts) */
   --e-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
   --e-pen: cubic-bezier(0.37, 0.01, 0.2, 1);
-  --font-tight: "Inter Tight", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-tight: "DM Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 @supports not (height: 100dvh) {
   :root {
@@ -230,6 +235,17 @@
   html {
     font-family: var(--font-sans);
   }
+  /* WP-spec headings: DM Sans 700. Class-styled headings keep their own
+     rhythm; unclassed headings inherit the spec face and weight. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
   /* The stage never scrolls sideways — vignettes, sheens and slides stay
      inside the composition (reference: no blank bands, no overflow). */
   html,
@@ -237,7 +253,8 @@
     overflow-x: clip;
   }
   ::selection {
-    @apply bg-foreground text-background;
+    background: rgb(217 10 44 / 0.28);
+    color: #ffffff;
   }
 
   /* Custom editorial cursor: a small ink dot (fine pointers only, so touch
@@ -299,21 +316,22 @@
     font-size: clamp(1.875rem, 4vw, 2.75rem);
     line-height: 1.06;
     letter-spacing: -0.02em;
-    font-weight: 300;
+    font-weight: 700;
   }
   .h2-editorial {
     font-size: clamp(1.625rem, 3.5vw, 2.25rem);
     line-height: 1.1;
     letter-spacing: -0.02em;
-    font-weight: 300;
+    font-weight: 700;
   }
   /* Oversized display headline (hero / numbered strategies). Sized so the
      longest uppercase line fits the hero column from 320px to desktop. */
   .display-editorial {
+    font-family: var(--font-tight);
     font-size: clamp(2rem, 7.5vw, 4.5rem);
     line-height: 0.98;
     letter-spacing: -0.03em;
-    font-weight: 300;
+    font-weight: 700;
   }
 
   /* Uniform vertical rhythm for page sections: tight on mobile, generous
@@ -368,6 +386,86 @@
   .btn-outline:hover {
     border-color: color-mix(in oklab, var(--foreground) 45%, transparent);
   }
+  /* Button micro-interaction (options_global_page_button_animation). */
+  .btn-solid:active,
+  .btn-outline:active {
+    transform: translateY(1px);
+  }
+
+  /* WP-spec content links: #DC405A, subrayado, hover #D90A2C. */
+  .link-editorial {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: color var(--motion-normal) ease;
+  }
+  .link-editorial:hover {
+    color: var(--link-hover);
+  }
+
+  /* Promo banner flipping text (offer_banner, intervalo 3500ms). */
+  .promo-flip {
+    animation: promoFlip 0.45s var(--e-out) both;
+  }
+  @keyframes promoFlip {
+    from {
+      opacity: 0;
+      transform: translateY(60%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Double-bounce preloader (preloader_type double_bounce). */
+  .preloader-bar {
+    width: 4px;
+    height: 28px;
+    border-radius: 2px;
+    background: var(--signal-red);
+    animation: plBounce 1s ease-in-out infinite;
+  }
+  .preloader-bar-b {
+    animation-delay: 0.15s;
+  }
+  @keyframes plBounce {
+    0%,
+    100% {
+      transform: scaleY(0.35);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+
+  /* Subscribe popup slide-in (position slidein_right). */
+  .animate-slide-in-right {
+    animation: slideInRight 0.5s var(--e-out) both;
+  }
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .promo-flip,
+    .preloader-bar,
+    .animate-slide-in-right {
+      animation: none;
+    }
+    .btn-solid:active,
+    .btn-outline:active {
+      transform: none;
+    }
+  }
 
   /* ── MOONØ.LAB brand utilities (§15/§19/§21/§25) ─────────────────────── */
 
@@ -385,7 +483,7 @@
     width: 6px;
     height: 6px;
     border-radius: 9999px;
-    background: var(--signal-red, #ff0033);
+    background: var(--signal-red, #d90a2c);
   }
 
   /* Hairline grid backdrop — ORBIT/GRID graphic language (§19). */
@@ -541,10 +639,10 @@
     }
   }
 
-  /* Headline voice of the reference — Inter Tight 500. */
+  /* Headline voice — DM Sans 700 (WP headings spec). */
   .headline-tight {
     font-family: var(--font-tight);
-    font-weight: 500;
+    font-weight: 700;
     letter-spacing: -0.02em;
   }
 

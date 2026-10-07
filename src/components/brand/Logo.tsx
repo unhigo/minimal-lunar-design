@@ -101,7 +101,7 @@ export function SignalDot({ className }: { className?: string }) {
   return (
     <span
       aria-hidden
-      className={cn("inline-block shrink-0 rounded-full bg-[#FF0033]", className)}
+      className={cn("inline-block shrink-0 rounded-full bg-signal-red", className)}
     />
   );
 }

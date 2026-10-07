@@ -59,7 +59,7 @@ export function ResourceCard({ resource }: { resource: ResourceCardData }) {
               <span className="ml-2 inline-flex items-center gap-1.5 text-foreground">
                 <span
                   aria-hidden
-                  className="inline-block size-1.5 shrink-0 rounded-full bg-[#FF0033]"
+                  className="inline-block size-1.5 shrink-0 rounded-full bg-signal-red"
                 />
                 destacado
               </span>
